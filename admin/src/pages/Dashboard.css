@@ -1,0 +1,100 @@
+/* src/pages/Dashboard.css */
+
+/* Specific layout for Dashboard Stats (4 Columns) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--bg-card); /* Uses variable from index.css */
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 140px;
+}
+
+.sc-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sc-val {
+  font-size: 36px;
+  font-weight: 800;
+  color: #fff;
+  margin-top: 15px;
+}
+
+.sc-sub {
+  font-size: 13px;
+  color: #666;
+  margin-top: auto;
+}
+
+/* Custom Table Header for Dashboard "Recent Activity" */
+.table-header {
+  padding: 20px 25px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  font-size: 16px;
+}
+
+/* User Cell helpers (also used in other pages, but defined here for now) */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Status Pills */
+.status-pill {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.st-open {
+  background: var(--danger);
+  color: #fff;
+}
+
+.st-review {
+  background: var(--warning);
+  color: #000;
+}
+
+.st-solved {
+  background: #333;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+/* Text Colors (Helpers) */
+.text-danger {
+  color: var(--danger);
+}
+.text-warning {
+  color: var(--warning);
+}
+.text-primary {
+  color: var(--primary);
+}
+.text-accent {
+  color: var(--accent-blue);
+}

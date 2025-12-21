@@ -1,0 +1,178 @@
+/* src/styles/Dashboard.css */
+
+/* --- SUMMARY GRID --- */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: #1a1a1a; /* Darker panel background */
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 150px;
+  transition: transform 0.2s;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: #444;
+}
+
+.sc-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sc-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  margin: 10px 0;
+  line-height: 1;
+}
+
+.sc-sub {
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+}
+
+/* Card Specific Colors */
+.sc-users .sc-icon {
+  color: var(--accent-blue);
+}
+.sc-users .trend {
+  color: var(--accent-blue);
+  background: rgba(0, 85, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sc-complaints .sc-icon {
+  color: var(--warning);
+}
+.sc-complaints .new-badge {
+  color: #fff;
+  background: var(--warning);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  color: #000;
+}
+
+.sc-faults .sc-icon {
+  color: var(--danger);
+}
+.sc-faults .sc-value {
+  color: var(--danger);
+}
+
+.sc-load .sc-icon {
+  color: var(--primary);
+}
+.sc-load .sc-value {
+  color: #fff;
+}
+
+/* --- DASHBOARD TABLE --- */
+.table-header-box {
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1a1a1a;
+  border-radius: 16px 16px 0 0;
+}
+.table-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-export {
+  background: #333;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-export:hover {
+  background: #444;
+}
+
+/* Ticket ID */
+.ticket-id {
+  font-family: monospace;
+  color: #888;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Priority Badges */
+.prio-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  width: 90px;
+}
+.prio-high {
+  color: var(--danger);
+}
+.prio-med {
+  color: var(--warning);
+}
+.prio-low {
+  color: #888;
+}
+
+/* Status Pills */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  display: inline-block;
+  min-width: 70px;
+  text-align: center;
+  border: 1px solid transparent;
+}
+.sb-open {
+  background: rgba(255, 68, 68, 0.15);
+  color: var(--danger);
+  border-color: rgba(255, 68, 68, 0.2);
+}
+.sb-review {
+  background: rgba(255, 170, 0, 0.15);
+  color: var(--warning);
+  border-color: rgba(255, 170, 0, 0.2);
+}
+.sb-resolved {
+  background: rgba(0, 255, 153, 0.15);
+  color: var(--primary);
+  border-color: rgba(0, 255, 153, 0.2);
+}

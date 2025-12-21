@@ -1,0 +1,111 @@
+/* src/styles/Sidebar.css */
+
+.sidebar {
+  width: var(--sidebar-width);
+  background: #161616; /* Matches --bg-panel */
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 30px 20px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* --- BRAND SECTION --- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  padding: 0 10px;
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #333;
+  object-fit: cover;
+}
+
+.brand-text {
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 1px;
+  /* The Blue-to-Green Gradient Text */
+  background: linear-gradient(90deg, #0055ff, #00ff99);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --- NAVIGATION LINKS --- */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  color: #888;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  text-decoration: none;
+  transition: 0.15s;
+  border-left: 4px solid transparent; /* Placeholder for active border */
+}
+
+.nav-link:hover {
+  background: #222;
+  color: #fff;
+}
+
+.nav-link .material-icons {
+  font-size: 22px;
+}
+
+/* ACTIVE STATE (The Green Glow) */
+.nav-link.active {
+  background: linear-gradient(90deg, rgba(0, 255, 153, 0.1), transparent);
+  color: #fff;
+  font-weight: 600;
+  border-left: 4px solid var(--primary);
+}
+
+.nav-link.active .material-icons {
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
+}
+
+/* --- USER FOOTER --- */
+.user-nav {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.user-nav:hover {
+  border-color: #555;
+  background: #222;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #0055ff, #00ff99);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #000;
+  font-size: 13px;
+}
