@@ -1,20 +1,71 @@
-// src/pages/Users.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Users.css";
 
 const Users = () => {
-  // State to handle Modal visibility
   const [showModal, setShowModal] = useState(false);
+
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [archiveReason, setArchiveReason] = useState("");
+
+  const [usersList] = useState([
+    {
+      id: 1,
+      initials: "NA",
+      name: "Natasha Alonzo",
+      email: "natasha@email.com",
+      location: "Unit 402, Congress Ville",
+      hubs: "2 Active",
+      status: "Active",
+      color: "linear-gradient(135deg, #0055ff, #00ff99)",
+      textColor: "#000",
+    },
+    {
+      id: 2,
+      initials: "JD",
+      name: "John Doe",
+      email: "john.doe@email.com",
+      location: "Unit 305, Tower A",
+      hubs: "1 Active",
+      status: "Active",
+      color: "#2a2a2a",
+      textColor: "#fff",
+      borderColor: "#444",
+    },
+    {
+      id: 3,
+      initials: "MC",
+      name: "Maria Cruz",
+      email: "maria.c@yahoo.com",
+      location: "Unit 101, Ground Floor",
+      hubs: "0 Devices",
+      status: "Inactive",
+      color: "#333",
+      textColor: "#888",
+      borderColor: "#444",
+    },
+  ]);
+
+  const handleArchiveClick = (user) => {
+    setSelectedUser(user);
+    setArchiveReason("");
+    setShowArchiveModal(true);
+  };
+
+  const handleConfirmArchive = () => {
+    console.log(`Archiving ${selectedUser?.name}. Reason: ${archiveReason}`);
+
+    setShowArchiveModal(false);
+    setSelectedUser(null);
+  };
 
   return (
     <>
-      {/* Page Header */}
       <div className="page-header">
         <div className="page-title">User Management</div>
       </div>
 
-      {/* Toolbar */}
       <div className="toolbar">
         <div className="search-box">
           <span
@@ -30,7 +81,6 @@ const Users = () => {
           />
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
-          {/* UPDATED: Link to Archived Page */}
           <Link
             to="/users/archived"
             className="btn btn-secondary"
@@ -41,7 +91,6 @@ const Users = () => {
             </span>
             Archived
           </Link>
-
           <button className="btn btn-primary">
             <span className="material-icons" style={{ fontSize: "18px" }}>
               file_download
@@ -51,7 +100,6 @@ const Users = () => {
         </div>
       </div>
 
-      {/* Main User Table */}
       <div className="table-container">
         <table>
           <thead>
@@ -74,229 +122,115 @@ const Users = () => {
             </tr>
           </thead>
           <tbody>
-            {/* User Row 1 (Natasha) */}
-            <tr>
-              <td>
-                <input
-                  type="checkbox"
-                  style={{
-                    accentColor: "var(--primary)",
-                    width: "18px",
-                    height: "18px",
-                  }}
-                />
-              </td>
-              <td>
-                <div className="user-cell">
-                  <div
-                    className="u-avatar"
+            {usersList.map((user) => (
+              <tr key={user.id}>
+                <td>
+                  <input
+                    type="checkbox"
                     style={{
-                      background: "linear-gradient(135deg, #0055ff, #00ff99)",
-                      color: "#000",
+                      accentColor: "var(--primary)",
+                      width: "18px",
+                      height: "18px",
                     }}
-                  >
-                    NA
-                  </div>
-                  <div style={{ fontWeight: 600, color: "#fff" }}>
-                    Natasha Alonzo
-                    <br />
-                    <span
+                  />
+                </td>
+                <td>
+                  <div className="user-cell">
+                    <div
+                      className="u-avatar"
                       style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        fontWeight: 400,
+                        background: user.color,
+                        color: user.textColor,
+                        border: user.borderColor
+                          ? `1px solid ${user.borderColor}`
+                          : "none",
                       }}
                     >
-                      natasha@email.com
-                    </span>
+                      {user.initials}
+                    </div>
+                    <div style={{ fontWeight: 600, color: "#fff" }}>
+                      {user.name}
+                      <br />
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          color: "#666",
+                          fontWeight: 400,
+                        }}
+                      >
+                        {user.email}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td>Unit 402, Congress Ville</td>
-              <td>2 Active</td>
-              <td>
-                <span className="status-dot st-active"></span> Active
-              </td>
-              <td>
-                <div className="action-cell">
-                  <button
-                    className="icon-btn"
-                    title="View Details"
-                    onClick={() => setShowModal(true)}
-                  >
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "18px" }}
+                </td>
+                <td>{user.location}</td>
+                <td>{user.hubs}</td>
+                <td>
+                  <span
+                    className="status-dot"
+                    style={{
+                      background:
+                        user.status === "Active" ? "var(--primary)" : "#666",
+                      boxShadow:
+                        user.status === "Active"
+                          ? "0 0 8px rgba(0, 255, 153, 0.4)"
+                          : "none",
+                    }}
+                  ></span>{" "}
+                  {user.status}
+                </td>
+                <td>
+                  <div className="action-cell">
+                    <button
+                      className="icon-btn"
+                      title="View Details"
+                      onClick={() => setShowModal(true)}
                     >
-                      visibility
-                    </span>
-                  </button>
-                  <button className="icon-btn" title="Archive User">
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "18px" }}
-                    >
-                      archive
-                    </span>
-                  </button>
-                </div>
-              </td>
-            </tr>
+                      <span
+                        className="material-icons"
+                        style={{ fontSize: "18px" }}
+                      >
+                        visibility
+                      </span>
+                    </button>
 
-            {/* User Row 2 (John) */}
-            <tr>
-              <td>
-                <input
-                  type="checkbox"
-                  style={{
-                    accentColor: "var(--primary)",
-                    width: "18px",
-                    height: "18px",
-                  }}
-                />
-              </td>
-              <td>
-                <div className="user-cell">
-                  <div
-                    className="u-avatar"
-                    style={{
-                      background: "#2a2a2a",
-                      borderColor: "#444",
-                      color: "#fff",
-                    }}
-                  >
-                    JD
+                    <button
+                      className="icon-btn"
+                      title="Archive User"
+                      onClick={() => handleArchiveClick(user)}
+                    >
+                      <span
+                        className="material-icons"
+                        style={{ fontSize: "18px" }}
+                      >
+                        archive
+                      </span>
+                    </button>
                   </div>
-                  <div style={{ fontWeight: 600, color: "#fff" }}>
-                    John Doe
-                    <br />
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        fontWeight: 400,
-                      }}
-                    >
-                      john.doe@email.com
-                    </span>
-                  </div>
-                </div>
-              </td>
-              <td>Unit 305, Tower A</td>
-              <td>1 Active</td>
-              <td>
-                <span className="status-dot st-active"></span> Active
-              </td>
-              <td>
-                <div className="action-cell">
-                  <button className="icon-btn" title="View Details">
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "18px" }}
-                    >
-                      visibility
-                    </span>
-                  </button>
-                  <button className="icon-btn" title="Archive User">
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "18px" }}
-                    >
-                      archive
-                    </span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-
-            {/* User Row 3 (Maria) */}
-            <tr>
-              <td>
-                <input
-                  type="checkbox"
-                  style={{
-                    accentColor: "var(--primary)",
-                    width: "18px",
-                    height: "18px",
-                  }}
-                />
-              </td>
-              <td>
-                <div className="user-cell">
-                  <div
-                    className="u-avatar"
-                    style={{
-                      background: "#333",
-                      color: "#888",
-                      borderColor: "#444",
-                    }}
-                  >
-                    MC
-                  </div>
-                  <div style={{ fontWeight: 600, color: "#fff" }}>
-                    Maria Cruz
-                    <br />
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        fontWeight: 400,
-                      }}
-                    >
-                      maria.c@yahoo.com
-                    </span>
-                  </div>
-                </div>
-              </td>
-              <td>Unit 101, Ground Floor</td>
-              <td>0 Devices</td>
-              <td>
-                <span className="status-dot st-inactive"></span> Inactive
-              </td>
-              <td>
-                <div className="action-cell">
-                  <button className="icon-btn" title="View Details">
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "18px" }}
-                    >
-                      visibility
-                    </span>
-                  </button>
-                  <button className="icon-btn" title="Archive User">
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "18px" }}
-                    >
-                      archive
-                    </span>
-                  </button>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
-        <div className="pagination">
+        <div className="u-pagination">
           <div style={{ fontSize: "14px", color: "#666" }}>
             Showing 1-3 of 24
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button className="page-btn">{"<"}</button>
-            <button className="page-btn active">1</button>
-            <button className="page-btn">2</button>
-            <button className="page-btn">{">"}</button>
+            <button className="u-page-btn">{"<"}</button>
+            <button className="u-page-btn active">1</button>
+            <button className="u-page-btn">2</button>
+            <button className="u-page-btn">{">"}</button>
           </div>
         </div>
       </div>
 
-      {/* --- MODAL --- */}
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            {/* Modal Header */}
-            <div className="modal-header">
-              <div className="modal-title">
+        <div className="u-modal-overlay">
+          <div className="u-modal-container">
+            <div className="u-modal-header">
+              <div className="u-modal-title">
                 <span
                   className="material-icons"
                   style={{ color: "var(--primary)" }}
@@ -305,14 +239,15 @@ const Users = () => {
                 </span>
                 User Details
               </div>
-              <button className="close-btn" onClick={() => setShowModal(false)}>
+              <button
+                className="u-close-btn"
+                onClick={() => setShowModal(false)}
+              >
                 <span className="material-icons">close</span>
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="modal-body">
-              {/* Left Column: Profile Card */}
+            <div className="u-modal-body">
               <div className="profile-card">
                 <div className="profile-header">
                   <div className="avatar-lg">NA</div>
@@ -362,9 +297,7 @@ const Users = () => {
                 </div>
               </div>
 
-              {/* Right Column: Stats & Hardware */}
               <div>
-                {/* Stats Grid */}
                 <div className="modal-stats-grid">
                   <div className="m-stat-card">
                     <div className="m-stat-label">Total Spend (Dec)</div>
@@ -395,7 +328,6 @@ const Users = () => {
                   </div>
                 </div>
 
-                {/* Hardware List */}
                 <div className="detail-card">
                   <div className="section-title">
                     <span
@@ -439,7 +371,6 @@ const Users = () => {
                   </div>
                 </div>
 
-                {/* Activity Log */}
                 <div className="detail-card">
                   <div className="section-title">
                     <span
@@ -508,6 +439,76 @@ const Users = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showArchiveModal && selectedUser && (
+        <div className="u-modal-overlay">
+          <div className="u-modal-container archive-mode">
+            <div className="u-modal-header" style={{ borderBottom: "none" }}>
+              <div className="u-modal-title" style={{ color: "var(--danger)" }}>
+                <span className="material-icons">warning</span>
+                Archive User
+              </div>
+              <button
+                className="u-close-btn"
+                onClick={() => setShowArchiveModal(false)}
+              >
+                <span className="material-icons">close</span>
+              </button>
+            </div>
+
+            <div className="u-archive-body">
+              <p
+                style={{
+                  color: "#ccc",
+                  marginBottom: "25px",
+                  lineHeight: "1.5",
+                }}
+              >
+                Are you sure you want to archive{" "}
+                <strong>{selectedUser.name}</strong>? This action will restrict
+                their access to the platform immediately.
+              </p>
+
+              <div className="u-form-group">
+                <label className="u-form-label">Reason for Archiving</label>
+                <select className="u-form-select">
+                  <option>Non-payment of Dues</option>
+                  <option>Violation of Terms</option>
+                  <option>Moved Out / Contract Ended</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div className="u-form-group">
+                <label className="u-form-label">
+                  Additional Remarks (Optional)
+                </label>
+                <textarea
+                  className="u-form-textarea"
+                  placeholder="Enter details here..."
+                  value={archiveReason}
+                  onChange={(e) => setArchiveReason(e.target.value)}
+                ></textarea>
+              </div>
+
+              <div className="u-modal-actions">
+                <button
+                  className="u-btn-cancel"
+                  onClick={() => setShowArchiveModal(false)}
+                >
+                  Cancel
+                </button>
+                <button className="u-btn-danger" onClick={handleConfirmArchive}>
+                  <span className="material-icons" style={{ fontSize: "18px" }}>
+                    archive
+                  </span>
+                  Confirm Archive
+                </button>
               </div>
             </div>
           </div>

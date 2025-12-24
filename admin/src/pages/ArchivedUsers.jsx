@@ -287,13 +287,13 @@ const ArchivedUsers = () => {
           </tbody>
         </table>
 
-        {/* Pagination */}
-        <div className="pagination">
+        {/* UPDATED PAGINATION */}
+        <div className="a-pagination">
           <div style={{ fontSize: "14px", color: "#666" }}>
             Showing 1-3 of 3
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button className="page-btn active">1</button>
+            <button className="a-page-btn active">1</button>
           </div>
         </div>
       </div>

@@ -5,15 +5,37 @@ import "./Complaints.css";
 const Complaints = () => {
   const [showModal, setShowModal] = useState(false);
 
+  // --- REPLY STATES ---
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyText, setReplyText] = useState("");
+
+  // Mock Chat Data
+  const [chatLogs, setChatLogs] = useState([
+    { id: 1, type: "user", msg: "User created ticket." },
+    { id: 2, type: "admin", msg: "Admin assigned to Technical Support." },
+  ]);
+
+  // Handle Sending
+  const handleSendReply = () => {
+    if (!replyText.trim()) return;
+
+    // Add message
+    const newMessage = { id: Date.now(), type: "admin", msg: replyText };
+    setChatLogs([...chatLogs, newMessage]);
+
+    // Reset
+    setReplyText("");
+    setIsReplying(false);
+  };
+
   return (
     <>
       <div className="page-header">
         <div className="page-title">Complaints Management</div>
       </div>
 
-      {/* UPDATED: c-stats-grid */}
+      {/* Stats Grid */}
       <div className="c-stats-grid">
-        {/* Card 1 */}
         <div className="c-stat-card sc-open">
           <div>
             <div className="c-sc-label">OPEN TICKETS</div>
@@ -33,7 +55,6 @@ const Complaints = () => {
           </div>
         </div>
 
-        {/* Card 2 */}
         <div className="c-stat-card sc-prio">
           <div>
             <div className="c-sc-label">HIGH PRIORITY</div>
@@ -53,7 +74,6 @@ const Complaints = () => {
           </div>
         </div>
 
-        {/* Card 3 */}
         <div className="c-stat-card sc-solve">
           <div>
             <div className="c-sc-label">RESOLVED (DEC)</div>
@@ -74,6 +94,7 @@ const Complaints = () => {
         </div>
       </div>
 
+      {/* Toolbar */}
       <div className="toolbar">
         <div className="search-box">
           <span
@@ -103,6 +124,7 @@ const Complaints = () => {
         </div>
       </div>
 
+      {/* Table */}
       <div className="table-container">
         <table>
           <thead>
@@ -141,7 +163,6 @@ const Complaints = () => {
                   High
                 </span>
               </td>
-              {/* UPDATED: c-status-pill */}
               <td>
                 <span className="c-status-pill">OPEN</span>
               </td>
@@ -162,7 +183,7 @@ const Complaints = () => {
                 </div>
               </td>
             </tr>
-
+            {/* Row 2 */}
             <tr>
               <td className="ticket-id">#TK-9920</td>
               <td>
@@ -188,11 +209,10 @@ const Complaints = () => {
                 <span className="prio-badge med">
                   <span className="material-icons" style={{ fontSize: "16px" }}>
                     remove
-                  </span>
+                  </span>{" "}
                   Med
                 </span>
               </td>
-              {/* UPDATED: c-status-pill */}
               <td>
                 <span className="c-status-pill review">IN REVIEW</span>
               </td>
@@ -213,7 +233,7 @@ const Complaints = () => {
                 </div>
               </td>
             </tr>
-
+            {/* Row 3 */}
             <tr>
               <td className="ticket-id">#TK-9918</td>
               <td>
@@ -239,11 +259,10 @@ const Complaints = () => {
                 <span className="prio-badge low">
                   <span className="material-icons" style={{ fontSize: "16px" }}>
                     arrow_downward
-                  </span>
+                  </span>{" "}
                   Low
                 </span>
               </td>
-              {/* UPDATED: c-status-pill */}
               <td>
                 <span className="c-status-pill solved">RESOLVED</span>
               </td>
@@ -267,21 +286,19 @@ const Complaints = () => {
           </tbody>
         </table>
 
-        <div className="pagination">
+        {/* Pagination (Now styled) */}
+        <div className="c-pagination">
           <div style={{ fontSize: "14px", color: "#666" }}>
             Showing 1-3 of 15
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button className="page-btn">{"<"}</button>
-            <button className="page-btn active">1</button>
-            <button className="page-btn">2</button>
-            <button className="page-btn">{">"}</button>
+            <button className="c-page-btn">{"<"}</button>
+            <button className="c-page-btn active">1</button>
+            <button className="c-page-btn">2</button>
+            <button className="c-page-btn">{">"}</button>
           </div>
         </div>
       </div>
-
-      {/* --- MODAL --- */}
-      {/* ... inside Complaints.jsx ... */}
 
       {/* --- MODAL --- */}
       {showModal && (
@@ -306,31 +323,23 @@ const Complaints = () => {
             </div>
 
             <div className="c-modal-body">
-              {/* Row 1: Subject */}
               <div className="c-modal-row">
                 <span className="c-modal-label">Subject</span>
                 <span className="c-modal-val">Hub Offline</span>
               </div>
-
-              {/* Row 2: User */}
               <div className="c-modal-row">
                 <span className="c-modal-label">User</span>
                 <span className="c-modal-val">Natasha Alonzo (Unit 402)</span>
               </div>
-
-              {/* Row 3: Status */}
               <div className="c-modal-row">
                 <span className="c-modal-label">Status</span>
                 <span className="c-status-pill">OPEN</span>
               </div>
-
-              {/* Row 4: Priority */}
               <div className="c-modal-row">
                 <span className="c-modal-label">Priority</span>
                 <span className="prio-badge">High</span>
               </div>
 
-              {/* Description Section */}
               <div>
                 <span className="c-desc-label">Description</span>
                 <div className="c-desc-box">
@@ -340,32 +349,74 @@ const Complaints = () => {
                 </div>
               </div>
 
-              {/* Chat Section */}
               <div>
                 <div className="c-section-title">Activity Log</div>
                 <div className="c-chat-box">
-                  <div className="c-chat-msg user">User created ticket.</div>
-                  <div className="c-chat-msg admin">
-                    Admin assigned to Technical Support.
-                  </div>
+                  {/* Dynamic Chat Rendering */}
+                  {chatLogs.map((log) => (
+                    <div key={log.id} className={`c-chat-msg ${log.type}`}>
+                      {log.msg}
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="c-modal-footer">
-                <button className="c-btn-modal c-btn-reply">
-                  <span className="material-icons" style={{ fontSize: "18px" }}>
-                    reply
-                  </span>
-                  Reply
-                </button>
-                <button className="c-btn-modal c-btn-resolve">
-                  <span className="material-icons" style={{ fontSize: "18px" }}>
-                    check_circle
-                  </span>
-                  Mark as Resolved
-                </button>
-              </div>
+              {/* TOGGLE: Show Footer Buttons OR Reply Form */}
+              {!isReplying ? (
+                <div className="c-modal-footer">
+                  <button
+                    className="c-btn-modal c-btn-reply"
+                    onClick={() => setIsReplying(true)}
+                  >
+                    <span
+                      className="material-icons"
+                      style={{ fontSize: "18px" }}
+                    >
+                      reply
+                    </span>
+                    Reply
+                  </button>
+                  <button className="c-btn-modal c-btn-resolve">
+                    <span
+                      className="material-icons"
+                      style={{ fontSize: "18px" }}
+                    >
+                      check_circle
+                    </span>
+                    Mark as Resolved
+                  </button>
+                </div>
+              ) : (
+                <div className="c-reply-section">
+                  <textarea
+                    className="c-reply-textarea"
+                    placeholder="Type your response to the user..."
+                    autoFocus
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                  />
+                  <div className="c-reply-actions">
+                    <button
+                      className="c-btn-modal c-btn-cancel"
+                      onClick={() => setIsReplying(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="c-btn-modal c-btn-send"
+                      onClick={handleSendReply}
+                    >
+                      <span
+                        className="material-icons"
+                        style={{ fontSize: "18px" }}
+                      >
+                        send
+                      </span>
+                      Send Reply
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -30,7 +30,6 @@ const UserDetails = () => {
           gap: "30px",
         }}
       >
-        {/* Profile Card */}
         <div className="card">
           <div
             style={{
@@ -102,7 +101,6 @@ const UserDetails = () => {
           </div>
         </div>
 
-        {/* Stats & Activity */}
         <div>
           <div className="card" style={{ marginBottom: "20px" }}>
             <div

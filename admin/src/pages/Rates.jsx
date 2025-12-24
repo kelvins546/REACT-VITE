@@ -1,4 +1,3 @@
-// src/pages/Rates.jsx
 import React, { useState } from "react";
 import "./Rates.css";
 
@@ -7,7 +6,6 @@ const Rates = () => {
 
   return (
     <>
-      {/* Page Header */}
       <div className="page-header">
         <div>
           <div className="page-title">Utility Rates</div>
@@ -23,9 +21,7 @@ const Rates = () => {
         </button>
       </div>
 
-      {/* Main Grid: Rate Card & Trend Chart */}
       <div className="rates-grid">
-        {/* Left: Rate Card */}
         <div className="rate-card">
           <div
             style={{
@@ -82,7 +78,6 @@ const Rates = () => {
           </button>
         </div>
 
-        {/* Right: Trend Card */}
         <div className="trend-card">
           <div
             style={{
@@ -109,67 +104,66 @@ const Rates = () => {
           </div>
 
           <div className="chart-box">
-            {/* 2015 */}
             <div className="bar-group">
               <div className="bar-val">₱8.50</div>
               <div className="bar" style={{ height: "30%" }}></div>
               <div className="bar-label">2015</div>
             </div>
-            {/* 2016 */}
+
             <div className="bar-group">
               <div className="bar-val">₱8.90</div>
               <div className="bar" style={{ height: "35%" }}></div>
               <div className="bar-label">2016</div>
             </div>
-            {/* 2017 */}
+
             <div className="bar-group">
               <div className="bar-val">₱9.20</div>
               <div className="bar" style={{ height: "38%" }}></div>
               <div className="bar-label">2017</div>
             </div>
-            {/* 2018 */}
+
             <div className="bar-group">
               <div className="bar-val">₱9.50</div>
               <div className="bar" style={{ height: "40%" }}></div>
               <div className="bar-label">2018</div>
             </div>
-            {/* 2019 */}
+
             <div className="bar-group">
               <div className="bar-val">₱9.80</div>
               <div className="bar" style={{ height: "45%" }}></div>
               <div className="bar-label">2019</div>
             </div>
-            {/* 2020 */}
+
             <div className="bar-group">
               <div className="bar-val">₱10.20</div>
               <div className="bar" style={{ height: "50%" }}></div>
               <div className="bar-label">2020</div>
             </div>
-            {/* 2021 */}
+
             <div className="bar-group">
               <div className="bar-val">₱10.50</div>
               <div className="bar" style={{ height: "55%" }}></div>
               <div className="bar-label">2021</div>
             </div>
-            {/* 2022 */}
+
             <div className="bar-group">
               <div className="bar-val">₱11.10</div>
               <div className="bar" style={{ height: "65%" }}></div>
               <div className="bar-label">2022</div>
             </div>
-            {/* 2023 */}
+
             <div className="bar-group">
               <div className="bar-val">₱11.80</div>
               <div className="bar" style={{ height: "80%" }}></div>
               <div className="bar-label">2023</div>
             </div>
-            {/* 2024 (High) */}
+
             <div className="bar-group">
               <div className="bar-val high">₱12.10</div>
               <div className="bar active" style={{ height: "88%" }}></div>
               <div className="bar-label">2024</div>
             </div>
-            {/* 2025 (Current) */}
+
             <div className="bar-group">
               <div className="bar-val curr">₱12.50</div>
               <div className="bar current" style={{ height: "98%" }}></div>
@@ -179,7 +173,6 @@ const Rates = () => {
         </div>
       </div>
 
-      {/* History Table */}
       <div className="table-container">
         <table>
           <thead>
@@ -193,7 +186,6 @@ const Rates = () => {
             </tr>
           </thead>
           <tbody>
-            {/* Row 1 */}
             <tr>
               <td style={{ color: "#ddd", fontWeight: 400 }}>Oct 23, 2025</td>
               <td>Meralco</td>
@@ -222,7 +214,7 @@ const Rates = () => {
                 </div>
               </td>
             </tr>
-            {/* Row 2 */}
+
             <tr>
               <td style={{ color: "#ddd", fontWeight: 400 }}>Sep 15, 2025</td>
               <td>Meralco</td>
@@ -251,7 +243,7 @@ const Rates = () => {
                 </div>
               </td>
             </tr>
-            {/* Row 3 */}
+
             <tr>
               <td style={{ color: "#ddd", fontWeight: 400 }}>Aug 01, 2025</td>
               <td>Meralco</td>
@@ -280,7 +272,7 @@ const Rates = () => {
                 </div>
               </td>
             </tr>
-            {/* Row 4 */}
+
             <tr>
               <td style={{ color: "#ddd", fontWeight: 400 }}>Jul 12, 2025</td>
               <td>Meralco</td>
@@ -309,7 +301,7 @@ const Rates = () => {
                 </div>
               </td>
             </tr>
-            {/* Row 5 */}
+
             <tr>
               <td style={{ color: "#ddd", fontWeight: 400 }}>Jun 05, 2025</td>
               <td>Meralco</td>
@@ -342,7 +334,6 @@ const Rates = () => {
         </table>
       </div>
 
-      {/* --- MODAL --- */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-container">

@@ -66,3 +66,36 @@
   color: var(--danger);
   border-color: var(--danger);
 }
+
+/* --- PAGINATION (Added for Archived Users) --- */
+.a-pagination {
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+}
+
+.a-page-btn {
+  background: #222;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.a-page-btn:hover {
+  background: #333;
+  color: #fff;
+}
+
+.a-page-btn.active {
+  background: var(--primary);
+  color: #000;
+  font-weight: 700;
+  border-color: var(--primary);
+}

@@ -1,20 +1,24 @@
 // src/components/Sidebar.jsx
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import "./Sidebar.css"; // <--- Import the new CSS file here
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear session if needed
+    navigate("/login");
+  };
+
   return (
     <div className="sidebar">
-      {/* Brand / Logo */}
       <div className="brand">
-        {/* Ensure this image is in your public folder */}
         <img src="/Untitled design (1).png" className="brand-logo" alt="Logo" />
         <span className="brand-text">GRIDWATCH</span>
       </div>
 
-      {/* Navigation Links */}
       <nav style={{ display: "flex", flexDirection: "column" }}>
-        {/* Dashboard - "end" prop ensures it only lights up on exact match */}
         <NavLink
           to="/"
           end
@@ -53,8 +57,7 @@ const Sidebar = () => {
         </NavLink>
       </nav>
 
-      {/* User Profile (Bottom) */}
-      <div className="user-nav">
+      <div className="user-nav" onClick={handleLogout} title="Log Out">
         <div className="user-avatar">AD</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>
