@@ -8,6 +8,29 @@ const Users = () => {
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [archiveReason, setArchiveReason] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
+
+  const [isMessaging, setIsMessaging] = useState(false);
+  const [messageText, setMessageText] = useState("");
+
+  const [chatLogs, setChatLogs] = useState([
+    { id: 1, type: "user", msg: "User created ticket." },
+    { id: 2, type: "admin", msg: "Admin assigned to Technical Support." },
+  ]);
+
+  const handleSendMessage = () => {
+    if (!messageText.trim()) return;
+
+    const newMessage = {
+      id: Date.now(),
+      type: "admin",
+      msg: messageText,
+    };
+
+    setChatLogs(prev => [...prev, newMessage]);
+    setMessageText("");
+    setIsMessaging(false);
+  };
 
   const [usersList] = useState([
     {
@@ -287,14 +310,57 @@ const Users = () => {
                 </div>
 
                 <div className="btn-group">
-                  <button className="btn-full">
+                  <button className="btn-full" onClick={() => setShowResetModal(true)}>
                     <span className="material-icons">lock_reset</span> Send
                     Password Reset
                   </button>
-                  <button className="btn-full">
+                  <button className="btn-full" onClick={() => setIsMessaging(true)}>
                     <span className="material-icons">mail</span> Send Message
                   </button>
                 </div>
+                <div className="user-message-box">
+                <div className="user-message-section">
+                  {chatLogs.map(chat => (
+                    <div
+                      key={chat.id}
+                      className={`user-message-bubble ${chat.type}`}
+                    >
+                      {chat.msg}
+                    </div>
+                  ))}
+                </div>
+
+                </div>
+                {isMessaging && (
+                  <div className="user-message-reply-section">
+                    <textarea
+                      className="user-message-textarea"
+                      placeholder="Type your message to the user..."
+                      autoFocus
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                    />
+
+                    <div className="user-message-actions">
+                      <button
+                        className="c-btn-modal c-btn-cancel"
+                        onClick={() => setIsMessaging(false)}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        className="c-btn-modal c-btn-send"
+                        onClick={handleSendMessage}
+                      >
+                        <span className="material-icons" style={{ fontSize: "18px" }}>
+                          send
+                        </span>
+                        Send Message
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -444,6 +510,40 @@ const Users = () => {
           </div>
         </div>
       )}
+      {showResetModal && (
+        <div className="send-reset-modal-overlay">
+          <div className="send-reset-modal-container">
+
+            <span className="material-icons send-reset-modal-icon">
+              lock_reset
+            </span>
+
+            <h3 className="send-reset-modal-title">Send Password Reset</h3>
+            <p className="send-reset-modal-desc">
+              Are you sure you want to send a password reset link to this user?
+            </p>
+
+            <div className="send-reset-modal-actions">
+              <button
+                className="c-btn-modal c-btn-cancel"
+                onClick={() => setShowResetModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="c-btn-modal c-btn-send"
+                onClick={() => {
+                  setShowResetModal(false);
+                }}
+              >
+                Send Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {showArchiveModal && selectedUser && (
         <div className="u-modal-overlay">

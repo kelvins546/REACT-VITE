@@ -111,12 +111,12 @@ const Complaints = () => {
         </div>
 
         <div className="filter-group">
-          <select className="custom-select" defaultValue="Category: All">
+          <select className="custom-select sel-complaints" defaultValue="Category: All">
             <option>Category: All</option>
             <option>Hardware</option>
             <option>Billing</option>
           </select>
-          <select className="custom-select" defaultValue="Status: All">
+          <select className="custom-select sel-complaints" defaultValue="Status: All">
             <option>Status: All</option>
             <option>Open</option>
             <option>Closed</option>
@@ -156,15 +156,15 @@ const Complaints = () => {
               </td>
               <td>Today, 09:30 AM</td>
               <td>
-                <span className="prio-badge">
-                  <span className="material-icons" style={{ fontSize: "16px" }}>
+                <span className="prio-badge prio-high">
+                  <span className="material-icons prio-icon-high" style={{ fontSize: "16px" }}>
                     arrow_upward
                   </span>
                   High
                 </span>
               </td>
               <td>
-                <span className="c-status-pill">OPEN</span>
+                <span className="status-pill st-open">OPEN</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -206,15 +206,17 @@ const Complaints = () => {
               </td>
               <td>Yesterday, 2:15 PM</td>
               <td>
-                <span className="prio-badge med">
-                  <span className="material-icons" style={{ fontSize: "16px" }}>
+                <span className="prio-badge prio-med">
+                  <span className="material-icons prio-icon-med" style={{ fontSize: "16px" }}>
                     remove
-                  </span>{" "}
-                  Med
+                  </span>
+                  <span className="prio-text">
+                    Med
+                  </span>
                 </span>
               </td>
               <td>
-                <span className="c-status-pill review">IN REVIEW</span>
+                <span className="status-pill st-review">IN REVIEW</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -256,15 +258,17 @@ const Complaints = () => {
               </td>
               <td>Dec 12, 11:00 AM</td>
               <td>
-                <span className="prio-badge low">
-                  <span className="material-icons" style={{ fontSize: "16px" }}>
+                <span className="prio-badge prio-low">
+                  <span className="material-icons prio-icon-low" style={{ fontSize: "16px" }}>
                     arrow_downward
                   </span>{" "}
-                  Low
+                  <span className="prio-text">
+                    Low
+                  </span>
                 </span>
               </td>
               <td>
-                <span className="c-status-pill solved">RESOLVED</span>
+                <span className="status-pill st-solved">RESOLVED</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -287,15 +291,15 @@ const Complaints = () => {
         </table>
 
         {/* Pagination (Now styled) */}
-        <div className="c-pagination">
+        <div className="u-pagination">
           <div style={{ fontSize: "14px", color: "#666" }}>
             Showing 1-3 of 15
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button className="c-page-btn">{"<"}</button>
-            <button className="c-page-btn active">1</button>
-            <button className="c-page-btn">2</button>
-            <button className="c-page-btn">{">"}</button>
+            <button className="u-page-btn">{"<"}</button>
+            <button className="u-page-btn active">1</button>
+            <button className="u-page-btn">2</button>
+            <button className="u-page-btn">{">"}</button>
           </div>
         </div>
       </div>

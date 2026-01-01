@@ -1,21 +1,41 @@
 // src/pages/AdminLogin.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
+import { LoadingPopup } from "../components/loaders/LoadingPopUp";
+import { PuffLoader } from 'react-spinners';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const [temporaryLoading, setTemporaryLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setTemporaryLoading(true); // Show loading first
 
-    navigate("/");
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      setTemporaryLoading(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Login failed:", error);
+      setTemporaryLoading(false);
+    }
   };
-
   return (
     <div className="login-page">
-      <div className="auth-bg"></div>
+      <LoadingPopup
+        show={temporaryLoading}
+        message="Logging In..."
+        Loader={PuffLoader}
+        color="#0055ff"
+      />
+      <div className="auth-bg">
 
+      </div>
       <div className="auth-container">
         <div className="brand-side">
           <div className="logo-circle">
@@ -47,6 +67,8 @@ const AdminLogin = () => {
                   type="email"
                   className="input-field"
                   placeholder="admin@gridwatch.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -60,6 +82,8 @@ const AdminLogin = () => {
                   type="password"
                   className="input-field"
                   placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
                 <span
@@ -75,7 +99,10 @@ const AdminLogin = () => {
               <span className="forgot-link">Forgot Password?</span>
             </div>
 
-            <button type="submit" className="btn-login">
+            <button
+              type="submit"
+              className="btn-login"
+            >
               Access Dashboard
             </button>
           </form>

@@ -3,6 +3,10 @@ import "./Rates.css";
 
 const Rates = () => {
   const [showModal, setShowModal] = useState(false);
+  const [showMonthlyTrend, setshowMonthlyTrend] = useState(false);
+  const [showYearlyTrend, setshowYearlyTrend] = useState(true);
+  const [showTrendStatsMonthly, setshowTrendStatsMonthly] = useState(false);
+  const [showTrendStatYearly, setshowTrendStatsYearly] = useState(true);
 
   return (
     <>
@@ -90,85 +94,169 @@ const Rates = () => {
               Rate Trend
             </div>
             <div className="trend-toggle">
-              <div className="tt-opt">Monthly</div>
-              <div className="tt-opt active">Yearly</div>
+              <div className={`tt-opt ${showMonthlyTrend === true ? 'active' : ''}`} onClick={() => setshowMonthlyTrend(true) & setshowYearlyTrend(false) & setshowTrendStatsMonthly(true) & setshowTrendStatsYearly(false)}>Monthly</div>
+              <div className={`tt-opt ${showYearlyTrend === true ? 'active' : ''}`} onClick={() => setshowYearlyTrend(true) & setshowMonthlyTrend(false) & setshowTrendStatsYearly(true) & setshowTrendStatsMonthly(false)}>Yearly</div>
             </div>
           </div>
           <div className="trend-stats-text">
-            <div>
-              HIGH <span className="ts-val">₱12.50</span>
-            </div>
-            <div>
-              LOW <span className="ts-val-low">₱8.50</span>
-            </div>
+            {showTrendStatYearly && (
+              <>
+                <div>
+                  HIGH <span className="ts-val">₱12.50</span>
+                </div>
+                <div>
+                  LOW <span className="ts-val-low">₱8.50</span>
+                </div>
+              </>
+            )}
+            {showTrendStatsMonthly && (
+              <>
+                <div>
+                  HIGH <span className="ts-val">₱19.00</span>
+                </div>
+                <div>
+                  LOW <span className="ts-val-low">₱10.50</span>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="chart-box">
-            <div className="bar-group">
-              <div className="bar-val">₱8.50</div>
-              <div className="bar" style={{ height: "30%" }}></div>
-              <div className="bar-label">2015</div>
-            </div>
+            {showYearlyTrend && (
+              <>
+                <div className="bar-group">
+                  <div className="bar-val">₱8.50</div>
+                  <div className="bar" style={{ height: "30%" }}></div>
+                  <div className="bar-label">2015</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val">₱8.90</div>
-              <div className="bar" style={{ height: "35%" }}></div>
-              <div className="bar-label">2016</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱8.90</div>
+                  <div className="bar" style={{ height: "35%" }}></div>
+                  <div className="bar-label">2016</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val">₱9.20</div>
-              <div className="bar" style={{ height: "38%" }}></div>
-              <div className="bar-label">2017</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱9.20</div>
+                  <div className="bar" style={{ height: "38%" }}></div>
+                  <div className="bar-label">2017</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val">₱9.50</div>
-              <div className="bar" style={{ height: "40%" }}></div>
-              <div className="bar-label">2018</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱9.50</div>
+                  <div className="bar" style={{ height: "40%" }}></div>
+                  <div className="bar-label">2018</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val">₱9.80</div>
-              <div className="bar" style={{ height: "45%" }}></div>
-              <div className="bar-label">2019</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱9.80</div>
+                  <div className="bar" style={{ height: "45%" }}></div>
+                  <div className="bar-label">2019</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val">₱10.20</div>
-              <div className="bar" style={{ height: "50%" }}></div>
-              <div className="bar-label">2020</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱10.20</div>
+                  <div className="bar" style={{ height: "50%" }}></div>
+                  <div className="bar-label">2020</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val">₱10.50</div>
-              <div className="bar" style={{ height: "55%" }}></div>
-              <div className="bar-label">2021</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱10.50</div>
+                  <div className="bar" style={{ height: "55%" }}></div>
+                  <div className="bar-label">2021</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val">₱11.10</div>
-              <div className="bar" style={{ height: "65%" }}></div>
-              <div className="bar-label">2022</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱11.10</div>
+                  <div className="bar" style={{ height: "65%" }}></div>
+                  <div className="bar-label">2022</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val">₱11.80</div>
-              <div className="bar" style={{ height: "80%" }}></div>
-              <div className="bar-label">2023</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱11.80</div>
+                  <div className="bar" style={{ height: "80%" }}></div>
+                  <div className="bar-label">2023</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val high">₱12.10</div>
-              <div className="bar active" style={{ height: "88%" }}></div>
-              <div className="bar-label">2024</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val high">₱12.10</div>
+                  <div className="bar active" style={{ height: "88%" }}></div>
+                  <div className="bar-label">2024</div>
+                </div>
 
-            <div className="bar-group">
-              <div className="bar-val curr">₱12.50</div>
-              <div className="bar current" style={{ height: "98%" }}></div>
-              <div className="bar-label">2025</div>
-            </div>
+                <div className="bar-group">
+                  <div className="bar-val curr">₱12.50</div>
+                  <div className="bar current" style={{ height: "98%" }}></div>
+                  <div className="bar-label">2025</div>
+                </div>
+              </>
+            )}
+
+            {showMonthlyTrend && (
+              <>
+                <div className="bar-group">
+                  <div className="bar-val">₱10.50</div>
+                  <div className="bar" style={{ height: "30%" }}></div>
+                  <div className="bar-label">Jan</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱12.50</div>
+                  <div className="bar" style={{ height: "32%" }}></div>
+                  <div className="bar-label">Feb</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱13.00</div>
+                  <div className="bar" style={{ height: "33%" }}></div>
+                  <div className="bar-label">Mar</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱12.50</div>
+                  <div className="bar" style={{ height: "32%" }}></div>
+                  <div className="bar-label">Apr</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱10.50</div>
+                  <div className="bar" style={{ height: "30%" }}></div>
+                  <div className="bar-label">May</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱14.50</div>
+                  <div className="bar" style={{ height: "40%" }}></div>
+                  <div className="bar-label">Jun</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱19.00</div>
+                  <div className="bar" style={{ height: "50%" }}></div>
+                  <div className="bar-label">Jul</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱14.50</div>
+                  <div className="bar" style={{ height: "40%" }}></div>
+                  <div className="bar-label">Aug</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱15.75</div>
+                  <div className="bar" style={{ height: "41%" }}></div>
+                  <div className="bar-label">Sep</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱16.25</div>
+                  <div className="bar" style={{ height: "42%" }}></div>
+                  <div className="bar-label">Oct</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val">₱17.00</div>
+                  <div className="bar active" style={{ height: "45%" }}></div>
+                  <div className="bar-label">Nov</div>
+                </div>
+                <div className="bar-group">
+                  <div className="bar-val high">₱21.00</div>
+                  <div className="bar current" style={{ height: "60%" }}></div>
+                  <div className="bar-label">Dec</div>
+                </div>
+              </>
+            )}
+
           </div>
         </div>
       </div>
