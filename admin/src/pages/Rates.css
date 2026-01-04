@@ -79,7 +79,6 @@
   color: #fff;
 }
 
-/* --- TREND CARD (Right) --- */
 .trend-card {
   background: var(--bg-card);
   border-radius: 16px;
@@ -135,7 +134,6 @@
   margin-left: 5px;
 }
 
-/* --- BAR CHART --- */
 .chart-box {
   flex: 1;
   display: flex;
@@ -188,7 +186,6 @@
   color: #888;
 }
 
-/* --- TABLE PILLS & BADGES --- */
 .rate-pill {
   background: #2a2a2a;
   padding: 6px 12px;
@@ -238,7 +235,6 @@
   border: 1px solid #444;
 }
 
-/* --- MODAL --- */
 .modal-overlay {
   position: fixed;
   top: 0;

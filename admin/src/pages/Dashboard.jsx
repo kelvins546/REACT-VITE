@@ -1,11 +1,9 @@
-// src/pages/Dashboard.jsx
 import React from "react";
-import "./Dashboard.css"; 
+import "./Dashboard.css";
 
 const Dashboard = () => {
   return (
     <>
-   
       <div className="page-header">
         <div>
           <div className="page-title">Dashboard Overview</div>
@@ -15,9 +13,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-     
       <div className="stats-grid">
-       
         <div className="stat-card">
           <div className="sc-label">
             <span
@@ -32,7 +28,6 @@ const Dashboard = () => {
           <div className="sc-sub text-primary">+12% vs last month</div>
         </div>
 
-     
         <div className="stat-card">
           <div className="sc-label">
             <span
@@ -47,7 +42,6 @@ const Dashboard = () => {
           <div className="sc-sub">+4 New in last 3 hours</div>
         </div>
 
-        
         <div className="stat-card">
           <div className="sc-label">
             <span
@@ -62,7 +56,6 @@ const Dashboard = () => {
           <div className="sc-sub">1 reported recently</div>
         </div>
 
-     
         <div className="stat-card">
           <div className="sc-label">
             <span
@@ -78,7 +71,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-     
       <div className="table-container">
         <div className="table-header">Recent Complaints</div>
         <table>

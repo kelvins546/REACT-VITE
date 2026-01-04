@@ -1,4 +1,3 @@
-/* Stats Grid Container */
 .c-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -6,7 +5,6 @@
   margin-bottom: 24px;
 }
 
-/* Individual Stat Card */
 .c-stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -23,7 +21,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Card Label */
 .c-sc-label {
   font-size: 11px;
   font-weight: 600;
@@ -33,7 +30,6 @@
   text-transform: uppercase;
 }
 
-/* Card Value */
 .c-sc-val {
   font-size: 36px;
   font-weight: 700;
@@ -41,7 +37,6 @@
   margin-bottom: 8px;
 }
 
-/* Card Subtitle */
 .c-sc-sub {
   font-size: 13px;
   color: #999;
@@ -49,13 +44,10 @@
   align-items: center;
 }
 
-/* Card Icon */
 .c-sc-icon {
   font-size: 48px;
-
 }
 
-/* Color Variants */
 .sc-open .c-sc-val {
   color: #ff4757;
 }
@@ -80,7 +72,6 @@
   color: #2ed573;
 }
 
-/* Toolbar Container */
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -93,7 +84,6 @@
   flex-wrap: wrap;
 }
 
-/* Search Box */
 .search-box {
   display: flex;
   align-items: center;
@@ -126,7 +116,6 @@
   color: #666;
 }
 
-/* Filter Group */
 .filter-group {
   display: flex;
   gap: 12px;
@@ -187,7 +176,6 @@
   }
 }
 
-/* Modal Overlay */
 .c-modal-overlay {
   position: fixed;
   top: 0;
@@ -214,7 +202,6 @@
   }
 }
 
-/* Modal Container */
 .c-modal-container {
   background: #1a1a1a;
   border-radius: 16px;
@@ -240,7 +227,6 @@
   }
 }
 
-/* Modal Header */
 .c-modal-header {
   display: flex;
   justify-content: space-between;
@@ -277,7 +263,6 @@
   color: #fff;
 }
 
-/* Modal Body */
 .c-modal-body {
   padding: 28px;
   overflow-y: auto;
@@ -288,7 +273,6 @@
   scrollbar-color: #3a3a3a transparent;
 }
 
-/* Webkit browsers */
 .c-modal-body::-webkit-scrollbar {
   width: 6px;
 }
@@ -312,7 +296,6 @@
   justify-content: space-between;
   width: 100%;
 }
-
 
 .c-modal-label {
   font-size: 13px;
@@ -355,7 +338,6 @@
   line-height: 1.6;
 }
 
-/* Section Title */
 .c-section-title {
   font-size: 15px;
   font-weight: 600;
@@ -363,7 +345,6 @@
   margin-bottom: 12px;
 }
 
-/* Chat Box */
 .c-chat-box {
   background: #0f0f0f;
   border: 1px solid #2a2a2a;
@@ -393,7 +374,6 @@
   background: #3a3a3a;
 }
 
-/* Chat Messages */
 .c-chat-msg {
   padding: 10px 14px;
   border-radius: 8px;
@@ -415,7 +395,6 @@
   align-self: flex-end;
 }
 
-/* Modal Footer */
 .c-modal-footer {
   display: flex;
   gap: 12px;
@@ -423,7 +402,6 @@
   border-top: 1px solid #2a2a2a;
 }
 
-/* Modal Buttons */
 .c-btn-modal {
   flex: 1;
   padding: 12px 20px;
@@ -458,7 +436,6 @@
   transform: translateY(-1px);
 }
 
-/* Reply Section */
 .c-reply-section {
   display: flex;
   flex-direction: column;
@@ -518,7 +495,6 @@
   transform: translateY(-1px);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .c-modal-container {
     max-width: 100%;
@@ -559,19 +535,19 @@
 }
 
 .prio-high {
-  background: #FF44441A;
+  background: #ff44441a;
   color: var(--danger);
-  border: 1px solid #FF4444;
+  border: 1px solid #ff4444;
 }
 
 .prio-med {
-  background: #FFAA001A;
-  color: #FFAA00;
-  border: 1px solid #FFAA00;
+  background: #ffaa001a;
+  color: #ffaa00;
+  border: 1px solid #ffaa00;
 }
 
 .prio-low {
-  background: #FFFFFF1A;
+  background: #ffffff1a;
   color: #888888;
   border: 1px solid #888888;
 }
@@ -582,7 +558,7 @@
 }
 
 .prio-icon-med {
-  color: #FFAA00;
+  color: #ffaa00;
   transform: translateY(10%);
 }
 

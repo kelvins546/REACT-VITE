@@ -1,29 +1,23 @@
-// src/pages/Complaints.jsx
 import React, { useState } from "react";
 import "./Complaints.css";
 
 const Complaints = () => {
   const [showModal, setShowModal] = useState(false);
 
-  // --- REPLY STATES ---
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
 
-  // Mock Chat Data
   const [chatLogs, setChatLogs] = useState([
     { id: 1, type: "user", msg: "User created ticket." },
     { id: 2, type: "admin", msg: "Admin assigned to Technical Support." },
   ]);
 
-  // Handle Sending
   const handleSendReply = () => {
     if (!replyText.trim()) return;
 
-    // Add message
     const newMessage = { id: Date.now(), type: "admin", msg: replyText };
     setChatLogs([...chatLogs, newMessage]);
 
-    // Reset
     setReplyText("");
     setIsReplying(false);
   };
@@ -34,7 +28,7 @@ const Complaints = () => {
         <div className="page-title">Complaints Management</div>
       </div>
 
-      {/* Stats Grid */}
+      {}
       <div className="c-stats-grid">
         <div className="c-stat-card sc-open">
           <div>
@@ -94,7 +88,7 @@ const Complaints = () => {
         </div>
       </div>
 
-      {/* Toolbar */}
+      {}
       <div className="toolbar">
         <div className="search-box">
           <span
@@ -111,12 +105,18 @@ const Complaints = () => {
         </div>
 
         <div className="filter-group">
-          <select className="custom-select sel-complaints" defaultValue="Category: All">
+          <select
+            className="custom-select sel-complaints"
+            defaultValue="Category: All"
+          >
             <option>Category: All</option>
             <option>Hardware</option>
             <option>Billing</option>
           </select>
-          <select className="custom-select sel-complaints" defaultValue="Status: All">
+          <select
+            className="custom-select sel-complaints"
+            defaultValue="Status: All"
+          >
             <option>Status: All</option>
             <option>Open</option>
             <option>Closed</option>
@@ -124,7 +124,7 @@ const Complaints = () => {
         </div>
       </div>
 
-      {/* Table */}
+      {}
       <div className="table-container">
         <table>
           <thead>
@@ -157,7 +157,10 @@ const Complaints = () => {
               <td>Today, 09:30 AM</td>
               <td>
                 <span className="prio-badge prio-high">
-                  <span className="material-icons prio-icon-high" style={{ fontSize: "16px" }}>
+                  <span
+                    className="material-icons prio-icon-high"
+                    style={{ fontSize: "16px" }}
+                  >
                     arrow_upward
                   </span>
                   High
@@ -183,7 +186,7 @@ const Complaints = () => {
                 </div>
               </td>
             </tr>
-            {/* Row 2 */}
+            {}
             <tr>
               <td className="ticket-id">#TK-9920</td>
               <td>
@@ -207,12 +210,13 @@ const Complaints = () => {
               <td>Yesterday, 2:15 PM</td>
               <td>
                 <span className="prio-badge prio-med">
-                  <span className="material-icons prio-icon-med" style={{ fontSize: "16px" }}>
+                  <span
+                    className="material-icons prio-icon-med"
+                    style={{ fontSize: "16px" }}
+                  >
                     remove
                   </span>
-                  <span className="prio-text">
-                    Med
-                  </span>
+                  <span className="prio-text">Med</span>
                 </span>
               </td>
               <td>
@@ -235,7 +239,7 @@ const Complaints = () => {
                 </div>
               </td>
             </tr>
-            {/* Row 3 */}
+            {}
             <tr>
               <td className="ticket-id">#TK-9918</td>
               <td>
@@ -259,12 +263,13 @@ const Complaints = () => {
               <td>Dec 12, 11:00 AM</td>
               <td>
                 <span className="prio-badge prio-low">
-                  <span className="material-icons prio-icon-low" style={{ fontSize: "16px" }}>
+                  <span
+                    className="material-icons prio-icon-low"
+                    style={{ fontSize: "16px" }}
+                  >
                     arrow_downward
                   </span>{" "}
-                  <span className="prio-text">
-                    Low
-                  </span>
+                  <span className="prio-text">Low</span>
                 </span>
               </td>
               <td>
@@ -290,7 +295,7 @@ const Complaints = () => {
           </tbody>
         </table>
 
-        {/* Pagination (Now styled) */}
+        {}
         <div className="u-pagination">
           <div style={{ fontSize: "14px", color: "#666" }}>
             Showing 1-3 of 15
@@ -304,7 +309,7 @@ const Complaints = () => {
         </div>
       </div>
 
-      {/* --- MODAL --- */}
+      {}
       {showModal && (
         <div className="c-modal-overlay">
           <div className="c-modal-container">
@@ -356,7 +361,7 @@ const Complaints = () => {
               <div>
                 <div className="c-section-title">Activity Log</div>
                 <div className="c-chat-box">
-                  {/* Dynamic Chat Rendering */}
+                  {}
                   {chatLogs.map((log) => (
                     <div key={log.id} className={`c-chat-msg ${log.type}`}>
                       {log.msg}
@@ -365,7 +370,7 @@ const Complaints = () => {
                 </div>
               </div>
 
-              {/* TOGGLE: Show Footer Buttons OR Reply Form */}
+              {}
               {!isReplying ? (
                 <div className="c-modal-footer">
                   <button

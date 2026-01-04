@@ -1,12 +1,12 @@
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7); /* Darker overlay */
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 99;
-  backdrop-filter: blur(2px); /* Optional soft blur */
+  backdrop-filter: blur(2px);
 }
 
 .loading-content {
@@ -17,9 +17,9 @@
   gap: 12px;
 }
 
-.loading-content p{
-    font-size: 1.2rem;
-    font-weight: 500;
+.loading-content p {
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
 .gradient-loader {

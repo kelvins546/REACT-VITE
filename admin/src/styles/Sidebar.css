@@ -1,8 +1,6 @@
-/* src/styles/Sidebar.css */
-
 .sidebar {
   width: var(--sidebar-width);
-  background: #161616; /* Matches --bg-panel */
+  background: #161616;
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -11,7 +9,6 @@
   z-index: 100;
 }
 
-/* --- BRAND SECTION --- */
 .brand {
   display: flex;
   align-items: center;
@@ -32,7 +29,7 @@
   font-weight: 800;
   font-size: 18px;
   letter-spacing: 1px;
-  /* The Blue-to-Green Gradient Text */
+
   background: linear-gradient(90deg, #0055ff, #00ff99);
   background-clip: text;
   -webkit-background-clip: text;
@@ -40,7 +37,6 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* --- NAVIGATION LINKS --- */
 .nav-link {
   display: flex;
   align-items: center;
@@ -53,7 +49,7 @@
   margin-bottom: 6px;
   text-decoration: none;
   transition: 0.15s;
-  border-left: 4px solid transparent; /* Placeholder for active border */
+  border-left: 4px solid transparent;
 }
 
 .nav-link:hover {
@@ -65,7 +61,6 @@
   font-size: 22px;
 }
 
-/* ACTIVE STATE (The Green Glow) */
 .nav-link.active {
   background: linear-gradient(90deg, rgba(0, 255, 153, 0.1), transparent);
   color: #fff;
@@ -78,7 +73,6 @@
   text-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
 }
 
-/* --- USER FOOTER --- */
 .user-nav {
   margin-top: auto;
   display: flex;

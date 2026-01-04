@@ -1,4 +1,3 @@
-// src/pages/ArchivedUsers.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import "./ArchivedUsers.css";
@@ -6,7 +5,7 @@ import "./ArchivedUsers.css";
 const ArchivedUsers = () => {
   return (
     <>
-      {/* Page Header */}
+      {}
       <div className="page-header">
         <div>
           <div className="page-title">Archived Users</div>
@@ -16,7 +15,7 @@ const ArchivedUsers = () => {
         </div>
       </div>
 
-      {/* Toolbar */}
+      {}
       <div className="toolbar">
         <div className="search-box">
           <span
@@ -32,7 +31,7 @@ const ArchivedUsers = () => {
           />
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
-          {/* Link back to Active Users */}
+          {}
           <Link
             to="/users"
             className="btn btn-secondary"
@@ -52,7 +51,7 @@ const ArchivedUsers = () => {
         </div>
       </div>
 
-      {/* Table Container */}
+      {}
       <div className="table-container">
         <table>
           <thead>
@@ -75,7 +74,7 @@ const ArchivedUsers = () => {
             </tr>
           </thead>
           <tbody>
-            {/* Row 1 */}
+            {}
             <tr>
               <td>
                 <input
@@ -145,7 +144,7 @@ const ArchivedUsers = () => {
               </td>
             </tr>
 
-            {/* Row 2 */}
+            {}
             <tr>
               <td>
                 <input
@@ -215,7 +214,7 @@ const ArchivedUsers = () => {
               </td>
             </tr>
 
-            {/* Row 3 */}
+            {}
             <tr>
               <td>
                 <input
@@ -287,7 +286,7 @@ const ArchivedUsers = () => {
           </tbody>
         </table>
 
-        {/* UPDATED PAGINATION */}
+        {}
         <div className="a-pagination">
           <div style={{ fontSize: "14px", color: "#666" }}>
             Showing 1-3 of 3

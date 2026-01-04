@@ -1,41 +1,75 @@
-// src/pages/AdminLogin.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
 import { LoadingPopup } from "../components/loaders/LoadingPopUp";
-import { PuffLoader } from 'react-spinners';
+import { PuffLoader } from "react-spinners";
+import { supabase } from "../supabaseClient";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [temporaryLoading, setTemporaryLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/", { replace: true });
+      }
+    };
+    checkSession();
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setTemporaryLoading(true); // Show loading first
+    setTemporaryLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { data: authData, error: authError } =
+        await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+      if (authError) throw authError;
+
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (userError) throw userError;
+
+      const allowedRoles = ["admin", "super admin", "support"];
+
+      if (!userData || !allowedRoles.includes(userData.role)) {
+        await supabase.auth.signOut();
+        throw new Error("Access Denied: You do not have admin privileges.");
+      }
 
       setTemporaryLoading(false);
       navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
+      alert(error.message || "Login failed. Please check your credentials.");
       setTemporaryLoading(false);
     }
   };
+
   return (
     <div className="login-page">
       <LoadingPopup
         show={temporaryLoading}
-        message="Logging In..."
+        message="Verifying Credentials..."
         Loader={PuffLoader}
         color="#0055ff"
       />
-      <div className="auth-bg">
-
-      </div>
+      <div className="auth-bg"></div>
       <div className="auth-container">
         <div className="brand-side">
           <div className="logo-circle">
@@ -79,7 +113,7 @@ const AdminLogin = () => {
               <div className="input-wrapper">
                 <span className="material-icons input-icon">lock</span>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="input-field"
                   placeholder="••••••••"
                   value={password}
@@ -89,8 +123,9 @@ const AdminLogin = () => {
                 <span
                   className="material-icons"
                   style={{ fontSize: "18px", color: "#666", cursor: "pointer" }}
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  visibility_off
+                  {showPassword ? "visibility" : "visibility_off"}
                 </span>
               </div>
             </div>
@@ -102,6 +137,7 @@ const AdminLogin = () => {
             <button
               type="submit"
               className="btn-login"
+              disabled={temporaryLoading}
             >
               Access Dashboard
             </button>

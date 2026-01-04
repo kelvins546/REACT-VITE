@@ -1,6 +1,3 @@
-/* src/pages/AdminLogin.css */
-
-/* Background wrapper for the entire login screen */
 .login-page {
   height: 100vh;
   width: 100vw;
@@ -112,7 +109,6 @@
   margin-bottom: 30px;
 }
 
-/* Inputs */
 .input-group {
   margin-bottom: 18px;
 }
@@ -157,7 +153,6 @@
   font-family: "Inter", sans-serif;
 }
 
-/* Button */
 .btn-login {
   width: 100%;
   padding: 16px;

@@ -1,74 +1,133 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 import "./Users.css";
+import { PuffLoader } from "react-spinners";
 
 const Users = () => {
+  const [usersList, setUsersList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const [showModal, setShowModal] = useState(false);
+  const [viewUser, setViewUser] = useState(null);
+  const [viewUserHubs, setViewUserHubs] = useState([]);
+  const [viewStats, setViewStats] = useState({ alerts: 0, registeredHubs: 0 });
 
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [archiveReason, setArchiveReason] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
 
-  const [isMessaging, setIsMessaging] = useState(false);
-  const [messageText, setMessageText] = useState("");
+  const checkHubStatus = (lastSeen) => {
+    if (!lastSeen) return false;
 
-  const [chatLogs, setChatLogs] = useState([
-    { id: 1, type: "user", msg: "User created ticket." },
-    { id: 2, type: "admin", msg: "Admin assigned to Technical Support." },
-  ]);
+    let timeStr = lastSeen.replace(" ", "T");
+    if (!timeStr.endsWith("Z") && !timeStr.includes("+")) {
+      timeStr += "Z";
+    }
 
-  const handleSendMessage = () => {
-    if (!messageText.trim()) return;
+    const lastSeenMs = new Date(timeStr).getTime();
+    const now = Date.now();
+    const diffInSeconds = (now - lastSeenMs) / 1000;
 
-    const newMessage = {
-      id: Date.now(),
-      type: "admin",
-      msg: messageText,
-    };
-
-    setChatLogs(prev => [...prev, newMessage]);
-    setMessageText("");
-    setIsMessaging(false);
+    return diffInSeconds < 120 && diffInSeconds > -5;
   };
 
-  const [usersList] = useState([
-    {
-      id: 1,
-      initials: "NA",
-      name: "Natasha Alonzo",
-      email: "natasha@email.com",
-      location: "Unit 402, Congress Ville",
-      hubs: "2 Active",
-      status: "Active",
-      color: "linear-gradient(135deg, #0055ff, #00ff99)",
-      textColor: "#000",
-    },
-    {
-      id: 2,
-      initials: "JD",
-      name: "John Doe",
-      email: "john.doe@email.com",
-      location: "Unit 305, Tower A",
-      hubs: "1 Active",
-      status: "Active",
-      color: "#2a2a2a",
-      textColor: "#fff",
-      borderColor: "#444",
-    },
-    {
-      id: 3,
-      initials: "MC",
-      name: "Maria Cruz",
-      email: "maria.c@yahoo.com",
-      location: "Unit 101, Ground Floor",
-      hubs: "0 Devices",
-      status: "Inactive",
-      color: "#333",
-      textColor: "#888",
-      borderColor: "#444",
-    },
-  ]);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+
+      const { data: usersData, error: usersError } = await supabase
+        .from("users")
+        .select("*")
+        .order("joined_at", { ascending: false });
+
+      if (usersError) throw usersError;
+
+      const visibleUsers = usersData.filter(
+        (u) => u.role !== "super admin" && u.role !== "admin"
+      );
+
+      const userIds = visibleUsers.map((u) => u.id);
+      let hubsData = [];
+      if (userIds.length > 0) {
+        const { data: fetchedHubs } = await supabase
+          .from("hubs")
+          .select("user_id, last_seen")
+          .in("user_id", userIds);
+        hubsData = fetchedHubs || [];
+      }
+
+      const mappedUsers = visibleUsers.map((u) => {
+        const totalHubsCount = hubsData.filter(
+          (h) => h.user_id === u.id
+        ).length;
+
+        return {
+          id: u.id,
+          initials: getInitials(u.full_name),
+          name: u.full_name,
+          email: u.email,
+          location: u.unit_location || "No Location",
+          hubs: `${totalHubsCount} Registered`,
+          status: capitalize(u.status),
+          role: u.role,
+          joined_at: u.joined_at,
+          phone: u.phone_number,
+          avatar_url: u.avatar_url,
+          color: getAvatarColor(u.full_name),
+          textColor: "#fff",
+          borderColor: "transparent",
+        };
+      });
+
+      setUsersList(mappedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewDetails = async (user) => {
+    setViewUser(user);
+    setShowModal(true);
+    setViewUserHubs([]);
+
+    try {
+      const { data: logs } = await supabase
+        .from("system_logs")
+        .select("severity")
+        .eq("user_id", user.id)
+        .limit(50);
+
+      const { data: hubs } = await supabase
+        .from("hubs")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (hubs) setViewUserHubs(hubs);
+
+      const criticalErrors = logs
+        ? logs.filter((l) => l.severity === "critical").length
+        : 0;
+      const totalHubs = hubs ? hubs.length : 0;
+
+      setViewStats({
+        alerts: criticalErrors,
+        registeredHubs: totalHubs,
+      });
+    } catch (err) {
+      console.error("Error fetching details", err);
+    }
+  };
 
   const handleArchiveClick = (user) => {
     setSelectedUser(user);
@@ -76,12 +135,55 @@ const Users = () => {
     setShowArchiveModal(true);
   };
 
-  const handleConfirmArchive = () => {
-    console.log(`Archiving ${selectedUser?.name}. Reason: ${archiveReason}`);
+  const handleConfirmArchive = async () => {
+    if (!selectedUser) return;
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ status: "archived" })
+        .eq("id", selectedUser.id);
 
-    setShowArchiveModal(false);
-    setSelectedUser(null);
+      if (error) throw error;
+
+      setUsersList((prev) =>
+        prev.map((u) =>
+          u.id === selectedUser.id ? { ...u, status: "Archived" } : u
+        )
+      );
+
+      setShowArchiveModal(false);
+      setSelectedUser(null);
+    } catch (err) {
+      alert("Error archiving: " + err.message);
+    }
   };
+
+  const getInitials = (name) =>
+    name
+      ? name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase()
+      : "??";
+  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
+  const getAvatarColor = (name) => {
+    const colors = ["#0055ff", "#00ff99", "#ffaa00", "#ff4444", "#9d00ff"];
+    if (!name) return colors[0];
+    return colors[name.length % colors.length];
+  };
+
+  const filteredUsers = usersList.filter(
+    (u) =>
+      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -101,6 +203,11 @@ const Users = () => {
             type="text"
             className="search-input"
             placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
@@ -124,30 +231,21 @@ const Users = () => {
       </div>
 
       <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th style={{ width: "50px" }}>
-                <input
-                  type="checkbox"
-                  style={{
-                    accentColor: "var(--primary)",
-                    width: "18px",
-                    height: "18px",
-                  }}
-                />
-              </th>
-              <th>User Profile</th>
-              <th>Unit / Location</th>
-              <th>Active Hubs</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usersList.map((user) => (
-              <tr key={user.id}>
-                <td>
+        {loading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "50px",
+            }}
+          >
+            <PuffLoader color="#0055ff" size={40} />
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: "50px" }}>
                   <input
                     type="checkbox"
                     style={{
@@ -156,102 +254,179 @@ const Users = () => {
                       height: "18px",
                     }}
                   />
-                </td>
-                <td>
-                  <div className="user-cell">
-                    <div
-                      className="u-avatar"
-                      style={{
-                        background: user.color,
-                        color: user.textColor,
-                        border: user.borderColor
-                          ? `1px solid ${user.borderColor}`
-                          : "none",
-                      }}
-                    >
-                      {user.initials}
-                    </div>
-                    <div style={{ fontWeight: 600, color: "#fff" }}>
-                      {user.name}
-                      <br />
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          color: "#666",
-                          fontWeight: 400,
-                        }}
-                      >
-                        {user.email}
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>{user.location}</td>
-                <td>{user.hubs}</td>
-                <td>
-                  <span
-                    className="status-dot"
-                    style={{
-                      background:
-                        user.status === "Active" ? "var(--primary)" : "#666",
-                      boxShadow:
-                        user.status === "Active"
-                          ? "0 0 8px rgba(0, 255, 153, 0.4)"
-                          : "none",
-                    }}
-                  ></span>{" "}
-                  {user.status}
-                </td>
-                <td>
-                  <div className="action-cell">
-                    <button
-                      className="icon-btn"
-                      title="View Details"
-                      onClick={() => setShowModal(true)}
-                    >
-                      <span
-                        className="material-icons"
-                        style={{ fontSize: "18px" }}
-                      >
-                        visibility
-                      </span>
-                    </button>
-
-                    <button
-                      className="icon-btn"
-                      title="Archive User"
-                      onClick={() => handleArchiveClick(user)}
-                    >
-                      <span
-                        className="material-icons"
-                        style={{ fontSize: "18px" }}
-                      >
-                        archive
-                      </span>
-                    </button>
-                  </div>
-                </td>
+                </th>
+                <th>User Profile</th>
+                <th>Unit / Location</th>
+                <th>Registered Hubs</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paginatedUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#666",
+                    }}
+                  >
+                    No users found.
+                  </td>
+                </tr>
+              ) : (
+                paginatedUsers.map((user, index) => (
+                  <tr
+                    key={user.id || index}
+                    style={{ opacity: user.status === "Archived" ? 0.5 : 1 }}
+                  >
+                    <td>
+                      <input
+                        type="checkbox"
+                        style={{
+                          accentColor: "var(--primary)",
+                          width: "18px",
+                          height: "18px",
+                        }}
+                      />
+                    </td>
+                    <td>
+                      <div className="user-cell">
+                        {user.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            alt={user.name}
+                            className="u-avatar"
+                            style={{ objectFit: "cover" }}
+                          />
+                        ) : (
+                          <div
+                            className="u-avatar"
+                            style={{
+                              background: user.color,
+                              color: user.textColor,
+                            }}
+                          >
+                            {user.initials}
+                          </div>
+                        )}
 
-        <div className="u-pagination">
-          <div style={{ fontSize: "14px", color: "#666" }}>
-            Showing 1-3 of 24
+                        <div style={{ fontWeight: 600, color: "#fff" }}>
+                          {user.name}
+                          <br />
+                          <span
+                            style={{
+                              fontSize: "13px",
+                              color: "#666",
+                              fontWeight: 400,
+                            }}
+                          >
+                            {user.email}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{user.location}</td>
+                    <td>{user.hubs}</td>
+                    <td>
+                      <span
+                        className="status-dot"
+                        style={{
+                          background:
+                            user.status === "Active"
+                              ? "var(--primary)"
+                              : "#666",
+                          boxShadow:
+                            user.status === "Active"
+                              ? "0 0 8px rgba(0, 255, 153, 0.4)"
+                              : "none",
+                        }}
+                      ></span>{" "}
+                      {user.status}
+                    </td>
+                    <td>
+                      <div className="action-cell">
+                        <button
+                          className="icon-btn"
+                          title="View Details"
+                          onClick={() => handleViewDetails(user)}
+                        >
+                          <span
+                            className="material-icons"
+                            style={{ fontSize: "18px" }}
+                          >
+                            visibility
+                          </span>
+                        </button>
+                        {user.status !== "Archived" && (
+                          <button
+                            className="icon-btn"
+                            title="Archive User"
+                            onClick={() => handleArchiveClick(user)}
+                          >
+                            <span
+                              className="material-icons"
+                              style={{ fontSize: "18px" }}
+                            >
+                              archive
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
+
+        {!loading && (
+          <div className="u-pagination">
+            <div style={{ fontSize: "14px", color: "#666" }}>
+              Showing{" "}
+              {paginatedUsers.length > 0
+                ? (currentPage - 1) * itemsPerPage + 1
+                : 0}
+              -{Math.min(currentPage * itemsPerPage, filteredUsers.length)} of{" "}
+              {filteredUsers.length}
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                className="u-page-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                {"<"}
+              </button>
+              <button className="u-page-btn active">{currentPage}</button>
+              <button
+                className="u-page-btn"
+                disabled={currentPage === totalPages || totalPages === 0}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                {">"}
+              </button>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button className="u-page-btn">{"<"}</button>
-            <button className="u-page-btn active">1</button>
-            <button className="u-page-btn">2</button>
-            <button className="u-page-btn">{">"}</button>
-          </div>
-        </div>
+        )}
       </div>
 
-      {showModal && (
+      {}
+      {showModal && viewUser && (
         <div className="u-modal-overlay">
-          <div className="u-modal-container">
+          <div
+            className="u-modal-container"
+            style={{
+              maxWidth: "850px",
+              width: "90%",
+              height: "auto",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+          >
             <div className="u-modal-header">
               <div className="u-modal-title">
                 <span
@@ -270,130 +445,127 @@ const Users = () => {
               </button>
             </div>
 
-            <div className="u-modal-body">
-              <div className="profile-card">
+            <div
+              className="u-modal-body"
+              style={{ display: "flex", gap: "25px", padding: "25px" }}
+            >
+              {}
+              <div
+                className="profile-card"
+                style={{ width: "320px", flexShrink: 0, height: "fit-content" }}
+              >
                 <div className="profile-header">
-                  <div className="avatar-lg">NA</div>
-                  <div className="user-name">Natasha Alonzo</div>
-                  <div className="user-meta">Unit 402 • Resident</div>
-                  <span className="status-badge st-active-badge">
-                    Active Account
+                  {viewUser.avatar_url ? (
+                    <img
+                      src={viewUser.avatar_url}
+                      alt="Profile"
+                      className="avatar-lg"
+                      style={{ objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div
+                      className="avatar-lg"
+                      style={{ background: viewUser.color }}
+                    >
+                      {viewUser.initials}
+                    </div>
+                  )}
+
+                  <div className="user-name">{viewUser.name}</div>
+                  <div className="user-meta">
+                    {viewUser.location} • {capitalize(viewUser.role)}
+                  </div>
+                  <span
+                    className={`status-badge ${
+                      viewUser.status === "Active" ? "st-active-badge" : ""
+                    }`}
+                  >
+                    {viewUser.status} Account
                   </span>
                 </div>
 
                 <div className="info-group">
                   <div className="info-row">
                     <span className="info-label">Email</span>
-                    <span className="info-val">natasha@example.com</span>
+                    <span className="info-val">{viewUser.email}</span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Phone</span>
-                    <span className="info-val">+63 917 123 4567</span>
+                    <span className="info-val">
+                      {viewUser.phone || "Not Set"}
+                    </span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Joined</span>
-                    <span className="info-val">Oct 12, 2024</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="info-label">Last Login</span>
-                    <span className="info-val">2 hours ago</span>
+                    <span className="info-val">
+                      {new Date(viewUser.joined_at).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">User ID</span>
                     <span
                       className="info-val"
-                      style={{ fontFamily: "monospace", color: "#888" }}
+                      style={{
+                        fontFamily: "monospace",
+                        color: "#888",
+                        fontSize: "11px",
+                      }}
                     >
-                      GW-8821-USR
+                      {viewUser.id}
                     </span>
                   </div>
                 </div>
 
                 <div className="btn-group">
-                  <button className="btn-full" onClick={() => setShowResetModal(true)}>
+                  <button
+                    className="btn-full"
+                    onClick={() => setShowResetModal(true)}
+                  >
                     <span className="material-icons">lock_reset</span> Send
                     Password Reset
                   </button>
-                  <button className="btn-full" onClick={() => setIsMessaging(true)}>
-                    <span className="material-icons">mail</span> Send Message
-                  </button>
                 </div>
-                <div className="user-message-box">
-                <div className="user-message-section">
-                  {chatLogs.map(chat => (
-                    <div
-                      key={chat.id}
-                      className={`user-message-bubble ${chat.type}`}
-                    >
-                      {chat.msg}
-                    </div>
-                  ))}
-                </div>
-
-                </div>
-                {isMessaging && (
-                  <div className="user-message-reply-section">
-                    <textarea
-                      className="user-message-textarea"
-                      placeholder="Type your message to the user..."
-                      autoFocus
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                    />
-
-                    <div className="user-message-actions">
-                      <button
-                        className="c-btn-modal c-btn-cancel"
-                        onClick={() => setIsMessaging(false)}
-                      >
-                        Cancel
-                      </button>
-
-                      <button
-                        className="c-btn-modal c-btn-send"
-                        onClick={handleSendMessage}
-                      >
-                        <span className="material-icons" style={{ fontSize: "18px" }}>
-                          send
-                        </span>
-                        Send Message
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
 
-              <div>
-                <div className="modal-stats-grid">
-                  <div className="m-stat-card">
-                    <div className="m-stat-label">Total Spend (Dec)</div>
-                    <div className="m-stat-val">₱ 1,450.75</div>
-                    <div className="m-stat-sub">52% of Budget Used</div>
-                  </div>
-                  <div className="m-stat-card">
-                    <div className="m-stat-label">Active Hubs</div>
-                    <div className="m-stat-val">2</div>
+              {}
+              <div
+                style={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                {}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "15px",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <div className="m-stat-card" style={{ width: "100%" }}>
+                    <div className="m-stat-label">Registered Hubs</div>
+                    <div className="m-stat-val">{viewStats.registeredHubs}</div>
                     <div className="m-stat-sub" style={{ color: "#888" }}>
-                      Living Room, Bedroom
+                      Total Devices
                     </div>
                   </div>
-                  <div className="m-stat-card">
+
+                  <div className="m-stat-card" style={{ width: "100%" }}>
                     <div className="m-stat-label">Safety Alerts</div>
                     <div
                       className="m-stat-val"
                       style={{ color: "var(--danger)" }}
                     >
-                      3
+                      {viewStats.alerts}
                     </div>
                     <div
                       className="m-stat-sub"
                       style={{ color: "var(--danger)" }}
                     >
-                      Critical Faults this month
+                      Critical Faults
                     </div>
                   </div>
                 </div>
 
+                {}
                 <div className="detail-card">
                   <div className="section-title">
                     <span
@@ -404,125 +576,67 @@ const Users = () => {
                     </span>
                     Registered Hardware
                   </div>
-
-                  <div className="hub-item">
-                    <div className="hub-left">
-                      <div className="hub-icon">
-                        <span className="material-icons">router</span>
-                      </div>
-                      <div className="hub-info">
-                        <h4>Living Room Hub</h4>
-                        <p>Serial: GW-ESP32-PRO-X1 • IP: 192.168.1.15</p>
-                      </div>
-                    </div>
-                    <span className="hub-status">Online</span>
-                  </div>
-
-                  <div className="hub-item">
-                    <div className="hub-left">
-                      <div
-                        className="hub-icon"
-                        style={{ background: "#2a2a2a", color: "#666" }}
-                      >
-                        <span className="material-icons">wifi_off</span>
-                      </div>
-                      <div className="hub-info">
-                        <h4>Bedroom Hub</h4>
-                        <p>Serial: GW-ESP32-LITE-B2 • Last seen 2h ago</p>
-                      </div>
-                    </div>
-                    <span className="hub-status" style={{ color: "#666" }}>
-                      Offline
-                    </span>
-                  </div>
-                </div>
-
-                <div className="detail-card">
-                  <div className="section-title">
-                    <span
-                      className="material-icons"
-                      style={{ color: "var(--warning)" }}
+                  {viewUserHubs.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "25px",
+                        color: "#666",
+                        fontStyle: "italic",
+                        textAlign: "center",
+                      }}
                     >
-                      history
-                    </span>
-                    Recent Activity Log
-                  </div>
-                  <table className="activity-table">
-                    <thead>
-                      <tr>
-                        <th>Activity Description</th>
-                        <th>Category</th>
-                        <th>Date & Time</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <span className="material-icons act-icon text-crit">
-                            error
-                          </span>
-                          Critical Fault: Outlet 3 Short Circuit
-                        </td>
-                        <td>Safety</td>
-                        <td>Today, 10:42 AM</td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <span className="material-icons act-icon text-warn">
-                            monetization_on
-                          </span>
-                          Budget Limit Exceeded (Smart TV)
-                        </td>
-                        <td>Automation</td>
-                        <td>Yesterday, 8:15 PM</td>
-                      </tr>
-                      <tr>
-                        <td>
+                      No hubs registered.
+                    </div>
+                  ) : (
+                    viewUserHubs.map((hub) => {
+                      const isOnline = checkHubStatus(hub.last_seen);
+
+                      return (
+                        <div className="hub-item" key={hub.id}>
+                          <div className="hub-left">
+                            <div
+                              className="hub-icon"
+                              style={{ background: isOnline ? "" : "#2a2a2a" }}
+                            >
+                              <span
+                                className="material-icons"
+                                style={{ color: isOnline ? "" : "#666" }}
+                              >
+                                {isOnline ? "router" : "wifi_off"}
+                              </span>
+                            </div>
+                            <div className="hub-info">
+                              <h4>{hub.name}</h4>
+                              <p>Serial: {hub.serial_number}</p>
+                            </div>
+                          </div>
                           <span
-                            className="material-icons act-icon"
-                            style={{ color: "var(--primary)" }}
+                            className="hub-status"
+                            style={{ color: isOnline ? "" : "#666" }}
                           >
-                            login
+                            {isOnline ? "Online" : "Offline"}
                           </span>
-                          User Logged In (Web Portal)
-                        </td>
-                        <td>Access</td>
-                        <td>Yesterday, 8:00 AM</td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <span
-                            className="material-icons act-icon"
-                            style={{ color: "var(--accent-blue)" }}
-                          >
-                            settings
-                          </span>
-                          Updated Electricity Rate (₱12.50)
-                        </td>
-                        <td>Configuration</td>
-                        <td>Dec 12, 4:30 PM</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
       )}
+
       {showResetModal && (
         <div className="send-reset-modal-overlay">
           <div className="send-reset-modal-container">
-
             <span className="material-icons send-reset-modal-icon">
               lock_reset
             </span>
-
             <h3 className="send-reset-modal-title">Send Password Reset</h3>
             <p className="send-reset-modal-desc">
               Are you sure you want to send a password reset link to this user?
             </p>
-
             <div className="send-reset-modal-actions">
               <button
                 className="c-btn-modal c-btn-cancel"
@@ -530,11 +644,11 @@ const Users = () => {
               >
                 Cancel
               </button>
-
               <button
                 className="c-btn-modal c-btn-send"
                 onClick={() => {
                   setShowResetModal(false);
+                  alert("Reset link sent!");
                 }}
               >
                 Send Reset
@@ -544,14 +658,12 @@ const Users = () => {
         </div>
       )}
 
-
       {showArchiveModal && selectedUser && (
         <div className="u-modal-overlay">
           <div className="u-modal-container archive-mode">
             <div className="u-modal-header" style={{ borderBottom: "none" }}>
               <div className="u-modal-title" style={{ color: "var(--danger)" }}>
-                <span className="material-icons">warning</span>
-                Archive User
+                <span className="material-icons">warning</span> Archive User
               </div>
               <button
                 className="u-close-btn"
@@ -573,17 +685,19 @@ const Users = () => {
                 <strong>{selectedUser.name}</strong>? This action will restrict
                 their access to the platform immediately.
               </p>
-
               <div className="u-form-group">
                 <label className="u-form-label">Reason for Archiving</label>
-                <select className="u-form-select">
+                <select
+                  className="u-form-select"
+                  value={archiveReason}
+                  onChange={(e) => setArchiveReason(e.target.value)}
+                >
                   <option>Non-payment of Dues</option>
                   <option>Violation of Terms</option>
                   <option>Moved Out / Contract Ended</option>
                   <option>Other</option>
                 </select>
               </div>
-
               <div className="u-form-group">
                 <label className="u-form-label">
                   Additional Remarks (Optional)
@@ -595,7 +709,6 @@ const Users = () => {
                   onChange={(e) => setArchiveReason(e.target.value)}
                 ></textarea>
               </div>
-
               <div className="u-modal-actions">
                 <button
                   className="u-btn-cancel"
@@ -606,7 +719,7 @@ const Users = () => {
                 <button className="u-btn-danger" onClick={handleConfirmArchive}>
                   <span className="material-icons" style={{ fontSize: "18px" }}>
                     archive
-                  </span>
+                  </span>{" "}
                   Confirm Archive
                 </button>
               </div>
