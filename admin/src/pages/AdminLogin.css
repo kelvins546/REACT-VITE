@@ -186,3 +186,36 @@
 .forgot-link:hover {
   color: #00ff99;
 }
+
+.notification-modal {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
+  z-index: 50;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-modal.notification-error {
+  background-color: #ef4444;
+  color: white;
+}
+
+.notification-modal.notification-success {
+  background-color: #10b981;
+  color: white;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

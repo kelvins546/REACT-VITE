@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
 import { LoadingPopup } from "../components/loaders/LoadingPopUp";
+import { PopupNotification } from "../components/notifications/PopUpNotification";
 import { PuffLoader } from "react-spinners";
 import { supabase } from "../supabaseClient";
 
@@ -11,6 +12,14 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [notification, setNotification] = React.useState({
+    show: false,
+    title: "",
+    message: "",
+    variant: "",
+    icon: "info"
+  });
 
   useEffect(() => {
     const checkSession = async () => {
@@ -56,13 +65,34 @@ const AdminLogin = () => {
       navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
-      alert(error.message || "Login failed. Please check your credentials.");
+
+      setNotification({
+        show: true,
+        title: "Login failed",
+        message: error.message || "Please check your credentials.",
+        variant: "error",
+        icon: "error"
+      });
+
       setTemporaryLoading(false);
     }
+
   };
 
   return (
     <div className="login-page">
+      <PopupNotification
+        show={notification.show}
+        title={notification.title}
+        message={notification.message}
+        variant={notification.variant}
+        icon={notification.icon}
+        duration={3000}
+        onClose={() =>
+          setNotification((prev) => ({ ...prev, show: false }))
+        }
+      />
+
       <LoadingPopup
         show={temporaryLoading}
         message="Verifying Credentials..."

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { supabase } from "../supabaseClient";
+import { supabase } from "../../supabaseClient";
 import { PuffLoader } from "react-spinners";
+import { LoadingPopup } from "../loaders/LoadingPopUp";
 
 const ProtectedRoute = () => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -19,7 +21,7 @@ const ProtectedRoute = () => {
           return;
         }
 
-        const { data: userData, error } = await supabase
+        const { data: userData } = await supabase
           .from("users")
           .select("role")
           .eq("id", session.user.id)
@@ -29,6 +31,7 @@ const ProtectedRoute = () => {
 
         if (userData && allowedRoles.includes(userData.role)) {
           setIsAuthenticated(true);
+          setRole(userData.role);
         } else {
           await supabase.auth.signOut();
         }
@@ -44,21 +47,20 @@ const ProtectedRoute = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "#0f0f0f",
-        }}
-      >
-        <PuffLoader color="#0055ff" size={60} />
-      </div>
+      <LoadingPopup
+        show
+        message="Loading..."
+        Loader={PuffLoader}
+        color="#0055ff"
+      />
     );
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet context={{ role }} />;
 };
 
 export default ProtectedRoute;

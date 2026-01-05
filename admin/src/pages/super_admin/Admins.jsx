@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../supabaseClient";
+import { supabase } from "../../supabaseClient";
 import { createClient } from "@supabase/supabase-js";
 import "./Admins.css";
 import { PuffLoader } from "react-spinners";
+import { PopupNotification } from "../../components/notifications/PopUpNotification";
 
 const SUPABASE_URL = "https://grgkznbbfedbipxuwkdl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_C9Vr_lDZsic_RsvJ2aM9Bg_l9ag2A0L";
@@ -11,6 +12,15 @@ const Admins = () => {
   const [adminsList, setAdminsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [notification, setNotification] = useState({
+    show: false,
+    title: "",
+    message: "",
+    variant: "success",
+    icon: "info"
+  });
+
 
   const [currentUserRole, setCurrentUserRole] = useState(null);
 
@@ -85,12 +95,26 @@ const Admins = () => {
 
   const handleCreateAdmin = async () => {
     if (!newAdmin.email || !newAdmin.password || !newAdmin.name) {
-      alert("Please fill in all fields.");
+      setNotification({
+        show: true,
+        title: "Missing information",
+        message: "Please fill in all fields.",
+        variant: "warning",
+        icon: "warning"
+      });
+
       return;
     }
 
     if (SUPABASE_URL.includes("PASTE") || SUPABASE_ANON_KEY.includes("PASTE")) {
-      alert("STOP! Keys are missing.");
+      setNotification({
+        show: true,
+        title: "Configuration error",
+        message: "Supabase keys are missing or invalid.",
+        variant: "error",
+        icon: "error"
+      });
+
       return;
     }
 
@@ -129,12 +153,24 @@ const Admins = () => {
         if (dbError && dbError.code !== "23505") throw dbError;
       }
 
-      alert(`Success! Created new Admin: ${newAdmin.email}`);
+      setNotification({
+        show: true,
+        title: "Admin created",
+        message: `Successfully created admin: ${newAdmin.email}`,
+        variant: "success",
+        icon: "check_circle"
+      });
       setShowCreateModal(false);
       setNewAdmin({ name: "", email: "", password: "", role: "admin" });
       fetchAdmins();
     } catch (error) {
-      alert("Error creating admin: " + error.message);
+      setNotification({
+        show: true,
+        title: "Creation failed",
+        message: error.message,
+        variant: "error",
+        icon: "error"
+      });
     } finally {
       setLoading(false);
     }
@@ -147,7 +183,17 @@ const Admins = () => {
   };
 
   const handleUpdateAdmin = async () => {
-    if (!editFormData.name) return alert("Name cannot be empty");
+    if (!editFormData.name) {
+      setNotification({
+        show: true,
+        title: "Invalid input",
+        message: "Name cannot be empty.",
+        variant: "warning",
+        icon: "warning"
+      });
+      return;
+    }
+
 
     try {
       setLoading(true);
@@ -158,11 +204,24 @@ const Admins = () => {
 
       if (error) throw error;
 
-      alert("Admin updated successfully!");
+      setNotification({
+        show: true,
+        title: "Admin updated",
+        message: "Admin details were updated successfully.",
+        variant: "success",
+        icon: "check_circle"
+      });
       setShowEditModal(false);
       fetchAdmins();
     } catch (error) {
-      alert("Error updating: " + error.message);
+      setNotification({
+        show: true,
+        title: "Update failed",
+        message: error.message,
+        variant: "error",
+        icon: "error"
+      });
+
     } finally {
       setLoading(false);
     }
@@ -183,11 +242,25 @@ const Admins = () => {
 
       if (error) throw error;
 
-      alert("Admin archived successfully.");
+      setNotification({
+        show: true,
+        title: "Admin archived",
+        message: "The admin has been archived successfully.",
+        variant: "warning",
+        icon: "archive"
+      });
+
       setShowArchiveModal(false);
       fetchAdmins();
     } catch (error) {
-      alert("Error archiving: " + error.message);
+      setNotification({
+        show: true,
+        title: "Archive failed",
+        message: error.message,
+        variant: "error",
+        icon: "error"
+      });
+
     } finally {
       setLoading(false);
     }
@@ -196,11 +269,11 @@ const Admins = () => {
   const getInitials = (name) =>
     name
       ? name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .substring(0, 2)
-          .toUpperCase()
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase()
       : "AD";
 
   const filteredAdmins = adminsList.filter(
@@ -211,6 +284,17 @@ const Admins = () => {
 
   return (
     <>
+      <PopupNotification
+        show={notification.show}
+        title={notification.title}
+        message={notification.message}
+        variant={notification.variant}
+        icon={notification.icon}
+        duration={3000}
+        onClose={() =>
+          setNotification((prev) => ({ ...prev, show: false }))
+        }
+      />
       <div className="page-header">
         <div>
           <div className="page-title">Admin Management</div>
@@ -349,21 +433,21 @@ const Admins = () => {
                       */}
                       {(admin.role !== "super admin" ||
                         currentUserRole === "super admin") && (
-                        <button
-                          className="icon-btn"
-                          title="Edit Admin"
-                          onClick={() => openEditModal(admin)}
-                        >
-                          <span
-                            className="material-icons"
-                            style={{ fontSize: "18px" }}
+                          <button
+                            className="icon-btn"
+                            title="Edit Admin"
+                            onClick={() => openEditModal(admin)}
                           >
-                            edit
-                          </span>
-                        </button>
-                      )}
+                            <span
+                              className="material-icons"
+                              style={{ fontSize: "18px" }}
+                            >
+                              edit
+                            </span>
+                          </button>
+                        )}
 
-                      {}
+                      { }
                       {admin.role !== "super admin" &&
                         admin.status !== "archived" && (
                           <button
@@ -388,7 +472,7 @@ const Admins = () => {
         )}
       </div>
 
-      {}
+      { }
       {showCreateModal && (
         <div className="a-modal-overlay">
           <div className="a-modal-container">
@@ -463,7 +547,7 @@ const Admins = () => {
         </div>
       )}
 
-      {}
+      { }
       {showEditModal && selectedAdmin && (
         <div className="a-modal-overlay">
           <div className="a-modal-container" style={{ maxWidth: "400px" }}>
@@ -514,7 +598,7 @@ const Admins = () => {
         </div>
       )}
 
-      {}
+      { }
       {showArchiveModal && archiveAdmin && (
         <div className="a-modal-overlay">
           <div className="a-modal-container" style={{ maxWidth: "400px" }}>

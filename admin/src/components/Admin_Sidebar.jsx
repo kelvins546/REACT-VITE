@@ -6,7 +6,7 @@ import { supabase } from "../supabaseClient";
 import { LoadingPopup } from "./loaders/LoadingPopUp";
 import { PuffLoader } from "react-spinners";
 
-const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
+const Admin_Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -61,11 +61,11 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
   const getInitials = (name) =>
     name
       ? name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase()
       : "AD";
 
   const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
@@ -94,7 +94,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
 
   return (
     <div className={`sidebar ${minimizeSidebar === 2 ? "active" : ""}`}>
-      { }
+      {}
       <LoadingPopup
         show={loggingOut}
         message="Logging out..."
@@ -150,117 +150,8 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               </AnimatePresence>
             </NavLink>
 
-            { }
-            <div className="nav-group">
-              <div
-                className={`nav-link ${isUserSectionActive ? "group-active" : ""
-                  }`}
-                onClick={() => setIsUsersOpen(!isUsersOpen)}
-                style={{ cursor: "pointer", justifyContent: "space-between" }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "16px",
-                  }}
-                >
-                  <span className="material-icons">manage_accounts</span>
-                  <div style={{ display: "flex", gap: "5px" }}>
-                    <AnimatePresence initial={!skipInitialAnimation}>
-                      {isVisible && (
-                        <>
-                          <motion.span
-                            key="label-user"
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            User
-                          </motion.span>
-                          <motion.span
-                            key="label-management"
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            Management
-                          </motion.span>
-                        </>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-                {isVisible && (
-                  <span
-                    className="material-icons"
-                    style={{
-                      fontSize: "16px",
-                      transform: isUsersOpen
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-                      transition: "0.3s",
-                    }}
-                  >
-                    expand_more
-                  </span>
-                )}
-              </div>
-
-              <AnimatePresence>
-                {isUsersOpen && isVisible && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ overflow: "hidden", marginLeft: "10px" }}
-                  >
-                    <NavLink
-                      to="/users"
-                      end
-                      className={({ isActive }) =>
-                        isActive
-                          ? "nav-link sub-link active"
-                          : "nav-link sub-link"
-                      }
-                      style={{ paddingLeft: "45px", height: "45px" }}
-                    >
-                      <span
-                        className="material-icons"
-                        style={{ fontSize: "18px" }}
-                      >
-                        people
-                      </span>
-                      <span>Residents</span>
-                    </NavLink>
-
-                    <NavLink
-                      to="/users/admins"
-                      className={({ isActive }) =>
-                        isActive
-                          ? "nav-link sub-link active"
-                          : "nav-link sub-link"
-                      }
-                      style={{ paddingLeft: "45px", height: "45px" }}
-                    >
-                      <span
-                        className="material-icons"
-                        style={{ fontSize: "18px" }}
-                      >
-                        admin_panel_settings
-                      </span>
-                      <span>System Admins</span>
-                    </NavLink>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             <NavLink
-              to="/rates"
+              to="/admin/rates"
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -295,7 +186,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             </NavLink>
 
             <NavLink
-              to="/complaints"
+              to="/admin/complaints"
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -324,7 +215,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             style={{ transition: "0.5s ease" }}
           >
             <AnimatePresence initial={!skipInitialAnimation}>
-              { }
+              {}
               <motion.div
                 key="user-avatar"
                 className="user-avatar"
@@ -343,7 +234,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                { }
+                {}
                 <div
                   style={{
                     fontSize: "14px",
@@ -357,7 +248,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                 >
                   {adminProfile.name}
                 </div>
-                { }
+                {}
                 <div style={{ fontSize: "12px", color: "#888" }}>
                   {adminProfile.role}
                 </div>
@@ -398,31 +289,8 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               <span className="material-icons">dashboard</span>
             </NavLink>
 
-            { }
             <NavLink
-              to="/users"
-              end
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-              title="Residents"
-            >
-              <span className="material-icons">people</span>
-            </NavLink>
-
-            { }
-            <NavLink
-              to="/users/admins"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-              title="Admins"
-            >
-              <span className="material-icons">admin_panel_settings</span>
-            </NavLink>
-
-            <NavLink
-              to="/rates"
+              to="/admin/rates"
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -431,7 +299,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             </NavLink>
 
             <NavLink
-              to="/complaints"
+              to="/admin/complaints"
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -556,4 +424,4 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
   );
 };
 
-export default Sidebar;
+export default Admin_Sidebar;
