@@ -47,6 +47,7 @@
   justify-content: center;
   backdrop-filter: blur(5px);
   animation: fadeIn 0.2s ease;
+  padding: 20px;
 }
 
 .u-modal-container {
@@ -60,7 +61,6 @@
   flex-direction: column;
   overflow-y: auto;
   animation: slideUp 0.2s ease;
-
   scrollbar-width: thin;
   scrollbar-color: #3a3a3a transparent;
 }
@@ -106,6 +106,18 @@
   }
 
   to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
     opacity: 1;
   }
 }
@@ -202,7 +214,7 @@
 
 .u-form-select:focus,
 .u-form-textarea:focus {
-  border-color: var(--primary);
+  border-color: var(--warning);
   background: #161616;
 }
 
@@ -214,8 +226,8 @@
 
 .u-btn-danger {
   background: rgba(255, 68, 68, 0.1);
-  color: var(--danger);
-  border: 1px solid var(--danger);
+  color: var(--warning);
+  border: 1px solid var(--warning);
   width: 100%;
   display: flex;
   justify-content: center;
@@ -228,7 +240,7 @@
 }
 
 .u-btn-danger:hover {
-  background: var(--danger);
+  background: var(--warning);
   color: #fff;
   box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
 }
@@ -654,4 +666,543 @@
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+@media (max-width: 1200px) {
+  .u-modal-container {
+    max-width: 95%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .u-modal-container {
+    height: 90vh;
+  }
+
+  .u-modal-body {
+    padding: 30px;
+  }
+
+  .u-form-select,
+  .u-form-textarea {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    gap: 15px;
+    padding: 12px 15px;
+  }
+
+  .user-cell {
+    gap: 10px;
+  }
+
+  .u-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .action-cell {
+    gap: 6px;
+  }
+
+  .u-modal-container {
+    height: 95vh;
+    max-width: 95%;
+  }
+
+  .u-modal-header {
+    padding: 15px 20px;
+  }
+
+  .u-modal-title {
+    font-size: 16px;
+  }
+
+  .u-modal-body {
+    padding: 25px;
+    grid-template-columns: 1fr;
+  }
+
+  .u-archive-body {
+    padding: 20px;
+  }
+
+  .modal-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .m-stat-card {
+    padding: 15px;
+  }
+
+  .m-stat-val {
+    font-size: 20px;
+  }
+
+  .u-form-group {
+    margin-bottom: 15px;
+  }
+
+  .u-form-label {
+    font-size: 12px;
+  }
+
+  .u-form-select,
+  .u-form-textarea {
+    font-size: 12px;
+  }
+
+  .u-modal-actions {
+    gap: 10px;
+  }
+
+  .u-btn-danger,
+  .u-btn-cancel {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .profile-header {
+    padding-bottom: 15px;
+  }
+
+  .avatar-lg {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+
+  .user-name {
+    font-size: 20px;
+  }
+
+  .info-row {
+    font-size: 13px;
+  }
+
+  .section-title {
+    font-size: 14px;
+  }
+
+  .hub-item {
+    padding: 12px;
+  }
+
+  .hub-left {
+    gap: 10px;
+  }
+
+  .hub-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .hub-info h4 {
+    font-size: 13px;
+  }
+
+  .hub-info p {
+    font-size: 11px;
+  }
+
+  .hub-status {
+    font-size: 11px;
+  }
+
+  .activity-table {
+    font-size: 13px;
+  }
+
+  .activity-table th {
+    font-size: 10px;
+  }
+
+  .activity-table td {
+    padding: 12px 0;
+  }
+
+  .u-pagination {
+    padding: 15px 20px;
+  }
+
+  .u-page-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .send-reset-modal-container {
+    max-width: 320px;
+  }
+
+  .send-reset-modal-icon {
+    font-size: 36px;
+  }
+
+  .send-reset-modal-title {
+    font-size: 16px;
+  }
+
+  .send-reset-modal-desc {
+    font-size: 12px;
+  }
+
+  .user-message-box {
+    max-height: 180px;
+  }
+
+  .user-message-bubble {
+    font-size: 12px;
+  }
+
+  .user-message-textarea {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar {
+    padding: 10px 12px;
+  }
+
+  .user-cell {
+    gap: 8px;
+  }
+
+  .u-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 10px;
+  }
+
+  .action-cell {
+    gap: 4px;
+  }
+
+  .u-modal-container {
+    height: 100vh;
+    max-width: 100%;
+  }
+
+  .u-modal-header {
+    padding: 12px 15px;
+  }
+
+  .u-modal-title {
+    font-size: 14px;
+  }
+
+  .u-modal-body {
+    padding: 20px;
+  }
+
+  .modal-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .m-stat-card {
+    padding: 12px;
+  }
+
+  .m-stat-val {
+    font-size: 18px;
+  }
+
+  .u-form-group {
+    margin-bottom: 12px;
+  }
+
+  .u-form-label {
+    font-size: 11px;
+  }
+
+  .u-form-select,
+  .u-form-textarea {
+    font-size: 11px;
+  }
+
+  .u-modal-actions {
+    gap: 8px;
+  }
+
+  .u-btn-danger,
+  .u-btn-cancel {
+    font-size: 11px;
+    padding: 8px;
+  }
+
+  .profile-header {
+    padding-bottom: 10px;
+  }
+
+  .avatar-lg {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+
+  .user-name {
+    font-size: 18px;
+  }
+
+  .info-row {
+    font-size: 12px;
+  }
+
+  .section-title {
+    font-size: 13px;
+  }
+
+  .hub-item {
+    padding: 10px;
+  }
+
+  .hub-left {
+    gap: 8px;
+  }
+
+  .hub-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .hub-info h4 {
+    font-size: 12px;
+  }
+
+  .hub-info p {
+    font-size: 10px;
+  }
+
+  .hub-status {
+    font-size: 10px;
+  }
+
+  .activity-table {
+    font-size: 12px;
+  }
+
+  .activity-table th {
+    font-size: 9px;
+  }
+
+  .activity-table td {
+    padding: 10px 0;
+  }
+
+  .u-pagination {
+    padding: 12px 15px;
+  }
+
+  .u-page-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .send-reset-modal-container {
+    max-width: 280px;
+  }
+
+  .send-reset-modal-icon {
+    font-size: 32px;
+  }
+
+  .send-reset-modal-title {
+    font-size: 14px;
+  }
+
+  .send-reset-modal-desc {
+    font-size: 11px;
+  }
+
+  .user-message-box {
+    max-height: 160px;
+  }
+
+  .user-message-bubble {
+    font-size: 11px;
+  }
+
+  .user-message-textarea {
+    font-size: 12px;
+  }
+
+  .user-message-actions {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 320px) {
+  .toolbar {
+    padding: 8px 10px;
+  }
+
+  .user-cell {
+    gap: 6px;
+  }
+
+  .u-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 8px;
+  }
+
+  .action-cell {
+    gap: 3px;
+  }
+
+  .u-modal-container {
+    height: 100vh;
+  }
+
+  .u-modal-header {
+    padding: 10px 12px;
+  }
+
+  .u-modal-title {
+    font-size: 12px;
+  }
+
+  .u-modal-body {
+    padding: 15px;
+  }
+
+  .modal-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .m-stat-card {
+    padding: 10px;
+  }
+
+  .m-stat-val {
+    font-size: 16px;
+  }
+
+  .u-form-group {
+    margin-bottom: 10px;
+  }
+
+  .u-form-label {
+    font-size: 10px;
+  }
+
+  .u-form-select,
+  .u-form-textarea {
+    font-size: 10px;
+  }
+
+  .u-modal-actions {
+    gap: 6px;
+  }
+
+  .u-btn-danger,
+  .u-btn-cancel {
+    font-size: 10px;
+    padding: 6px;
+  }
+
+  .profile-header {
+    padding-bottom: 8px;
+  }
+
+  .avatar-lg {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .user-name {
+    font-size: 16px;
+  }
+
+  .info-row {
+    font-size: 11px;
+  }
+
+  .section-title {
+    font-size: 12px;
+  }
+
+  .hub-item {
+    padding: 8px;
+  }
+
+  .hub-left {
+    gap: 6px;
+  }
+
+  .hub-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .hub-info h4 {
+    font-size: 11px;
+  }
+
+  .hub-info p {
+    font-size: 9px;
+  }
+
+  .hub-status {
+    font-size: 9px;
+  }
+
+  .activity-table {
+    font-size: 11px;
+  }
+
+  .activity-table th {
+    font-size: 8px;
+  }
+
+  .activity-table td {
+    padding: 8px 0;
+  }
+
+  .u-pagination {
+    padding: 10px 12px;
+  }
+
+  .u-page-btn {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .send-reset-modal-container {
+    max-width: 240px;
+  }
+
+  .send-reset-modal-icon {
+    font-size: 28px;
+  }
+
+  .send-reset-modal-title {
+    font-size: 12px;
+  }
+
+  .send-reset-modal-desc {
+    font-size: 10px;
+  }
+
+  .user-message-box {
+    max-height: 140px;
+  }
+
+  .user-message-bubble {
+    font-size: 10px;
+  }
+
+  .user-message-textarea {
+    font-size: 11px;
+  }
+
+  .user-message-actions {
+    gap: 4px;
+  }
 }

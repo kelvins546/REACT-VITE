@@ -22,6 +22,13 @@ const VARIANTS = {
         icon: "#ef4444",
         title: "#7f1d1d",
         message: "#991b1b"
+    },
+    processing: {
+        border: "#2563eb",
+        bg: "#eff6ff",
+        icon: "#2563eb",
+        title: "#1e3a8a",
+        message: "#1d4ed8"
     }
 };
 
@@ -73,7 +80,7 @@ export function PopupNotification({
                         style={{
                             fontSize: 26,
                             color: styles.icon,
-                            marginTop: 10
+                            alignSelf: "center",
                         }}
                     >
                         {icon}

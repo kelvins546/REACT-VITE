@@ -16,6 +16,12 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.c-card-data {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .c-stat-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -167,7 +173,8 @@
   }
 
   .filter-group {
-    flex-wrap: wrap;
+    display: flex;
+    flex-direction: column;
   }
 
   .custom-select {
@@ -417,9 +424,40 @@
   transition: all 0.2s ease;
 }
 
+.mark-btn-resolve {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--success);
+  border: #00FF99 1px solid;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.mark-btn-resolve:hover {
+  background: var(--primary);
+  color: #000;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+}
+
 .c-btn-reply {
-  background: #2a2a2a;
-  color: #fff;
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--success);
+  border: #00FF99 1px solid;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  gap: 8px;
 }
 
 .c-btn-reply:hover {
@@ -427,8 +465,8 @@
 }
 
 .c-btn-resolve {
-  background: #2ed573;
-  color: #000;
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--success)
 }
 
 .c-btn-resolve:hover {
@@ -473,7 +511,7 @@
 }
 
 .c-btn-cancel {
-  background: transparent;
+  background: #2A2A2A80;
   color: #888;
   border: 1px solid #2a2a2a;
   padding: 10px 20px;
@@ -565,4 +603,171 @@
 .prio-icon-low {
   color: #888888;
   transform: translateY(10%);
+}
+
+/* Filter Dropdown Container */
+.filters-container {
+  display: flex;
+  gap: 12px;
+  width: 400px;
+}
+
+/* Individual Dropdown */
+.complaint-dropdown {
+  position: relative;
+  flex: 1;
+}
+
+/* Dropdown Button */
+.dropdown-button {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #222;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.2s ease;
+}
+
+.dropdown-button:hover {
+  border-color: #333;
+}
+
+.dropdown-button.open {
+  border-color: #1f6fff;
+}
+
+.dropdown-button .dropdown-arrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-button.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: #0f0f0f;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  z-index: 20;
+  overflow: hidden;
+  animation: dropdownFade 0.18s ease-out forwards;
+  transform-origin: top;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Options List */
+.options-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+/* Option Item */
+.dropdown-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  margin-bottom: 10px;
+  background-color: #161616;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.dropdown-option:hover {
+  background-color: #1d1d1d;
+}
+
+.dropdown-option.selected {
+  border-color: #1f6fff;
+  box-shadow: inset 0 0 0 1px #1f6fff;
+}
+
+/* Option Text */
+.option-text {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Checkmark */
+.checkmark {
+  color: #1f6fff;
+  font-size: 18px;
+  margin-left: 8px;
+}
+
+/* No Results */
+.no-results {
+  padding: 16px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+}
+
+/* Group Label */
+.group-label {
+  padding: 8px 6px;
+  margin-top: 6px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #777;
+  text-align: left;
+}
+
+.confirmResolveBtn {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--success);
+  border: #00FF99 1px solid;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.confirmResolveBtn:hover {
+  background: var(--primary);
+  color: #000;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
 }

@@ -6,6 +6,7 @@ import MainLayout from "./components/MainLayout";
 import Dashboard from "./pages/super_admin/Dashboard";
 import Users from "./pages/super_admin/Users";
 import ArchivedUsers from "./pages/super_admin/ArchivedUsers";
+import ArchivedAdmins from "./pages/super_admin/ArchivedAdmins";
 import Rates from "./pages/super_admin/Rates";
 import Complaints from "./pages/super_admin/Complaints";
 import AdminLogin from "./pages/AdminLogin";
@@ -30,6 +31,7 @@ function App() {
           <Route path="users" element={<Users />} />
           <Route path="users/archived" element={<ArchivedUsers />} />
           <Route path="users/admins" element={<Admins />} />
+           <Route path="users/admins/archived" element={<ArchivedAdmins />} />
           <Route path="rates" element={<Rates />} />
           <Route path="complaints" element={<Complaints />} />
         </Route>

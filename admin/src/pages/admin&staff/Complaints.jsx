@@ -1,11 +1,35 @@
 import React, { useState } from "react";
 import "./Complaints.css";
+import { PuffLoader } from "react-spinners";
+import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
+import { PopupNotification } from "../../components/notifications/PopUpNotification";
 
 const Complaints = () => {
+  const [notification, setNotification] = useState({
+    show: false,
+    title: "",
+    message: "",
+    variant: "success",
+    icon: "info"
+  });
+
+  const [loader, setLoader] = useState({
+    show: false,
+    message: "Processing..."
+  });
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmResolve, setShowConfirmResolve] = useState(false);
 
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
+
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('Category: All');
+  const [selectedStatus, setSelectedStatus] = useState('Status: All');
+
+  const categories = ['Category: All', 'Category: Hardware', 'Category: Billing'];
+  const statuses = ['Status: All', 'Status: Open', 'Status: Closed'];
 
   const [chatLogs, setChatLogs] = useState([
     { id: 1, type: "user", msg: "User created ticket." },
@@ -22,16 +46,59 @@ const Complaints = () => {
     setIsReplying(false);
   };
 
+  const handleResolve = () => {
+    setLoader({
+      show: true,
+      message: "Marking as resolved..."
+    });
+
+    setTimeout(() => {
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
+
+      setNotification({
+        show: true,
+        title: "Resolved",
+        message: "The ticket has been successfully marked as resolved.",
+        variant: "success",
+        icon: "check_circle"
+      });
+
+      setShowConfirmResolve(false);
+      setShowModal(false)
+      setSelectedUser(null);
+    }, 2000);
+  };
+
   return (
     <>
+      <PopupNotification
+        show={notification.show}
+        title={notification.title}
+        message={notification.message}
+        variant={notification.variant}
+        icon={notification.icon}
+        duration={3000}
+        onClose={() =>
+          setNotification((prev) => ({ ...prev, show: false }))
+        }
+      />
+      <LoadingPopup
+        show={loader.show}
+        message={loader.message}
+        Loader={PuffLoader}
+        color="#0055ff"
+      />
       <div className="page-header">
         <div className="page-title">Complaints Management</div>
       </div>
 
-      {}
+      { }
       <div className="c-stats-grid">
         <div className="c-stat-card sc-open">
-          <div>
+          <div className="c-card-data">
             <div className="c-sc-label">OPEN TICKETS</div>
             <div className="c-sc-val">12</div>
             <div className="c-sc-sub">
@@ -50,7 +117,7 @@ const Complaints = () => {
         </div>
 
         <div className="c-stat-card sc-prio">
-          <div>
+          <div className="c-card-data">
             <div className="c-sc-label">HIGH PRIORITY</div>
             <div className="c-sc-val">4</div>
             <div className="c-sc-sub">
@@ -69,7 +136,7 @@ const Complaints = () => {
         </div>
 
         <div className="c-stat-card sc-solve">
-          <div>
+          <div className="c-card-data">
             <div className="c-sc-label">RESOLVED (DEC)</div>
             <div className="c-sc-val">48</div>
             <div className="c-sc-sub">
@@ -88,7 +155,7 @@ const Complaints = () => {
         </div>
       </div>
 
-      {}
+      { }
       <div className="toolbar">
         <div className="search-box">
           <span
@@ -103,28 +170,84 @@ const Complaints = () => {
             placeholder="Search ticket ID or user..."
           />
         </div>
-
         <div className="filter-group">
-          <select
-            className="custom-select sel-complaints"
-            defaultValue="Category: All"
-          >
-            <option>Category: All</option>
-            <option>Hardware</option>
-            <option>Billing</option>
-          </select>
-          <select
-            className="custom-select sel-complaints"
-            defaultValue="Status: All"
-          >
-            <option>Status: All</option>
-            <option>Open</option>
-            <option>Closed</option>
-          </select>
+          <div className="filters-container">
+            <div className="complaint-dropdown">
+              <button
+                className={`dropdown-button ${categoryOpen ? 'open' : ''}`}
+                onClick={() => setCategoryOpen(!categoryOpen)}
+              >
+                <span>{selectedCategory}</span>
+                <span className="material-symbols-outlined"
+                  style={{
+                    transform: categoryOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "0.3s"
+                  }}
+                >
+                  keyboard_arrow_down
+                </span>
+              </button>
+              {categoryOpen && (
+                <ul className="dropdown-menu options-list">
+                  {categories.map((cat) => (
+                    <li
+                      key={cat}
+                      className={`dropdown-option ${selectedCategory === cat ? 'selected' : ''}`}
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setCategoryOpen(false);
+                      }}
+                    >
+                      <span>{cat}</span>
+                      {selectedCategory === cat && <span className="checkmark material-symbols-outlined">
+                        check
+                      </span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="complaint-dropdown">
+              <button
+                className={`dropdown-button ${statusOpen ? 'open' : ''}`}
+                onClick={() => setStatusOpen(!statusOpen)}
+              >
+                <span>{selectedStatus}</span>
+                <span className="material-symbols-outlined"
+                  style={{
+                    transform: statusOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "0.3s"
+                  }}
+                >
+                  keyboard_arrow_down
+                </span>
+              </button>
+              {statusOpen && (
+                <ul className="dropdown-menu options-list">
+                  {statuses.map((status) => (
+                    <li
+                      key={status}
+                      className={`dropdown-option ${selectedStatus === status ? 'selected' : ''}`}
+                      onClick={() => {
+                        setSelectedStatus(status);
+                        setStatusOpen(false);
+                      }}
+                    >
+                      <span>{status}</span>
+                      {selectedStatus === status && <span className="checkmark material-symbols-outlined">
+                        check
+                      </span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {}
+      { }
       <div className="table-container">
         <table>
           <thead>
@@ -167,7 +290,7 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-pill st-open">OPEN</span>
+                <span className="status-badge st-open">OPEN</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -186,7 +309,7 @@ const Complaints = () => {
                 </div>
               </td>
             </tr>
-            {}
+            { }
             <tr>
               <td className="ticket-id">#TK-9920</td>
               <td>
@@ -220,7 +343,7 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-pill st-review">IN REVIEW</span>
+                <span className="status-badge st-review">IN REVIEW</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -239,7 +362,7 @@ const Complaints = () => {
                 </div>
               </td>
             </tr>
-            {}
+            { }
             <tr>
               <td className="ticket-id">#TK-9918</td>
               <td>
@@ -273,7 +396,7 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-pill st-solved">RESOLVED</span>
+                <span className="status-badge st-solved">RESOLVED</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -295,7 +418,7 @@ const Complaints = () => {
           </tbody>
         </table>
 
-        {}
+        { }
         <div className="u-pagination">
           <div style={{ fontSize: "14px", color: "#666" }}>
             Showing 1-3 of 15
@@ -309,7 +432,7 @@ const Complaints = () => {
         </div>
       </div>
 
-      {}
+      { }
       {showModal && (
         <div className="c-modal-overlay">
           <div className="c-modal-container">
@@ -342,11 +465,11 @@ const Complaints = () => {
               </div>
               <div className="c-modal-row">
                 <span className="c-modal-label">Status</span>
-                <span className="c-status-pill">OPEN</span>
+                <span className="status-badge st-open">OPEN</span>
               </div>
               <div className="c-modal-row">
                 <span className="c-modal-label">Priority</span>
-                <span className="prio-badge">High</span>
+                <span className="prio-badge prio-high">High</span>
               </div>
 
               <div>
@@ -361,7 +484,7 @@ const Complaints = () => {
               <div>
                 <div className="c-section-title">Activity Log</div>
                 <div className="c-chat-box">
-                  {}
+                  { }
                   {chatLogs.map((log) => (
                     <div key={log.id} className={`c-chat-msg ${log.type}`}>
                       {log.msg}
@@ -370,7 +493,7 @@ const Complaints = () => {
                 </div>
               </div>
 
-              {}
+              { }
               {!isReplying ? (
                 <div className="c-modal-footer">
                   <button
@@ -385,7 +508,7 @@ const Complaints = () => {
                     </span>
                     Reply
                   </button>
-                  <button className="c-btn-modal c-btn-resolve">
+                  <button className="c-btn-modal mark-btn-resolve" onClick={() => setShowConfirmResolve(true)}>
                     <span
                       className="material-icons"
                       style={{ fontSize: "18px" }}
@@ -412,7 +535,7 @@ const Complaints = () => {
                       Cancel
                     </button>
                     <button
-                      className="c-btn-modal c-btn-send"
+                      className="c-btn-modal mark-btn-resolve"
                       onClick={handleSendReply}
                     >
                       <span
@@ -426,6 +549,85 @@ const Complaints = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {showConfirmResolve && (
+        <div
+          style={{
+            position: "fixed",
+            top: "0",
+            left: "0",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: "9991",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#0F0F0F",
+              borderRadius: "12px",
+              border: "1px solid #333333",
+              padding: "20px",
+              maxWidth: "330px",
+              width: "100%",
+              textAlign: "center",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
+              animation: "slideUp 0.5s",
+            }}
+          >
+            <div>
+              <span
+                className="material-symbols-outlined"
+                style={{
+                  fontSize: "35px",
+                  marginTop: "10px",
+                  color: "#00FF99",
+                }}
+              >
+                siren_check
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <span
+                style={{ fontSize: "15.5px", fontWeight: "600", color: "#fff", marginTop: "10px" }}
+              >
+                Confirm Resolve
+              </span>
+              <span style={{ fontSize: "12px", color: "#aaa" }}>
+                Are you sure you want to mark this as resolved?
+              </span>
+            </div>
+            <div
+              style={{
+                marginTop: "16px",
+                display: "flex",
+                gap: "10px",
+              }}
+            >
+              <button className="logoutCancel"
+                onClick={() => setShowConfirmResolve(false)}
+
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResolve}
+                className="confirmResolveBtn"
+              >
+                Mark as Resolved
+              </button>
             </div>
           </div>
         </div>

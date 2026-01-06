@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Outlet, useOutletContext } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import Admin_Sidebar from "./Admin_Sidebar";
 import { SidebarToggle } from "./SidebarToggle";
 
 const SIDEBAR_EXPANDED = 250;
 const SIDEBAR_COLLAPSED = 72;
 
 const MainLayout = () => {
-  const { role } = useOutletContext(); 
-
   const [sidebarMinimized, setSidebarMinimized] = useState(() => {
     const saved = localStorage.getItem("sidebarState");
     return saved ? Number(saved) : 1;
@@ -24,21 +21,12 @@ const MainLayout = () => {
       ? SIDEBAR_COLLAPSED
       : SIDEBAR_EXPANDED;
 
-  const isSuperAdmin = role === "super admin";
-
   return (
     <>
-      {isSuperAdmin ? (
-        <Sidebar
-          minimizeSidebar={sidebarMinimized}
-          setminizeSidebar={setSidebarMinimized}
-        />
-      ) : (
-        <Admin_Sidebar
-          minimizeSidebar={sidebarMinimized}
-          setminizeSidebar={setSidebarMinimized}
-        />
-      )}
+      <Sidebar
+        minimizeSidebar={sidebarMinimized}
+        setminizeSidebar={setSidebarMinimized}
+      />
 
       <div className="main-pane">
         <SidebarToggle

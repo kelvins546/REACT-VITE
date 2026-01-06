@@ -5,10 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../supabaseClient";
 import { LoadingPopup } from "./loaders/LoadingPopUp";
 import { PuffLoader } from "react-spinners";
+import { useOutletContext } from "react-router-dom";
 
 const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { role } = useOutletContext();
+  const isSuperAdmin = role === "super admin";
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -151,116 +155,99 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             </NavLink>
 
             { }
-            <div className="nav-group">
-              <div
-                className={`nav-link ${isUserSectionActive ? "group-active" : ""
-                  }`}
-                onClick={() => setIsUsersOpen(!isUsersOpen)}
-                style={{ cursor: "pointer", justifyContent: "space-between" }}
-              >
+            {isSuperAdmin && (
+              <div className="nav-group">
                 <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "16px",
-                  }}
+                  className={`nav-link ${isUserSectionActive ? "group-active" : ""}`}
+                  onClick={() => setIsUsersOpen(!isUsersOpen)}
+                  style={{ cursor: "pointer", justifyContent: "space-between" }}
                 >
-                  <span className="material-icons">manage_accounts</span>
-                  <div style={{ display: "flex", gap: "5px" }}>
-                    <AnimatePresence initial={!skipInitialAnimation}>
-                      {isVisible && (
-                        <>
-                          <motion.span
-                            key="label-user"
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            User
-                          </motion.span>
-                          <motion.span
-                            key="label-management"
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            Management
-                          </motion.span>
-                        </>
-                      )}
-                    </AnimatePresence>
+                  <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                    <span className="material-icons">manage_accounts</span>
+                    <div style={{ display: "flex", gap: "5px" }}>
+                      <AnimatePresence initial={!skipInitialAnimation}>
+                        {isVisible && (
+                          <>
+                            <motion.span
+                              key="label-user"
+                              initial={{ opacity: 0, x: -50 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -50 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              User
+                            </motion.span>
+                            <motion.span
+                              key="label-management"
+                              initial={{ opacity: 0, x: -50 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -50 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              Management
+                            </motion.span>
+                          </>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
+                  {isVisible && (
+                    <span
+                      className="material-icons"
+                      style={{
+                        fontSize: "16px",
+                        transform: isUsersOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "0.3s",
+                      }}
+                    >
+                      expand_more
+                    </span>
+                  )}
                 </div>
-                {isVisible && (
-                  <span
-                    className="material-icons"
-                    style={{
-                      fontSize: "16px",
-                      transform: isUsersOpen
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-                      transition: "0.3s",
-                    }}
-                  >
-                    expand_more
-                  </span>
-                )}
+
+                <AnimatePresence>
+                  {isUsersOpen && isVisible && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ overflow: "hidden", marginLeft: "10px" }}
+                    >
+                      <NavLink
+                        to="/users"
+                        end
+                        className={({ isActive }) =>
+                          isActive ? "nav-link sub-link active" : "nav-link sub-link"
+                        }
+                        style={{ paddingLeft: "45px", height: "45px" }}
+                      >
+                        <span className="material-icons" style={{ fontSize: "18px" }}>
+                          people
+                        </span>
+                        <span>Residents</span>
+                      </NavLink>
+
+                      <NavLink
+                        to="/users/admins"
+                        className={({ isActive }) =>
+                          isActive ? "nav-link sub-link active" : "nav-link sub-link"
+                        }
+                        style={{ paddingLeft: "45px", height: "45px" }}
+                      >
+                        <span className="material-icons" style={{ fontSize: "18px" }}>
+                          admin_panel_settings
+                        </span>
+                        <span>System Admins</span>
+                      </NavLink>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-
-              <AnimatePresence>
-                {isUsersOpen && isVisible && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ overflow: "hidden", marginLeft: "10px" }}
-                  >
-                    <NavLink
-                      to="/users"
-                      end
-                      className={({ isActive }) =>
-                        isActive
-                          ? "nav-link sub-link active"
-                          : "nav-link sub-link"
-                      }
-                      style={{ paddingLeft: "45px", height: "45px" }}
-                    >
-                      <span
-                        className="material-icons"
-                        style={{ fontSize: "18px" }}
-                      >
-                        people
-                      </span>
-                      <span>Residents</span>
-                    </NavLink>
-
-                    <NavLink
-                      to="/users/admins"
-                      className={({ isActive }) =>
-                        isActive
-                          ? "nav-link sub-link active"
-                          : "nav-link sub-link"
-                      }
-                      style={{ paddingLeft: "45px", height: "45px" }}
-                    >
-                      <span
-                        className="material-icons"
-                        style={{ fontSize: "18px" }}
-                      >
-                        admin_panel_settings
-                      </span>
-                      <span>System Admins</span>
-                    </NavLink>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            )}
 
             <NavLink
-              to="/rates"
+              to={role === 'super admin' ? '/rates' : '/admin/rates'}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -295,7 +282,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             </NavLink>
 
             <NavLink
-              to="/complaints"
+              to={role === 'super admin' ? '/complaints' : '/admin/complaints'}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -399,30 +386,35 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             </NavLink>
 
             { }
-            <NavLink
-              to="/users"
-              end
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-              title="Residents"
-            >
-              <span className="material-icons">people</span>
-            </NavLink>
+            {isSuperAdmin && (
+              <>
+                <NavLink
+                  to="/users"
+                  end
+                  className={({ isActive }) =>
+                    isActive ? "nav-link active" : "nav-link"
+                  }
+                  title="Residents"
+                >
+                  <span className="material-icons">people</span>
+                </NavLink>
 
-            { }
-            <NavLink
-              to="/users/admins"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-              title="Admins"
-            >
-              <span className="material-icons">admin_panel_settings</span>
-            </NavLink>
+                { }
+                <NavLink
+                  to="/users/admins"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link active" : "nav-link"
+                  }
+                  title="Admins"
+                >
+                  <span className="material-icons">admin_panel_settings</span>
+                </NavLink>
+              </>
+            )}
+
 
             <NavLink
-              to="/rates"
+              to={role === 'super admin' ? '/rates' : '/admin/rates'}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -431,7 +423,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             </NavLink>
 
             <NavLink
-              to="/complaints"
+              to={role === 'super admin' ? '/complaints' : '/admin/complaints'}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -473,13 +465,13 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
           <div
             style={{
               backgroundColor: "#0F0F0F",
-              borderRadius: "8px",
+              borderRadius: "12px",
               border: "1px solid #333333",
               padding: "20px",
               maxWidth: "330px",
               width: "100%",
               textAlign: "center",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.5)",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
               animation: "slideUp 0.5s",
             }}
           >
@@ -487,7 +479,9 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               <span
                 className="material-icons"
                 style={{
-                  fontSize: "40px",
+                  fontSize: "35px",
+                  marginTop: "10px",
+                  color: "#888888",
                 }}
               >
                 logout
@@ -497,11 +491,11 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "5px",
+                gap: "10px",
               }}
             >
               <span
-                style={{ fontSize: "18px", fontWeight: "600", color: "#fff" }}
+                style={{ fontSize: "15.5px", fontWeight: "600", color: "#fff", marginTop: "10px" }}
               >
                 Confirm Logout
               </span>
@@ -513,38 +507,18 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               style={{
                 marginTop: "16px",
                 display: "flex",
-                gap: "5px",
+                gap: "10px",
               }}
             >
-              <button
+              <button className="logoutCancel"
                 onClick={() => setShowLogoutModal(false)}
-                style={{
-                  padding: "12px",
-                  backgroundColor: "#2a2a2a1a",
-                  color: "#fff",
-                  border: "1px #2A2A2A solid",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  margin: "0 8px",
-                  width: "100%",
-                }}
+                
               >
                 Cancel
               </button>
               <button
+                className="logoutbtn"
                 onClick={handleLogout}
-                style={{
-                  padding: "12px",
-                  backgroundColor: "#FF44441A",
-                  color: "#ff6b6b",
-                  border: "1px #FF4444 solid",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  width: "100%",
-                  fontWeight: "600",
-                }}
               >
                 Logout
               </button>

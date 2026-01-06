@@ -50,7 +50,10 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
+
 .page-title {
   margin-top: 10px;
   font-size: 26px;
@@ -67,6 +70,8 @@ body {
   padding: 16px 25px;
   border-radius: 16px;
   border: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .search-box {
@@ -78,7 +83,9 @@ body {
   padding: 0 16px;
   width: 380px;
   height: var(--comp-height);
+  flex-shrink: 0;
 }
+
 .search-input {
   background: transparent;
   border: none;
@@ -103,17 +110,25 @@ body {
   gap: 10px;
   border: 1px solid transparent;
   transition: 0.2s;
+  white-space: nowrap;
 }
+
 .btn-primary {
   background: linear-gradient(90deg, #0055ff, #00ff99);
   color: #000;
   border: none;
 }
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
 .btn-secondary {
   background: #2a2a2a;
   border-color: #444;
   color: #ccc;
 }
+
 .btn-secondary:hover {
   background: #333;
   color: #fff;
@@ -123,12 +138,15 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 16px;
-  overflow: hidden;
+  overflow-x: auto;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 600px;
 }
+
 th {
   text-align: left;
   padding: 18px 25px;
@@ -138,7 +156,9 @@ th {
   font-weight: 700;
   background: #222;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
+
 td {
   padding: 22px 25px;
   border-bottom: 1px solid #2a2a2a;
@@ -146,6 +166,7 @@ td {
   color: #ddd;
   vertical-align: middle;
 }
+
 tr:hover {
   background: #222;
 }
@@ -163,6 +184,7 @@ tr:hover {
   cursor: pointer;
   transition: 0.2s;
 }
+
 .icon-btn:hover {
   background: #444;
   color: #fff;
@@ -175,10 +197,111 @@ tr:hover {
   display: inline-block;
   margin-right: 8px;
 }
+
 .st-active {
   background: var(--primary);
   box-shadow: 0 0 8px rgba(0, 255, 153, 0.4);
 }
+
 .st-inactive {
   background: #666;
+}
+
+@media (max-width: 768px) {
+  .main-pane {
+    padding: 20px 15px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .search-box {
+    width: 100%;
+    max-width: 100%;
+    flex-shrink: 1;
+    height: 40px;
+  }
+
+  .btn {
+    font-size: 13px;
+    padding: 0 15px;
+    height: 40px;
+  }
+
+  th {
+    padding: 12px 16px;
+    font-size: 11px;
+  }
+
+  td {
+    padding: 16px 12px;
+    font-size: 14px;
+  }
+
+  .table-container {
+    border-radius: 12px;
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 20px;
+  }
+
+  .toolbar {
+    padding: 10px 10px;
+  }
+
+  .search-box {
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .search-input {
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 12px;
+    padding: 0 12px;
+    height: 36px;
+  }
+
+  th {
+    padding: 10px 10px;
+    font-size: 10px;
+  }
+
+  td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .table-container {
+    border-radius: 8px;
+  }
+
+  .icon-btn {
+    width: 28px;
+    height: 28px;
+  }
 }

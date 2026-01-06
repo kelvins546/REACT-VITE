@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import "./Users.css";
 import { PuffLoader } from "react-spinners";
+import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
+import { PopupNotification } from "../../components/notifications/PopUpNotification";
 
 const Users = () => {
   const [usersList, setUsersList] = useState([]);
@@ -10,6 +12,44 @@ const Users = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  const handleExport = () => {
+    setLoader({
+      show: true,
+      message: "Exporting Report..."
+    });
+
+    setTimeout(() => {
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
+
+      setNotification({
+        show: true,
+        title: "Processing",
+        message: "Your report is being exported.",
+        variant: "processing",
+        icon: "progress_activity"
+      });
+
+      setShowExportModal(false);
+    }, 2000);
+  }
+
+  const [notification, setNotification] = useState({
+    show: false,
+    title: "",
+    message: "",
+    variant: "success",
+    icon: "info"
+  });
+
+  const [loader, setLoader] = useState({
+    show: false,
+    message: "Processing..."
+  });
 
   const [showModal, setShowModal] = useState(false);
   const [viewUser, setViewUser] = useState(null);
@@ -136,7 +176,18 @@ const Users = () => {
   };
 
   const handleConfirmArchive = async () => {
-    if (!selectedUser) return;
+    setLoader({
+      show: true,
+      message: "Archiving User..."
+    });
+    if (!selectedUser) {
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from("users")
@@ -150,22 +201,43 @@ const Users = () => {
           u.id === selectedUser.id ? { ...u, status: "Archived" } : u
         )
       );
-
+      setNotification({
+        show: true,
+        title: "User archived",
+        message: "The user has been archived successfully.",
+        variant: "warning",
+        icon: "archive"
+      });
       setShowArchiveModal(false);
       setSelectedUser(null);
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
+
     } catch (err) {
-      alert("Error archiving: " + err.message);
+      setNotification({
+        show: true,
+        title: "Archived failed",
+        message: err.message,
+        variant: "error",
+        icon: "error"
+      });
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
     }
   };
 
   const getInitials = (name) =>
     name
       ? name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .substring(0, 2)
-          .toUpperCase()
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase()
       : "??";
   const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
   const getAvatarColor = (name) => {
@@ -187,6 +259,23 @@ const Users = () => {
 
   return (
     <>
+      <PopupNotification
+        show={notification.show}
+        title={notification.title}
+        message={notification.message}
+        variant={notification.variant}
+        icon={notification.icon}
+        duration={3000}
+        onClose={() =>
+          setNotification((prev) => ({ ...prev, show: false }))
+        }
+      />
+      <LoadingPopup
+        show={loader.show}
+        message={loader.message}
+        Loader={PuffLoader}
+        color="#0055ff"
+      />
       <div className="page-header">
         <div className="page-title">User Management</div>
       </div>
@@ -221,7 +310,7 @@ const Users = () => {
             </span>
             Archived
           </Link>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => setShowExportModal(true)}>
             <span className="material-icons" style={{ fontSize: "18px" }}>
               file_download
             </span>
@@ -245,7 +334,7 @@ const Users = () => {
           <table>
             <thead>
               <tr>
-                <th style={{ width: "50px" }}>
+                {/* <th style={{ width: "50px" }}>
                   <input
                     type="checkbox"
                     style={{
@@ -254,7 +343,8 @@ const Users = () => {
                       height: "18px",
                     }}
                   />
-                </th>
+                </th>*/}
+
                 <th>User Profile</th>
                 <th>Unit / Location</th>
                 <th>Registered Hubs</th>
@@ -282,7 +372,7 @@ const Users = () => {
                     key={user.id || index}
                     style={{ opacity: user.status === "Archived" ? 0.5 : 1 }}
                   >
-                    <td>
+                    {/* <td>
                       <input
                         type="checkbox"
                         style={{
@@ -291,7 +381,8 @@ const Users = () => {
                           height: "18px",
                         }}
                       />
-                    </td>
+                    </td> */}
+
                     <td>
                       <div className="user-cell">
                         {user.avatar_url ? (
@@ -414,7 +505,7 @@ const Users = () => {
         )}
       </div>
 
-      {}
+      { }
       {showModal && viewUser && (
         <div className="u-modal-overlay">
           <div
@@ -449,7 +540,7 @@ const Users = () => {
               className="u-modal-body"
               style={{ display: "flex", gap: "25px", padding: "25px" }}
             >
-              {}
+              { }
               <div
                 className="profile-card"
                 style={{ width: "320px", flexShrink: 0, height: "fit-content" }}
@@ -476,9 +567,8 @@ const Users = () => {
                     {viewUser.location} • {capitalize(viewUser.role)}
                   </div>
                   <span
-                    className={`status-badge ${
-                      viewUser.status === "Active" ? "st-active-badge" : ""
-                    }`}
+                    className={`status-badge ${viewUser.status === "Active" ? "st-active-badge" : ""
+                      }`}
                   >
                     {viewUser.status} Account
                   </span>
@@ -527,11 +617,11 @@ const Users = () => {
                 </div>
               </div>
 
-              {}
+              { }
               <div
                 style={{ flex: 1, display: "flex", flexDirection: "column" }}
               >
-                {}
+                { }
                 <div
                   style={{
                     display: "grid",
@@ -565,7 +655,7 @@ const Users = () => {
                   </div>
                 </div>
 
-                {}
+                { }
                 <div className="detail-card">
                   <div className="section-title">
                     <span
@@ -639,16 +729,23 @@ const Users = () => {
             </p>
             <div className="send-reset-modal-actions">
               <button
-                className="c-btn-modal c-btn-cancel"
+                
+                className="u-btn-cancel"
                 onClick={() => setShowResetModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="c-btn-modal c-btn-send"
+                className="u-btn-danger"
                 onClick={() => {
                   setShowResetModal(false);
-                  alert("Reset link sent!");
+                  setNotification({
+                    show: true,
+                    title: "Email Sent",
+                    message: "A reset password link has been sent to the user.",
+                    variant: "success",
+                    icon: "check_circle"
+                  });
                 }}
               >
                 Send Reset
@@ -663,13 +760,14 @@ const Users = () => {
           <div className="u-modal-container archive-mode">
             <div className="u-modal-header" style={{ borderBottom: "none" }}>
               <div className="u-modal-title" style={{ color: "var(--danger)" }}>
-                <span className="material-icons">warning</span> Archive User
+                <span style={{ color: "#FFAA00" }} className="material-icons">warning</span>
+                <span style={{ color: "#FFAA00" }}>Archive User</span>
               </div>
               <button
                 className="u-close-btn"
                 onClick={() => setShowArchiveModal(false)}
               >
-                <span className="material-icons">close</span>
+                <span style={{ color: "#FFAA00" }} className="material-icons">close</span>
               </button>
             </div>
 
@@ -727,6 +825,67 @@ const Users = () => {
           </div>
         </div>
       )}
+      {showExportModal && (
+        <div className="export-backdrop" onClick={() => setShowExportModal(false)}>
+          <div
+            style={{
+              backgroundColor: "#0F0F0F",
+              borderRadius: "12px",
+              border: "1px solid #333333",
+              padding: "20px",
+              maxWidth: "330px",
+              width: "100%",
+              textAlign: "center",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
+              animation: "slideUp 0.5s",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "35px",
+                  marginTop: "10px",
+                  color: "#0055FF",
+                }}
+              >
+                download
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <span
+                style={{ fontSize: "15.5px", fontWeight: "600", color: "#fff", marginTop: "10px" }}
+              >
+                Export CSV File
+              </span>
+              <span style={{ fontSize: "12px", color: "#aaa" }}>
+                Would you like to export user data report?
+              </span>
+            </div>
+
+            <div className="export-footer">
+              <button
+                className="r-btn-secondary"
+                onClick={() => setShowExportModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button className="r-btn-primary" onClick={handleExport}>
+                Export
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 };

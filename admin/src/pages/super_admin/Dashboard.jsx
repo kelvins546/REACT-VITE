@@ -94,7 +94,7 @@ const Dashboard = () => {
               </td>
               <td style={{ fontWeight: 600, color: "#fff" }}>Hub Offline</td>
               <td>
-                <span className="status-pill st-open">OPEN</span>
+                <span className="status-badge st-open">OPEN</span>
               </td>
             </tr>
             <tr>
@@ -111,7 +111,7 @@ const Dashboard = () => {
                 Rate Discrepancy
               </td>
               <td>
-                <span className="status-pill st-review">IN REVIEW</span>
+                <span className="status-badge st-review">IN REVIEW</span>
               </td>
             </tr>
             <tr>
@@ -126,7 +126,7 @@ const Dashboard = () => {
               </td>
               <td style={{ fontWeight: 600, color: "#fff" }}>Wifi Update</td>
               <td>
-                <span className="status-pill st-solved">RESOLVED</span>
+                <span className="status-badge st-solved">RESOLVED</span>
               </td>
             </tr>
           </tbody>

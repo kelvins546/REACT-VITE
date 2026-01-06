@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import { createClient } from "@supabase/supabase-js";
 import "./Admins.css";
 import { PuffLoader } from "react-spinners";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
+import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 
 const SUPABASE_URL = "https://grgkznbbfedbipxuwkdl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_C9Vr_lDZsic_RsvJ2aM9Bg_l9ag2A0L";
@@ -12,6 +14,11 @@ const Admins = () => {
   const [adminsList, setAdminsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [archiveReason, setArchiveReason] = useState("");
+  const [loader, setLoader] = useState({
+    show: false,
+    message: "Processing..."
+  });
 
   const [notification, setNotification] = useState({
     show: false,
@@ -31,6 +38,59 @@ const Admins = () => {
     password: "",
     role: "admin",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const nameRegex = /^[A-Za-z\s]+$/;
+  const emailRegex = /^[^ ,;:<>()\\/]+@(gmail\.com|yahoo\.com)$/;
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
+
+
+  const errors = {
+    name:
+      newAdmin.name === ""
+        ? " "
+        : !nameRegex.test(newAdmin.name)
+          ? "Name must contain letters only"
+          : "",
+
+    email:
+      newAdmin.email === ""
+        ? " "
+        : !emailRegex.test(newAdmin.email)
+          ? "Invalid email format"
+          : "",
+
+    password:
+      newAdmin.password === ""
+        ? " "
+        : !passwordRegex.test(newAdmin.password)
+          ? "Must be 8+ chars, 1 uppercase, 1 lowercase & 1 special character"
+          : "",
+
+    confirmPassword:
+      newAdmin.confirmPassword === ""
+        ? " "
+        : !passwordRegex.test(newAdmin.password)
+          ? " "
+          : newAdmin.password !== newAdmin.confirmPassword
+            ? "Passwords do not match"
+            : "",
+  };
+
+  const isFormValid =
+    !errors.name.trim() &&
+    !errors.email.trim() &&
+    !errors.password.trim() &&
+    !errors.confirmPassword.trim() &&
+    newAdmin.name &&
+    newAdmin.email &&
+    newAdmin.password &&
+    newAdmin.confirmPassword;
+
+
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
@@ -94,6 +154,10 @@ const Admins = () => {
   };
 
   const handleCreateAdmin = async () => {
+    setLoader({
+      show: true,
+      message: "Creating User..."
+    });
     if (!newAdmin.email || !newAdmin.password || !newAdmin.name) {
       setNotification({
         show: true,
@@ -102,7 +166,10 @@ const Admins = () => {
         variant: "warning",
         icon: "warning"
       });
-
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
       return;
     }
 
@@ -114,9 +181,10 @@ const Admins = () => {
         variant: "error",
         icon: "error"
       });
-
+      + setLoader({ show: false, message: "Processing..." });
       return;
     }
+
 
     try {
       setLoading(true);
@@ -173,6 +241,10 @@ const Admins = () => {
       });
     } finally {
       setLoading(false);
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
     }
   };
 
@@ -183,6 +255,11 @@ const Admins = () => {
   };
 
   const handleUpdateAdmin = async () => {
+    setLoader({
+      show: true,
+      message: "Updating User..."
+    });
+
     if (!editFormData.name) {
       setNotification({
         show: true,
@@ -191,6 +268,7 @@ const Admins = () => {
         variant: "warning",
         icon: "warning"
       });
+      + setLoader({ show: false, message: "Processing..." });
       return;
     }
 
@@ -221,9 +299,12 @@ const Admins = () => {
         variant: "error",
         icon: "error"
       });
-
     } finally {
       setLoading(false);
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
     }
   };
 
@@ -235,6 +316,10 @@ const Admins = () => {
   const handleArchiveAdmin = async () => {
     try {
       setLoading(true);
+      setLoader({
+        show: true,
+        message: "Archiving Admin..."
+      });
       const { error } = await supabase
         .from("users")
         .update({ status: "archived" })
@@ -263,6 +348,10 @@ const Admins = () => {
 
     } finally {
       setLoading(false);
+      setLoader({
+        show: false,
+        message: "Processing..."
+      });
     }
   };
 
@@ -295,6 +384,12 @@ const Admins = () => {
           setNotification((prev) => ({ ...prev, show: false }))
         }
       />
+      <LoadingPopup
+        show={loader.show}
+        message={loader.message}
+        Loader={PuffLoader}
+        color="#0055ff"
+      />
       <div className="page-header">
         <div>
           <div className="page-title">Admin Management</div>
@@ -320,16 +415,29 @@ const Admins = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <Link
+            to="/users/admins/archived"
+            className="btn btn-secondary"
+            style={{ textDecoration: "none" }}
+          >
+            <span className="material-icons" style={{ fontSize: "18px" }}>
+              inventory_2
+            </span>
+            Archived
+          </Link>
 
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowCreateModal(true)}
-        >
-          <span className="material-icons" style={{ fontSize: "18px" }}>
-            add
-          </span>
-          Add New Admin
-        </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <span className="material-icons" style={{ fontSize: "18px" }}>
+              add
+            </span>
+            Add New Admin
+          </button>
+        </div>
+
       </div>
 
       <div className="table-container">
@@ -425,16 +533,11 @@ const Admins = () => {
                   </td>
                   <td>
                     <div className="action-cell">
-                      {/* CONDITION: 
-                        Show Edit button only if:
-                        1. The target is NOT a super admin
-                        OR
-                        2. The current logged-in user IS a super admin 
-                      */}
+                      { }
                       {(admin.role !== "super admin" ||
                         currentUserRole === "super admin") && (
                           <button
-                            className="icon-btn"
+                            className="icon-btn edit-user-btn"
                             title="Edit Admin"
                             onClick={() => openEditModal(admin)}
                           >
@@ -451,7 +554,7 @@ const Admins = () => {
                       {admin.role !== "super admin" &&
                         admin.status !== "archived" && (
                           <button
-                            className="icon-btn"
+                            className="icon-btn archive-user-btn"
                             title="Archive Admin"
                             onClick={() => openArchiveModal(admin)}
                           >
@@ -485,52 +588,111 @@ const Admins = () => {
                 <span className="material-icons">close</span>
               </button>
             </div>
+
             <div className="a-modal-body">
               <div className="a-form-grid">
+
                 <div className="a-form-group">
                   <label className="a-form-label">Full Name</label>
-                  <input
-                    type="text"
-                    className="a-form-input"
-                    value={newAdmin.name}
-                    onChange={(e) =>
-                      setNewAdmin({ ...newAdmin, name: e.target.value })
-                    }
-                  />
+                  <div className="a-input-wrapper">
+                    <input
+                      type="text"
+                      className="a-form-input"
+                      value={newAdmin.name}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[0-9]/g, "");
+                        setNewAdmin({ ...newAdmin, name: value });
+                      }}
+                    />
+                  </div>
+                  {errors.name && (
+                    <span className="a-form-error">{errors.name}</span>
+                  )}
                 </div>
+
                 <div className="a-form-group">
                   <label className="a-form-label">Email Address</label>
-                  <input
-                    type="email"
-                    className="a-form-input"
-                    value={newAdmin.email}
-                    onChange={(e) =>
-                      setNewAdmin({ ...newAdmin, email: e.target.value })
-                    }
-                  />
+                  <div className="a-input-wrapper">
+                    <input
+                      type="email"
+                      className="a-form-input"
+                      value={newAdmin.email}
+                      onChange={(e) =>
+                        setNewAdmin({ ...newAdmin, email: e.target.value })
+                      }
+                    />
+                  </div>
+                  {errors.email && (
+                    <span className="a-form-error">{errors.email}</span>
+                  )}
                 </div>
+
                 <div className="a-form-group">
                   <label className="a-form-label">Password</label>
-                  <input
-                    type="password"
-                    className="a-form-input"
-                    value={newAdmin.password}
-                    onChange={(e) =>
-                      setNewAdmin({ ...newAdmin, password: e.target.value })
-                    }
-                  />
+                  <div className="a-input-wrapper">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="a-form-input"
+                      value={newAdmin.password}
+                      onChange={(e) =>
+                        setNewAdmin({ ...newAdmin, password: e.target.value })
+                      }
+                    />
+                    <span
+                      className="material-icons a-eye-icon"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? "visibility" : "visibility_off"}
+                    </span>
+                  </div>
+                  {errors.password && (
+                    <span className="a-form-error">{errors.password}</span>
+                  )}
                 </div>
+
+                <div className="a-form-group">
+                  <label className="a-form-label">Confirm Password</label>
+                  <div className="a-input-wrapper">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      className="a-form-input"
+                      value={newAdmin.confirmPassword}
+                      onChange={(e) =>
+                        setNewAdmin({
+                          ...newAdmin,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                    />
+                    <span
+                      className="material-icons a-eye-icon"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      {showConfirmPassword ? "visibility" : "visibility_off"}
+                    </span>
+                  </div>
+                  {errors.confirmPassword && (
+                    <span className="a-form-error">
+                      {errors.confirmPassword}
+                    </span>
+                  )}
+                </div>
+
                 <div className="a-form-group">
                   <label className="a-form-label">Assign Role</label>
                   <select
                     className="a-form-select"
                     value={newAdmin.role}
-                    disabled={true}
+                    disabled
                   >
                     <option value="admin">System Admin (Full Access)</option>
                   </select>
                 </div>
+
               </div>
+
               <div className="a-modal-actions">
                 <button
                   className="a-btn-cancel"
@@ -538,13 +700,20 @@ const Admins = () => {
                 >
                   Cancel
                 </button>
-                <button className="a-btn-create" onClick={handleCreateAdmin}>
+
+                <button
+                  className="a-btn-create"
+                  onClick={handleCreateAdmin}
+                  disabled={!isFormValid}
+                >
                   Create Account
                 </button>
               </div>
             </div>
           </div>
         </div>
+
+
       )}
 
       { }
@@ -572,7 +741,7 @@ const Admins = () => {
                   }
                 />
               </div>
-              <div className="a-form-group">
+              <div className="a-form-group" style={{ marginTop: "10px" }}>
                 <label className="a-form-label">Email (Read-only)</label>
                 <input
                   type="email"
@@ -600,39 +769,68 @@ const Admins = () => {
 
       { }
       {showArchiveModal && archiveAdmin && (
-        <div className="a-modal-overlay">
-          <div className="a-modal-container" style={{ maxWidth: "400px" }}>
-            <div className="a-modal-header" style={{ borderBottom: "none" }}>
-              <div className="a-modal-title" style={{ color: "var(--danger)" }}>
-                Archive Admin
+        <div className="u-modal-overlay">
+          <div className="u-modal-container archive-mode">
+            <div className="u-modal-header" style={{ borderBottom: "none" }}>
+              <div className="u-modal-title" style={{ color: "var(--warning)" }}>
+                <span className="material-icons">warning</span> Archive Admin
               </div>
               <button
-                className="a-close-btn"
+                className="u-close-btn"
                 onClick={() => setShowArchiveModal(false)}
               >
                 <span className="material-icons">close</span>
               </button>
             </div>
-            <div className="a-modal-body">
-              <p style={{ color: "#ccc", marginBottom: "20px" }}>
+
+            <div className="u-archive-body">
+              <p
+                style={{
+                  color: "#ccc",
+                  marginBottom: "25px",
+                  lineHeight: "1.5",
+                }}
+              >
                 Are you sure you want to archive{" "}
-                <strong>{archiveAdmin.name}</strong>?
-                <br />
-                <br />
-                They will lose access to the system immediately.
+                <strong>{archiveAdmin.name}</strong>? This action will restrict
+                their access to the platform immediately.
               </p>
-              <div className="a-modal-actions">
+              <div className="u-form-group">
+                <label className="u-form-label">Reason for Archiving</label>
+                <select
+                  className="u-form-select"
+                  value={archiveReason}
+                  onChange={(e) => setArchiveReason(e.target.value)}
+                >
+                  <option>Inactive</option>
+                  <option>Employee has left the organization</option>
+                  <option>Security Concerns</option>
+                  <option>Duplicate Account</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div className="u-form-group">
+                <label className="u-form-label">
+                  Additional Remarks (Optional)
+                </label>
+                <textarea
+                  className="u-form-textarea"
+                  placeholder="Enter details here..."
+                  value={archiveReason}
+                  onChange={(e) => setArchiveReason(e.target.value)}
+                ></textarea>
+              </div>
+              <div className="u-modal-actions">
                 <button
-                  className="a-btn-cancel"
+                  className="u-btn-cancel"
                   onClick={() => setShowArchiveModal(false)}
                 >
                   Cancel
                 </button>
-                <button
-                  className="a-btn-create"
-                  style={{ background: "var(--danger)" }}
-                  onClick={handleArchiveAdmin}
-                >
+                <button className="u-btn-danger" onClick={handleArchiveAdmin}>
+                  <span className="material-icons" style={{ fontSize: "18px" }}>
+                    archive
+                  </span>{" "}
                   Confirm Archive
                 </button>
               </div>
