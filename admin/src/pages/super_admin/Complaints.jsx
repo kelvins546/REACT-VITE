@@ -118,8 +118,7 @@ const Complaints = () => {
       });
 
       setShowConfirmResolve(false);
-      setShowModal(false)
-      setSelectedUser(null);
+      setShowModal(false);
     }, 2000);
   };
 
