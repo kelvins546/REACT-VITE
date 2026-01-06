@@ -21,7 +21,7 @@ const AdminLogin = () => {
     icon: "info",
   });
 
-  const MOCK_ADMIN = {
+  const TEMP_ADMIN = {
     email: "superadmin@gmail.com",
     password: "123456",
   };
@@ -32,8 +32,8 @@ const AdminLogin = () => {
 
     setTimeout(() => {
       if (
-        email === MOCK_ADMIN.email &&
-        password === MOCK_ADMIN.password
+        email === TEMP_ADMIN.email &&
+        password === TEMP_ADMIN.password
       ) {
         setTemporaryLoading(false);
         navigate("/");

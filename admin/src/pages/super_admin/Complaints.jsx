@@ -28,6 +28,57 @@ const Complaints = () => {
   const [selectedCategory, setSelectedCategory] = useState('Category: All');
   const [selectedStatus, setSelectedStatus] = useState('Status: All');
 
+  const ticketsData = [
+    {
+      id: "#TK-9921",
+      user: {
+        name: "Natasha Alonzo",
+        unit: "Unit 402",
+        initials: "NA",
+      },
+      subject: "Hub Offline",
+      issue: "Device not syncing data",
+      date: "Today, 09:30 AM",
+      priority: "high",
+      status: "OPEN",
+    },
+    {
+      id: "#TK-9920",
+      user: {
+        name: "John Doe",
+        unit: "Unit 305",
+        initials: "JD",
+      },
+      subject: "Rate Discrepancy",
+      issue: "Billing calculation error",
+      date: "Yesterday, 2:15 PM",
+      priority: "med",
+      status: "IN REVIEW",
+    },
+    {
+      id: "#TK-9918",
+      user: {
+        name: "Maria Cruz",
+        unit: "Unit 101",
+        initials: "MC",
+      },
+      subject: "Wifi Update",
+      issue: "Cannot update credentials",
+      date: "Dec 12, 11:00 AM",
+      priority: "low",
+      status: "RESOLVED",
+    },
+  ];
+
+  const [search, setSearch] = useState("");
+
+  const filteredTickets = ticketsData.filter((ticket) =>
+    `${ticket.id} ${ticket.user.name}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
+
   const categories = ['Category: All', 'Category: Hardware', 'Category: Billing'];
   const statuses = ['Status: All', 'Status: Open', 'Status: Closed'];
 
@@ -158,18 +209,18 @@ const Complaints = () => {
       { }
       <div className="toolbar">
         <div className="search-box">
-          <span
-            className="material-icons"
-            style={{ color: "#666", fontSize: "20px" }}
-          >
+          <span className="material-icons" style={{ color: "#666", fontSize: "20px" }}>
             search
           </span>
           <input
             type="text"
             className="search-input"
             placeholder="Search ticket ID or user..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+
         <div className="filter-group">
           <div className="filters-container">
             <div className="complaint-dropdown">
@@ -262,160 +313,71 @@ const Complaints = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="ticket-id">#TK-9921</td>
-              <td>
-                <div className="user-cell">
-                  <div className="u-avatar">NA</div>
-                  <div>
-                    <span className="text-main">Natasha Alonzo</span>
-                    <span className="text-sub">Unit 402</span>
+            {filteredTickets.map((ticket) => (
+              <tr key={ticket.id}>
+                <td className="ticket-id">{ticket.id}</td>
+
+                <td>
+                  <div className="user-cell">
+                    <div className="u-avatar">{ticket.user.initials}</div>
+                    <div>
+                      <span className="text-main">{ticket.user.name}</span>
+                      <span className="text-sub">{ticket.user.unit}</span>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td>
-                <span className="text-main">Hub Offline</span>
-                <span className="text-sub">Device not syncing data</span>
-              </td>
-              <td>Today, 09:30 AM</td>
-              <td>
-                <span className="prio-badge prio-high">
-                  <span
-                    className="material-icons prio-icon-high"
-                    style={{ fontSize: "16px" }}
-                  >
-                    arrow_upward
+                </td>
+
+                <td>
+                  <span className="text-main">{ticket.subject}</span>
+                  <span className="text-sub">{ticket.issue}</span>
+                </td>
+
+                <td>{ticket.date}</td>
+
+                <td>
+                  <span className={`prio-badge prio-${ticket.priority}`}>
+                    <span className="material-icons" style={{ fontSize: "16px" }}>
+                      {ticket.priority === "high"
+                        ? "arrow_upward"
+                        : ticket.priority === "low"
+                          ? "arrow_downward"
+                          : "remove"}
+                    </span>
+                    {ticket.priority.toUpperCase()}
                   </span>
-                  High
-                </span>
-              </td>
-              <td>
-                <span className="status-badge st-open">OPEN</span>
-              </td>
-              <td>
-                <div className="action-cell">
-                  <button
-                    className="icon-btn"
-                    title="View Details"
-                    onClick={() => setShowModal(true)}
-                  >
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "20px" }}
-                    >
-                      visibility
-                    </span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            { }
-            <tr>
-              <td className="ticket-id">#TK-9920</td>
-              <td>
-                <div className="user-cell">
-                  <div
-                    className="u-avatar"
-                    style={{ background: "#333", color: "#ccc" }}
-                  >
-                    JD
-                  </div>
-                  <div>
-                    <span className="text-main">John Doe</span>
-                    <span className="text-sub">Unit 305</span>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <span className="text-main">Rate Discrepancy</span>
-                <span className="text-sub">Billing calculation error</span>
-              </td>
-              <td>Yesterday, 2:15 PM</td>
-              <td>
-                <span className="prio-badge prio-med">
-                  <span
-                    className="material-icons prio-icon-med"
-                    style={{ fontSize: "16px" }}
-                  >
-                    remove
+                </td>
+
+                <td>
+                  <span className={`status-badge st-${ticket.status.toLowerCase().replace(" ", "")}`}>
+                    {ticket.status}
                   </span>
-                  <span className="prio-text">Med</span>
-                </span>
-              </td>
-              <td>
-                <span className="status-badge st-review">IN REVIEW</span>
-              </td>
-              <td>
-                <div className="action-cell">
-                  <button
-                    className="icon-btn"
-                    title="View Details"
-                    onClick={() => setShowModal(true)}
-                  >
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "20px" }}
+                </td>
+
+                <td>
+                  <div className="action-cell">
+                    <button
+                      className="icon-btn"
+                      title="View Details"
+                      onClick={() => setShowModal(true)}
                     >
-                      visibility
-                    </span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            { }
-            <tr>
-              <td className="ticket-id">#TK-9918</td>
-              <td>
-                <div className="user-cell">
-                  <div
-                    className="u-avatar"
-                    style={{ background: "#333", color: "#ccc" }}
-                  >
-                    MC
+                      <span className="material-icons" style={{ fontSize: "20px" }}>
+                        visibility
+                      </span>
+                    </button>
                   </div>
-                  <div>
-                    <span className="text-main">Maria Cruz</span>
-                    <span className="text-sub">Unit 101</span>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <span className="text-main">Wifi Update</span>
-                <span className="text-sub">Cannot update credentials</span>
-              </td>
-              <td>Dec 12, 11:00 AM</td>
-              <td>
-                <span className="prio-badge prio-low">
-                  <span
-                    className="material-icons prio-icon-low"
-                    style={{ fontSize: "16px" }}
-                  >
-                    arrow_downward
-                  </span>{" "}
-                  <span className="prio-text">Low</span>
-                </span>
-              </td>
-              <td>
-                <span className="status-badge st-solved">RESOLVED</span>
-              </td>
-              <td>
-                <div className="action-cell">
-                  <button
-                    className="icon-btn"
-                    title="View Details"
-                    onClick={() => setShowModal(true)}
-                  >
-                    <span
-                      className="material-icons"
-                      style={{ fontSize: "20px" }}
-                    >
-                      visibility
-                    </span>
-                  </button>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
+            ))}
+
+            {filteredTickets.length === 0 && (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center", padding: "20px", color: "#888" }}>
+                  No tickets found
+                </td>
+              </tr>
+            )}
           </tbody>
+
         </table>
 
         { }

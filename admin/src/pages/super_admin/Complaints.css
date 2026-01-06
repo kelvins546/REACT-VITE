@@ -446,18 +446,8 @@
 }
 
 .c-btn-reply {
-  background: rgba(76, 175, 80, 0.1);
-  color: var(--success);
-  border: #00FF99 1px solid;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  gap: 8px;
+  background: #2a2a2a;
+  color: #fff;
 }
 
 .c-btn-reply:hover {

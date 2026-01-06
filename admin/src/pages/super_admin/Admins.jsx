@@ -6,7 +6,7 @@ import { PopupNotification } from "../../components/notifications/PopUpNotificat
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 
 const Admins = () => {
-  const mockAdmins = [
+  const sampleAdmins = [
     {
       id: 1,
       initials: "LC",
@@ -120,7 +120,7 @@ const Admins = () => {
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
-      setAdminsList(mockAdmins);
+      setAdminsList(sampleAdmins);
       setLoading(false);
     }, 800);
   }, []);

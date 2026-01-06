@@ -36,7 +36,7 @@ const Users = () => {
   const [showResetModal, setShowResetModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const mockUsers = [
+  const sampleUsers = [
     {
       id: 1,
       initials: "JV",
@@ -78,7 +78,7 @@ const Users = () => {
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
-      setUsersList(mockUsers);
+      setUsersList(sampleUsers);
       setLoading(false);
     }, 800);
   }, []);
