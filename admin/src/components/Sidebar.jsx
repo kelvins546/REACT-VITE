@@ -1,97 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "../supabaseClient";
 import { LoadingPopup } from "./loaders/LoadingPopUp";
 import { PuffLoader } from "react-spinners";
-import { useOutletContext } from "react-router-dom";
 
 const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { role } = useOutletContext();
+  const MOCK_ACCOUNT = {
+    email: "superadmin@gmail.com",
+    role: "super admin", 
+    name: "Super Admin",
+  };
+
+  const role = MOCK_ACCOUNT.role;
   const isSuperAdmin = role === "super admin";
+
+  const getInitials = (name) =>
+    name
+      ? name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase()
+      : "AD";
+
+  const capitalize = (s) =>
+    s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [skipInitialAnimation, setSkipInitialAnimation] = useState(true);
   const [isUsersOpen, setIsUsersOpen] = useState(false);
-
-  const [adminProfile, setAdminProfile] = useState({
-    name: "Loading...",
-    role: "System Admin",
-    initials: "AD",
-  });
-
   const [loggingOut, setLoggingOut] = useState(false);
 
-  useEffect(() => {
-    setSkipInitialAnimation(false);
-    if (location.pathname.includes("/users")) {
-      setIsUsersOpen(true);
-    }
+  const [adminProfile] = useState({
+    name: MOCK_ACCOUNT.name,
+    role: capitalize(MOCK_ACCOUNT.role),
+    initials: getInitials(MOCK_ACCOUNT.name),
+  });
 
-    fetchCurrentAdmin();
-  }, [location.pathname]);
+  const handleLogout = () => {
+    setLoggingOut(true);
+    setShowLogoutModal(false);
 
-  const fetchCurrentAdmin = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("full_name, role")
-          .eq("id", user.id)
-          .single();
-
-        if (data && !error) {
-          setAdminProfile({
-            name: data.full_name || "Admin",
-            role: capitalize(data.role) || "System Admin",
-            initials: getInitials(data.full_name),
-          });
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching admin profile:", err);
-    }
-  };
-
-  const getInitials = (name) =>
-    name
-      ? name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
-      : "AD";
-
-  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
-
-  const handleLogout = async () => {
-    try {
-      setLoggingOut(true);
-      setShowLogoutModal(false);
-
-      await supabase.auth.signOut();
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    } catch (error) {
-      console.error("Error logging out:", error);
-      setLoggingOut(false);
-    }
+    setTimeout(() => {
+      navigate("/login");
+    }, 1200);
   };
 
   const toggleVisibility = () => {
-    setIsVisible(!isVisible);
+    setIsVisible((prev) => !prev);
   };
 
   const isUserSectionActive = location.pathname.includes("/users");
@@ -124,7 +86,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                   exit={{ opacity: 0, x: -50 }}
                   transition={{ duration: 0.3 }}
                 >
-                  GRIDWATCH
+                  GRIDWATCH NO BACKEND
                 </motion.span>
               )}
             </AnimatePresence>
@@ -512,7 +474,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             >
               <button className="logoutCancel"
                 onClick={() => setShowLogoutModal(false)}
-                
+
               >
                 Cancel
               </button>

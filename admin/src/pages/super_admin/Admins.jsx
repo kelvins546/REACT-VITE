@@ -1,23 +1,53 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "../../supabaseClient";
-import { createClient } from "@supabase/supabase-js";
 import "./Admins.css";
 import { PuffLoader } from "react-spinners";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 
-const SUPABASE_URL = "https://grgkznbbfedbipxuwkdl.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_C9Vr_lDZsic_RsvJ2aM9Bg_l9ag2A0L";
-
 const Admins = () => {
+  const mockAdmins = [
+    {
+      id: 1,
+      initials: "LC",
+      name: "Leo Carlo",
+      email: "admin3@gmail.com",
+      role: "admin",
+      status: "active",
+      color: "#1f6fff",
+    },
+    {
+      id: 2,
+      initials: "KA",
+      name: "Kelvin Arnold",
+      email: "admin2@gmail.com",
+      role: "admin",
+      status: "active",
+      color: "#1f6fff",
+    },
+    {
+      id: 3,
+      initials: "SA",
+      name: "Super Admin",
+      email: "superadmin@gmail.com",
+      role: "super admin",
+      status: "active",
+      color: "#1f6fff",
+    },
+  ];
+
+  const currentUserRole = "super admin";
+
   const [adminsList, setAdminsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [archiveReason, setArchiveReason] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+
   const [loader, setLoader] = useState({
     show: false,
-    message: "Processing..."
+    message: "Processing...",
   });
 
   const [notification, setNotification] = useState({
@@ -25,28 +55,30 @@ const Admins = () => {
     title: "",
     message: "",
     variant: "success",
-    icon: "info"
+    icon: "info",
   });
 
-
-  const [currentUserRole, setCurrentUserRole] = useState(null);
-
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [archiveAdmin, setArchiveAdmin] = useState(null);
+
   const [newAdmin, setNewAdmin] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     role: "admin",
   });
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [editFormData, setEditFormData] = useState({ name: "" });
 
   const nameRegex = /^[A-Za-z\s]+$/;
   const emailRegex = /^[^ ,;:<>()\\/]+@(gmail\.com|yahoo\.com)$/;
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
-
 
   const errors = {
     name:
@@ -55,197 +87,86 @@ const Admins = () => {
         : !nameRegex.test(newAdmin.name)
           ? "Name must contain letters only"
           : "",
-
     email:
       newAdmin.email === ""
         ? " "
         : !emailRegex.test(newAdmin.email)
           ? "Invalid email format"
           : "",
-
     password:
       newAdmin.password === ""
         ? " "
         : !passwordRegex.test(newAdmin.password)
           ? "Must be 8+ chars, 1 uppercase, 1 lowercase & 1 special character"
           : "",
-
     confirmPassword:
       newAdmin.confirmPassword === ""
         ? " "
-        : !passwordRegex.test(newAdmin.password)
-          ? " "
-          : newAdmin.password !== newAdmin.confirmPassword
-            ? "Passwords do not match"
-            : "",
+        : newAdmin.password !== newAdmin.confirmPassword
+          ? "Passwords do not match"
+          : "",
   };
 
   const isFormValid =
+    newAdmin.name.trim() &&
+    newAdmin.email.trim() &&
+    newAdmin.password.trim() &&
+    newAdmin.confirmPassword.trim() &&
     !errors.name.trim() &&
     !errors.email.trim() &&
     !errors.password.trim() &&
-    !errors.confirmPassword.trim() &&
-    newAdmin.name &&
-    newAdmin.email &&
-    newAdmin.password &&
-    newAdmin.confirmPassword;
-
-
-
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedAdmin, setSelectedAdmin] = useState(null);
-  const [editFormData, setEditFormData] = useState({ name: "" });
-
-  const [showArchiveModal, setShowArchiveModal] = useState(false);
-  const [archiveAdmin, setArchiveAdmin] = useState(null);
+    !errors.confirmPassword.trim();
 
   useEffect(() => {
-    fetchAdmins();
-    fetchCurrentUserRole();
+    setLoading(true);
+    setTimeout(() => {
+      setAdminsList(mockAdmins);
+      setLoading(false);
+    }, 800);
   }, []);
 
-  const fetchCurrentUserRole = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from("users")
-          .select("role")
-          .eq("id", user.id)
-          .single();
+  const getInitials = (name) =>
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
 
-        if (data) setCurrentUserRole(data.role);
-      }
-    } catch (error) {
-      console.error("Error fetching current user role:", error);
-    }
-  };
+  const handleCreateAdmin = () => {
+    setLoader({ show: true, message: "Creating Admin..." });
 
-  const fetchAdmins = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .in("role", ["admin", "super admin"])
-        .order("joined_at", { ascending: false });
+    setTimeout(() => {
+      const newUser = {
+        id: Date.now(),
+        initials: getInitials(newAdmin.name),
+        name: newAdmin.name,
+        email: newAdmin.email,
+        role: "admin",
+        status: "active",
+        color: "#1f6fff",
+      };
 
-      if (error) throw error;
-
-      const mappedAdmins = data.map((u) => ({
-        id: u.id,
-        initials: getInitials(u.full_name),
-        name: u.full_name,
-        email: u.email,
-        role: u.role,
-        status: u.status || "Active",
-        avatar_url: u.avatar_url,
-        color: "#0055ff",
-      }));
-
-      setAdminsList(mappedAdmins);
-    } catch (error) {
-      console.error("Error fetching admins:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateAdmin = async () => {
-    setLoader({
-      show: true,
-      message: "Creating User..."
-    });
-    if (!newAdmin.email || !newAdmin.password || !newAdmin.name) {
-      setNotification({
-        show: true,
-        title: "Missing information",
-        message: "Please fill in all fields.",
-        variant: "warning",
-        icon: "warning"
-      });
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
-      return;
-    }
-
-    if (SUPABASE_URL.includes("PASTE") || SUPABASE_ANON_KEY.includes("PASTE")) {
-      setNotification({
-        show: true,
-        title: "Configuration error",
-        message: "Supabase keys are missing or invalid.",
-        variant: "error",
-        icon: "error"
-      });
-      + setLoader({ show: false, message: "Processing..." });
-      return;
-    }
-
-
-    try {
-      setLoading(true);
-
-      const tempSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { persistSession: false },
-      });
-
-      const { data: authData, error: authError } =
-        await tempSupabase.auth.signUp({
-          email: newAdmin.email,
-          password: newAdmin.password,
-          options: {
-            data: {
-              full_name: newAdmin.name,
-              role: "admin",
-            },
-          },
-        });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        const { error: dbError } = await supabase.from("users").insert([
-          {
-            id: authData.user.id,
-            email: newAdmin.email,
-            full_name: newAdmin.name,
-            role: "admin",
-            status: "active",
-          },
-        ]);
-
-        if (dbError && dbError.code !== "23505") throw dbError;
-      }
+      setAdminsList((prev) => [newUser, ...prev]);
+      setLoader({ show: false, message: "Processing..." });
 
       setNotification({
         show: true,
-        title: "Admin created",
-        message: `Successfully created admin: ${newAdmin.email}`,
+        title: "Admin Created",
+        message: "Admin account created successfully.",
         variant: "success",
-        icon: "check_circle"
+        icon: "check_circle",
       });
+
       setShowCreateModal(false);
-      setNewAdmin({ name: "", email: "", password: "", role: "admin" });
-      fetchAdmins();
-    } catch (error) {
-      setNotification({
-        show: true,
-        title: "Creation failed",
-        message: error.message,
-        variant: "error",
-        icon: "error"
+      setNewAdmin({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "admin",
       });
-    } finally {
-      setLoading(false);
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
-    }
+    }, 1200);
   };
 
   const openEditModal = (admin) => {
@@ -254,58 +175,29 @@ const Admins = () => {
     setShowEditModal(true);
   };
 
-  const handleUpdateAdmin = async () => {
-    setLoader({
-      show: true,
-      message: "Updating User..."
-    });
+  const handleUpdateAdmin = () => {
+    setLoader({ show: true, message: "Updating Admin..." });
 
-    if (!editFormData.name) {
+    setTimeout(() => {
+      setAdminsList((prev) =>
+        prev.map((admin) =>
+          admin.id === selectedAdmin.id
+            ? { ...admin, name: editFormData.name }
+            : admin
+        )
+      );
+
+      setLoader({ show: false, message: "Processing..." });
       setNotification({
         show: true,
-        title: "Invalid input",
-        message: "Name cannot be empty.",
-        variant: "warning",
-        icon: "warning"
-      });
-      + setLoader({ show: false, message: "Processing..." });
-      return;
-    }
-
-
-    try {
-      setLoading(true);
-      const { error } = await supabase
-        .from("users")
-        .update({ full_name: editFormData.name })
-        .eq("id", selectedAdmin.id);
-
-      if (error) throw error;
-
-      setNotification({
-        show: true,
-        title: "Admin updated",
-        message: "Admin details were updated successfully.",
+        title: "Admin Updated",
+        message: "Admin details updated successfully.",
         variant: "success",
-        icon: "check_circle"
+        icon: "check_circle",
       });
+
       setShowEditModal(false);
-      fetchAdmins();
-    } catch (error) {
-      setNotification({
-        show: true,
-        title: "Update failed",
-        message: error.message,
-        variant: "error",
-        icon: "error"
-      });
-    } finally {
-      setLoading(false);
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
-    }
+    }, 1000);
   };
 
   const openArchiveModal = (admin) => {
@@ -313,57 +205,30 @@ const Admins = () => {
     setShowArchiveModal(true);
   };
 
-  const handleArchiveAdmin = async () => {
-    try {
-      setLoading(true);
-      setLoader({
-        show: true,
-        message: "Archiving Admin..."
-      });
-      const { error } = await supabase
-        .from("users")
-        .update({ status: "archived" })
-        .eq("id", archiveAdmin.id);
+  const handleArchiveAdmin = () => {
+    setLoader({ show: true, message: "Archiving Admin..." });
 
-      if (error) throw error;
+    setTimeout(() => {
+      setAdminsList((prev) =>
+        prev.map((admin) =>
+          admin.id === archiveAdmin.id
+            ? { ...admin, status: "archived" }
+            : admin
+        )
+      );
 
+      setLoader({ show: false, message: "Processing..." });
       setNotification({
         show: true,
-        title: "Admin archived",
+        title: "Admin Archived",
         message: "The admin has been archived successfully.",
         variant: "warning",
-        icon: "archive"
+        icon: "archive",
       });
 
       setShowArchiveModal(false);
-      fetchAdmins();
-    } catch (error) {
-      setNotification({
-        show: true,
-        title: "Archive failed",
-        message: error.message,
-        variant: "error",
-        icon: "error"
-      });
-
-    } finally {
-      setLoading(false);
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
-    }
+    }, 1200);
   };
-
-  const getInitials = (name) =>
-    name
-      ? name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
-      : "AD";
 
   const filteredAdmins = adminsList.filter(
     (u) =>
@@ -442,13 +307,7 @@ const Admins = () => {
 
       <div className="table-container">
         {loading ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              padding: "50px",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
             <PuffLoader color="#0055ff" size={40} />
           </div>
         ) : (
@@ -503,6 +362,7 @@ const Admins = () => {
                       </div>
                     </div>
                   </td>
+
                   <td>
                     <span
                       className="status-pill"
@@ -513,12 +373,12 @@ const Admins = () => {
                             : "rgba(0, 85, 255, 0.15)",
                         color:
                           admin.role === "super admin" ? "#ffd700" : "#0055ff",
-                        border: "1px solid transparent",
                       }}
                     >
                       {admin.role.toUpperCase()}
                     </span>
                   </td>
+
                   <td>
                     <span
                       className="status-dot"
@@ -531,9 +391,9 @@ const Admins = () => {
                     ></span>{" "}
                     {admin.status === "archived" ? "Archived" : "Active"}
                   </td>
+
                   <td>
                     <div className="action-cell">
-                      { }
                       {(admin.role !== "super admin" ||
                         currentUserRole === "super admin") && (
                           <button
@@ -541,16 +401,10 @@ const Admins = () => {
                             title="Edit Admin"
                             onClick={() => openEditModal(admin)}
                           >
-                            <span
-                              className="material-icons"
-                              style={{ fontSize: "18px" }}
-                            >
-                              edit
-                            </span>
+                            <span className="material-icons">edit</span>
                           </button>
                         )}
 
-                      { }
                       {admin.role !== "super admin" &&
                         admin.status !== "archived" && (
                           <button
@@ -558,12 +412,7 @@ const Admins = () => {
                             title="Archive Admin"
                             onClick={() => openArchiveModal(admin)}
                           >
-                            <span
-                              className="material-icons"
-                              style={{ fontSize: "18px" }}
-                            >
-                              archive
-                            </span>
+                            <span className="material-icons">archive</span>
                           </button>
                         )}
                     </div>
@@ -574,6 +423,7 @@ const Admins = () => {
           </table>
         )}
       </div>
+
 
       { }
       {showCreateModal && (
@@ -732,24 +582,28 @@ const Admins = () => {
             <div className="a-modal-body">
               <div className="a-form-group">
                 <label className="a-form-label">Full Name</label>
-                <input
-                  type="text"
-                  className="a-form-input"
-                  value={editFormData.name}
-                  onChange={(e) =>
-                    setEditFormData({ ...editFormData, name: e.target.value })
-                  }
-                />
+                <div className="a-input-wrapper">
+                  <input
+                    type="text"
+                    className="a-form-input"
+                    value={editFormData.name}
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, name: e.target.value })
+                    }
+                  />
+                </div>
               </div>
               <div className="a-form-group" style={{ marginTop: "10px" }}>
                 <label className="a-form-label">Email (Read-only)</label>
-                <input
-                  type="email"
-                  className="a-form-input"
-                  value={selectedAdmin.email}
-                  disabled
-                  style={{ opacity: 0.6, cursor: "not-allowed" }}
-                />
+                <div className="a-input-wrapper">
+                  <input
+                    type="email"
+                    className="a-form-input"
+                    value={selectedAdmin.email}
+                    disabled
+                    style={{ opacity: 0.6, cursor: "not-allowed" }}
+                  />
+                </div>
               </div>
               <div className="a-modal-actions">
                 <button
@@ -799,7 +653,7 @@ const Admins = () => {
                 <label className="u-form-label">Reason for Archiving</label>
                 <select
                   className="u-form-select"
-                  value={archiveReason}
+
                   onChange={(e) => setArchiveReason(e.target.value)}
                 >
                   <option>Inactive</option>
@@ -816,7 +670,7 @@ const Admins = () => {
                 <textarea
                   className="u-form-textarea"
                   placeholder="Enter details here..."
-                  value={archiveReason}
+
                   onChange={(e) => setArchiveReason(e.target.value)}
                 ></textarea>
               </div>

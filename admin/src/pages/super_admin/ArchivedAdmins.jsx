@@ -65,7 +65,6 @@ const ArchivedAdmins = () => {
             message: "Restoring User..."
         });
 
-        // Simulate a delay (e.g., 2 seconds) for the restore process
         setTimeout(() => {
             setLoader({
                 show: false,
@@ -82,7 +81,7 @@ const ArchivedAdmins = () => {
 
             setShowRestoreModal(false);
             setSelectedUser(null);
-        }, 2000); // Adjust delay as needed
+        }, 2000); 
     };
 
     const handleDelete = () => {
@@ -90,8 +89,7 @@ const ArchivedAdmins = () => {
             show: true,
             message: "Deleting User..."
         });
-
-        // Simulate a delay (e.g., 2 seconds) for the delete process
+        
         setTimeout(() => {
             setLoader({
                 show: false,

@@ -1,82 +1,53 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
 import { LoadingPopup } from "../components/loaders/LoadingPopUp";
 import { PopupNotification } from "../components/notifications/PopUpNotification";
 import { PuffLoader } from "react-spinners";
-import { supabase } from "../supabaseClient";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+
   const [temporaryLoading, setTemporaryLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const [notification, setNotification] = React.useState({
+  const [notification, setNotification] = useState({
     show: false,
     title: "",
     message: "",
     variant: "",
-    icon: "info"
+    icon: "info",
   });
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/", { replace: true });
-      }
-    };
-    checkSession();
-  }, [navigate]);
+  const MOCK_ADMIN = {
+    email: "superadmin@gmail.com",
+    password: "123456",
+  };
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     setTemporaryLoading(true);
 
-    try {
-      const { data: authData, error: authError } =
-        await supabase.auth.signInWithPassword({
-          email: email,
-          password: password,
+    setTimeout(() => {
+      if (
+        email === MOCK_ADMIN.email &&
+        password === MOCK_ADMIN.password
+      ) {
+        setTemporaryLoading(false);
+        navigate("/");
+      } else {
+        setTemporaryLoading(false);
+        setNotification({
+          show: true,
+          title: "Login failed",
+          message: "Invalid email or password.",
+          variant: "error",
+          icon: "error",
         });
-
-      if (authError) throw authError;
-
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", authData.user.id)
-        .single();
-
-      if (userError) throw userError;
-
-      const allowedRoles = ["admin", "super admin", "support"];
-
-      if (!userData || !allowedRoles.includes(userData.role)) {
-        await supabase.auth.signOut();
-        throw new Error("Access Denied: You do not have admin privileges.");
       }
-
-      setTemporaryLoading(false);
-      navigate("/");
-    } catch (error) {
-      console.error("Login failed:", error);
-
-      setNotification({
-        show: true,
-        title: "Login failed",
-        message: error.message || "Please check your credentials.",
-        variant: "error",
-        icon: "error"
-      });
-
-      setTemporaryLoading(false);
-    }
-
+    }, 1200);
   };
 
   return (
@@ -99,7 +70,9 @@ const AdminLogin = () => {
         Loader={PuffLoader}
         color="#0055ff"
       />
+
       <div className="auth-bg"></div>
+
       <div className="auth-container">
         <div className="brand-side">
           <div className="logo-circle">
@@ -152,8 +125,12 @@ const AdminLogin = () => {
                 />
                 <span
                   className="material-icons"
-                  style={{ fontSize: "18px", color: "#666", cursor: "pointer" }}
-                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    fontSize: "18px",
+                    color: "#666",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setShowPassword((prev) => !prev)}
                 >
                   {showPassword ? "visibility" : "visibility_off"}
                 </span>

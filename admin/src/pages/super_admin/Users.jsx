@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "../../supabaseClient";
 import "./Users.css";
 import { PuffLoader } from "react-spinners";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
@@ -11,8 +10,151 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [archiveReason, setArchiveReason] = useState("");
   const itemsPerPage = 10;
+
+  const [notification, setNotification] = useState({
+    show: false,
+    title: "",
+    message: "",
+    variant: "success",
+    icon: "info",
+  });
+
+  const [loader, setLoader] = useState({
+    show: false,
+    message: "Processing...",
+  });
+
+  const [showModal, setShowModal] = useState(false);
+  const [viewUser, setViewUser] = useState(null);
+  const [viewUserHubs, setViewUserHubs] = useState([]);
+  const [viewStats, setViewStats] = useState({ alerts: 0, registeredHubs: 0 });
+
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+
+  const mockUsers = [
+    {
+      id: 1,
+      initials: "JV",
+      name: "Jonas Vingegaard",
+      email: "TJV_@gmail.com",
+      location: "Unit 101 - Manila",
+      hubs: "2 Registered",
+      status: "Active",
+      avatar_url: null,
+      color: "#0055ff",
+      textColor: "#fff",
+    },
+    {
+      id: 2,
+      initials: "LC",
+      name: "Leo Carlo",
+      email: "icc.atay.leocarlo@immaculada.edu.ph",
+      location: "Unit 204 - Cebu",
+      hubs: "1 Registered",
+      status: "Active",
+      avatar_url: null,
+      color: "#00aa88",
+      textColor: "#fff",
+    },
+    {
+      id: 3,
+      initials: "KM",
+      name: "Kelvin Manalad",
+      email: "kelvin_manalad@gmail.com",
+      location: "Unit 12B - Davao",
+      hubs: "0 Registered",
+      status: "Archived",
+      avatar_url: null,
+      color: "#ff4444",
+      textColor: "#fff",
+    },
+  ];
+
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setUsersList(mockUsers);
+      setLoading(false);
+    }, 800);
+  }, []);
+
+  const handleViewDetails = (user) => {
+    setViewUser(user);
+    setViewUserHubs([
+      { id: 1, name: "Hub A" },
+      { id: 2, name: "Hub B" },
+    ]);
+    setViewStats({ alerts: 2, registeredHubs: 2 });
+    setShowModal(true);
+  };
+
+  const handleArchiveClick = (user) => {
+    setSelectedUser(user);
+    setShowArchiveModal(true);
+  };
+
+  const handleConfirmArchive = () => {
+    setLoader({ show: true, message: "Archiving User..." });
+
+    setTimeout(() => {
+      setUsersList((prev) =>
+        prev.map((u) =>
+          u.id === selectedUser.id ? { ...u, status: "Archived" } : u
+        )
+      );
+
+      setLoader({ show: false, message: "Processing..." });
+      setNotification({
+        show: true,
+        title: "User archived",
+        message: "The user has been archived successfully.",
+        variant: "warning",
+        icon: "archive",
+      });
+
+      setShowArchiveModal(false);
+      setSelectedUser(null);
+    }, 1200);
+  };
+
+
+
+  const handleSendReset = () => {
+    setLoader({ show: true, message: "Sending..." });
+
+    setTimeout(() => {
+
+      setLoader({ show: false, message: "Processing..." });
+      setNotification({
+        show: true,
+        title: "Email Sent",
+        message: "A reset password link has been sent to the user.",
+        variant: "success",
+        icon: "check_circle"
+      });
+
+      setShowResetModal(false);
+      setShowModal(false);
+      setSelectedUser(null);
+    }, 1200);
+  };
+
+  const filteredUsers = usersList.filter(
+    (u) =>
+      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleExport = () => {
     setLoader({
@@ -37,225 +179,6 @@ const Users = () => {
       setShowExportModal(false);
     }, 2000);
   }
-
-  const [notification, setNotification] = useState({
-    show: false,
-    title: "",
-    message: "",
-    variant: "success",
-    icon: "info"
-  });
-
-  const [loader, setLoader] = useState({
-    show: false,
-    message: "Processing..."
-  });
-
-  const [showModal, setShowModal] = useState(false);
-  const [viewUser, setViewUser] = useState(null);
-  const [viewUserHubs, setViewUserHubs] = useState([]);
-  const [viewStats, setViewStats] = useState({ alerts: 0, registeredHubs: 0 });
-
-  const [showArchiveModal, setShowArchiveModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [archiveReason, setArchiveReason] = useState("");
-  const [showResetModal, setShowResetModal] = useState(false);
-
-  const checkHubStatus = (lastSeen) => {
-    if (!lastSeen) return false;
-
-    let timeStr = lastSeen.replace(" ", "T");
-    if (!timeStr.endsWith("Z") && !timeStr.includes("+")) {
-      timeStr += "Z";
-    }
-
-    const lastSeenMs = new Date(timeStr).getTime();
-    const now = Date.now();
-    const diffInSeconds = (now - lastSeenMs) / 1000;
-
-    return diffInSeconds < 120 && diffInSeconds > -5;
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-
-      const { data: usersData, error: usersError } = await supabase
-        .from("users")
-        .select("*")
-        .order("joined_at", { ascending: false });
-
-      if (usersError) throw usersError;
-
-      const visibleUsers = usersData.filter(
-        (u) => u.role !== "super admin" && u.role !== "admin"
-      );
-
-      const userIds = visibleUsers.map((u) => u.id);
-      let hubsData = [];
-      if (userIds.length > 0) {
-        const { data: fetchedHubs } = await supabase
-          .from("hubs")
-          .select("user_id, last_seen")
-          .in("user_id", userIds);
-        hubsData = fetchedHubs || [];
-      }
-
-      const mappedUsers = visibleUsers.map((u) => {
-        const totalHubsCount = hubsData.filter(
-          (h) => h.user_id === u.id
-        ).length;
-
-        return {
-          id: u.id,
-          initials: getInitials(u.full_name),
-          name: u.full_name,
-          email: u.email,
-          location: u.unit_location || "No Location",
-          hubs: `${totalHubsCount} Registered`,
-          status: capitalize(u.status),
-          role: u.role,
-          joined_at: u.joined_at,
-          phone: u.phone_number,
-          avatar_url: u.avatar_url,
-          color: getAvatarColor(u.full_name),
-          textColor: "#fff",
-          borderColor: "transparent",
-        };
-      });
-
-      setUsersList(mappedUsers);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewDetails = async (user) => {
-    setViewUser(user);
-    setShowModal(true);
-    setViewUserHubs([]);
-
-    try {
-      const { data: logs } = await supabase
-        .from("system_logs")
-        .select("severity")
-        .eq("user_id", user.id)
-        .limit(50);
-
-      const { data: hubs } = await supabase
-        .from("hubs")
-        .select("*")
-        .eq("user_id", user.id);
-
-      if (hubs) setViewUserHubs(hubs);
-
-      const criticalErrors = logs
-        ? logs.filter((l) => l.severity === "critical").length
-        : 0;
-      const totalHubs = hubs ? hubs.length : 0;
-
-      setViewStats({
-        alerts: criticalErrors,
-        registeredHubs: totalHubs,
-      });
-    } catch (err) {
-      console.error("Error fetching details", err);
-    }
-  };
-
-  const handleArchiveClick = (user) => {
-    setSelectedUser(user);
-    setArchiveReason("");
-    setShowArchiveModal(true);
-  };
-
-  const handleConfirmArchive = async () => {
-    setLoader({
-      show: true,
-      message: "Archiving User..."
-    });
-    if (!selectedUser) {
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("users")
-        .update({ status: "archived" })
-        .eq("id", selectedUser.id);
-
-      if (error) throw error;
-
-      setUsersList((prev) =>
-        prev.map((u) =>
-          u.id === selectedUser.id ? { ...u, status: "Archived" } : u
-        )
-      );
-      setNotification({
-        show: true,
-        title: "User archived",
-        message: "The user has been archived successfully.",
-        variant: "warning",
-        icon: "archive"
-      });
-      setShowArchiveModal(false);
-      setSelectedUser(null);
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
-
-    } catch (err) {
-      setNotification({
-        show: true,
-        title: "Archived failed",
-        message: err.message,
-        variant: "error",
-        icon: "error"
-      });
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
-    }
-  };
-
-  const getInitials = (name) =>
-    name
-      ? name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
-      : "??";
-  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
-  const getAvatarColor = (name) => {
-    const colors = ["#0055ff", "#00ff99", "#ffaa00", "#ff4444", "#9d00ff"];
-    if (!name) return colors[0];
-    return colors[name.length % colors.length];
-  };
-
-  const filteredUsers = usersList.filter(
-    (u) =>
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   return (
     <>
@@ -506,210 +429,136 @@ const Users = () => {
       </div>
 
       { }
-      {showModal && viewUser && (
+      {showModal && (
         <div className="u-modal-overlay">
           <div
             className="u-modal-container"
             style={{
-              maxWidth: "850px",
-              width: "90%",
-              height: "auto",
+              maxWidth: "900px",
+              width: "95%",
               maxHeight: "90vh",
               overflowY: "auto",
             }}
           >
             <div className="u-modal-header">
               <div className="u-modal-title">
-                <span
-                  className="material-icons"
-                  style={{ color: "var(--primary)" }}
-                >
+                <span className="material-icons" style={{ color: "#00ff99" }}>
                   account_circle
                 </span>
                 User Details
               </div>
-              <button
-                className="u-close-btn"
-                onClick={() => setShowModal(false)}
-              >
+              <button className="u-close-btn" onClick={() => setShowModal(false)}>
                 <span className="material-icons">close</span>
               </button>
             </div>
 
             <div
               className="u-modal-body"
-              style={{ display: "flex", gap: "25px", padding: "25px" }}
+              style={{ display: "flex", gap: "24px", padding: "24px", flexWrap: "wrap" }}
             >
-              { }
+
               <div
                 className="profile-card"
-                style={{ width: "320px", flexShrink: 0, height: "fit-content" }}
+                style={{ width: "320px", flexShrink: 0 }}
               >
                 <div className="profile-header">
-                  {viewUser.avatar_url ? (
-                    <img
-                      src={viewUser.avatar_url}
-                      alt="Profile"
-                      className="avatar-lg"
-                      style={{ objectFit: "cover" }}
-                    />
-                  ) : (
-                    <div
-                      className="avatar-lg"
-                      style={{ background: viewUser.color }}
-                    >
-                      {viewUser.initials}
-                    </div>
-                  )}
-
-                  <div className="user-name">{viewUser.name}</div>
-                  <div className="user-meta">
-                    {viewUser.location} • {capitalize(viewUser.role)}
-                  </div>
-                  <span
-                    className={`status-badge ${viewUser.status === "Active" ? "st-active-badge" : ""
-                      }`}
+                  <div
+                    className="avatar-lg"
+                    style={{ background: "#00ff99", color: "#000" }}
                   >
-                    {viewUser.status} Account
-                  </span>
+                    JV
+                  </div>
+
+                  <div className="user-name">Jonas Vingegaard</div>
+                  <div className="user-meta">Denmark • Resident</div>
+
+                  <span className="status-badge">ARCHIVED ACCOUNT</span>
                 </div>
 
                 <div className="info-group">
                   <div className="info-row">
                     <span className="info-label">Email</span>
-                    <span className="info-val">{viewUser.email}</span>
+                    <span className="info-val">
+                      ucc.atay.leocarlo@gmail.com
+                    </span>
                   </div>
+
                   <div className="info-row">
                     <span className="info-label">Phone</span>
-                    <span className="info-val">
-                      {viewUser.phone || "Not Set"}
-                    </span>
+                    <span className="info-val">Not Set</span>
                   </div>
+
                   <div className="info-row">
                     <span className="info-label">Joined</span>
-                    <span className="info-val">
-                      {new Date(viewUser.joined_at).toLocaleDateString()}
-                    </span>
+                    <span className="info-val">1/1/2026</span>
                   </div>
+
                   <div className="info-row">
                     <span className="info-label">User ID</span>
                     <span
                       className="info-val"
-                      style={{
-                        fontFamily: "monospace",
-                        color: "#888",
-                        fontSize: "11px",
-                      }}
+                      style={{ fontFamily: "monospace", fontSize: "12px" }}
                     >
-                      {viewUser.id}
+                      ef0bf0a-f3b4-4fad-b401-ebf4b3edd3c8
                     </span>
                   </div>
                 </div>
 
                 <div className="btn-group">
-                  <button
-                    className="btn-full"
-                    onClick={() => setShowResetModal(true)}
-                  >
-                    <span className="material-icons">lock_reset</span> Send
-                    Password Reset
+                  <button className="btn-full" onClick={() => setShowResetModal(true)}>
+                    <span className="material-icons">lock_reset</span>
+                    Send Password Reset
                   </button>
                 </div>
               </div>
 
-              { }
-              <div
-                style={{ flex: 1, display: "flex", flexDirection: "column" }}
-              >
-                { }
+              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "15px",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: "16px",
                     marginBottom: "20px",
                   }}
                 >
-                  <div className="m-stat-card" style={{ width: "100%" }}>
-                    <div className="m-stat-label">Registered Hubs</div>
-                    <div className="m-stat-val">{viewStats.registeredHubs}</div>
-                    <div className="m-stat-sub" style={{ color: "#888" }}>
-                      Total Devices
-                    </div>
+                  <div className="m-stat-card">
+                    <div className="m-stat-label">REGISTERED HUBS</div>
+                    <div className="m-stat-val">0</div>
+                    <div className="m-stat-sub">Total Devices</div>
                   </div>
 
-                  <div className="m-stat-card" style={{ width: "100%" }}>
-                    <div className="m-stat-label">Safety Alerts</div>
-                    <div
-                      className="m-stat-val"
-                      style={{ color: "var(--danger)" }}
-                    >
-                      {viewStats.alerts}
+                  <div className="m-stat-card">
+                    <div className="m-stat-label">SAFETY ALERTS</div>
+                    <div className="m-stat-val" style={{ color: "red" }}>
+                      0
                     </div>
-                    <div
-                      className="m-stat-sub"
-                      style={{ color: "var(--danger)" }}
-                    >
+                    <div className="m-stat-sub" style={{ color: "red" }}>
                       Critical Faults
                     </div>
                   </div>
                 </div>
 
-                { }
                 <div className="detail-card">
                   <div className="section-title">
                     <span
                       className="material-icons"
-                      style={{ color: "var(--accent-blue)" }}
+                      style={{ color: "#0055ff" }}
                     >
                       router
                     </span>
                     Registered Hardware
                   </div>
-                  {viewUserHubs.length === 0 ? (
-                    <div
-                      style={{
-                        padding: "25px",
-                        color: "#666",
-                        fontStyle: "italic",
-                        textAlign: "center",
-                      }}
-                    >
-                      No hubs registered.
-                    </div>
-                  ) : (
-                    viewUserHubs.map((hub) => {
-                      const isOnline = checkHubStatus(hub.last_seen);
 
-                      return (
-                        <div className="hub-item" key={hub.id}>
-                          <div className="hub-left">
-                            <div
-                              className="hub-icon"
-                              style={{ background: isOnline ? "" : "#2a2a2a" }}
-                            >
-                              <span
-                                className="material-icons"
-                                style={{ color: isOnline ? "" : "#666" }}
-                              >
-                                {isOnline ? "router" : "wifi_off"}
-                              </span>
-                            </div>
-                            <div className="hub-info">
-                              <h4>{hub.name}</h4>
-                              <p>Serial: {hub.serial_number}</p>
-                            </div>
-                          </div>
-                          <span
-                            className="hub-status"
-                            style={{ color: isOnline ? "" : "#666" }}
-                          >
-                            {isOnline ? "Online" : "Offline"}
-                          </span>
-                        </div>
-                      );
-                    })
-                  )}
+                  <div
+                    style={{
+                      padding: "24px",
+                      textAlign: "center",
+                      color: "#666",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    No hubs registered.
+                  </div>
                 </div>
               </div>
             </div>
@@ -729,7 +578,7 @@ const Users = () => {
             </p>
             <div className="send-reset-modal-actions">
               <button
-                
+
                 className="u-btn-cancel"
                 onClick={() => setShowResetModal(false)}
               >
@@ -737,16 +586,7 @@ const Users = () => {
               </button>
               <button
                 className="u-btn-danger"
-                onClick={() => {
-                  setShowResetModal(false);
-                  setNotification({
-                    show: true,
-                    title: "Email Sent",
-                    message: "A reset password link has been sent to the user.",
-                    variant: "success",
-                    icon: "check_circle"
-                  });
-                }}
+                onClick={handleSendReset}
               >
                 Send Reset
               </button>

@@ -21,7 +21,7 @@ function App() {
     <Routes>
       { }
       <Route path="/login" element={<AdminLogin />} />
-      <Route element={<ProtectedRoute />}>
+     
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
           {/*amdin */}
@@ -35,7 +35,7 @@ function App() {
           <Route path="rates" element={<Rates />} />
           <Route path="complaints" element={<Complaints />} />
         </Route>
-      </Route>
+      
     </Routes>
   );
 }
