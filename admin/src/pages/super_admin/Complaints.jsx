@@ -41,6 +41,8 @@ const Complaints = () => {
       date: "Today, 09:30 AM",
       priority: "high",
       status: "OPEN",
+      category: "Hardware",
+      pillStatus: 'open',
     },
     {
       id: "#TK-9920",
@@ -50,10 +52,12 @@ const Complaints = () => {
         initials: "JD",
       },
       subject: "Rate Discrepancy",
-      issue: "Billing calculation error",
+      issue: "Billing calculation error   ",
       date: "Yesterday, 2:15 PM",
       priority: "med",
       status: "IN REVIEW",
+      category: "Billing",
+      pillStatus: 'review',
     },
     {
       id: "#TK-9918",
@@ -67,20 +71,30 @@ const Complaints = () => {
       date: "Dec 12, 11:00 AM",
       priority: "low",
       status: "RESOLVED",
+      category: "Hardware",
+      pillStatus: 'solved',
     },
   ];
 
   const [search, setSearch] = useState("");
 
-  const filteredTickets = ticketsData.filter((ticket) =>
-    `${ticket.id} ${ticket.user.name}`
+  const filteredTickets = ticketsData.filter((ticket) => {
+    const matchesSearch = `${ticket.id} ${ticket.user.name}`
       .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+      .includes(search.toLowerCase());
+
+    const matchesCategory = selectedCategory === 'Category: All' ||
+      selectedCategory.includes(ticket.category);
+
+    const matchesStatus = selectedStatus === 'Status: All' ||
+      selectedStatus.toLowerCase().includes(ticket.status.toLowerCase());
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
 
   const categories = ['Category: All', 'Category: Hardware', 'Category: Billing'];
-  const statuses = ['Status: All', 'Status: Open', 'Status: Closed'];
+  const statuses = ['Status: All', 'Status: Open', 'Status: In Review', 'Status: Resolved'];
 
   const [chatLogs, setChatLogs] = useState([
     { id: 1, type: "user", msg: "User created ticket." },
@@ -238,7 +252,7 @@ const Complaints = () => {
                 </span>
               </button>
               {categoryOpen && (
-                <ul className="dropdown-menu options-list">
+                <ul className="complaints-dropdown-menu options-list">
                   {categories.map((cat) => (
                     <li
                       key={cat}
@@ -274,7 +288,7 @@ const Complaints = () => {
                 </span>
               </button>
               {statusOpen && (
-                <ul className="dropdown-menu options-list">
+                <ul className="complaints-dropdown-menu options-list">
                   {statuses.map((status) => (
                     <li
                       key={status}
@@ -327,8 +341,9 @@ const Complaints = () => {
                 </td>
 
                 <td>
-                  <span className="text-main">{ticket.subject}</span>
-                  <span className="text-sub">{ticket.issue}</span>
+                  <span style={{fontWeight:"600"}} className="text-main">{ticket.subject}</span>
+                  <span>{" - "}</span>
+                  <span style={{fontWeight:"200", fontSize: "14px"}} className="text-sub">{ticket.issue}</span>
                 </td>
 
                 <td>{ticket.date}</td>
@@ -347,7 +362,7 @@ const Complaints = () => {
                 </td>
 
                 <td>
-                  <span className={`status-badge st-${ticket.status.toLowerCase().replace(" ", "")}`}>
+                  <span className={`status-badge st-${ticket.pillStatus.toLowerCase().replace(" ", "")}`}>
                     {ticket.status}
                   </span>
                 </td>

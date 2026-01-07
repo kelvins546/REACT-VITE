@@ -34,13 +34,14 @@
     background-color: #0f0f0f;
     border-radius: 16px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-    z-index: 20;
+    z-index: 9999;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     animation: dropdownFade 0.18s ease-out forwards;
     transform-origin: top;
+    height: 310px;
 }
 
 @keyframes dropdownFade {
@@ -48,6 +49,7 @@
         opacity: 0;
         transform: translateY(-6px) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -158,7 +160,7 @@
 }
 
 .checkmark {
-    color: #1f6fff;
+    color: #0055FF;
     font-size: 18px;
     margin-left: 8px;
 }
@@ -188,54 +190,54 @@
         font-size: 14px;
         padding: 0 12px;
     }
-    
+
     .dropdown-menu {
         top: calc(100% + 6px);
         border-radius: 12px;
         max-height: 280px;
     }
-    
+
     .options-list {
         padding: 8px;
         max-height: 260px;
     }
-    
+
     .provider-option {
         padding: 12px;
         margin-bottom: 8px;
         border-radius: 10px;
     }
-    
+
     .provider-left {
         gap: 10px;
     }
-    
+
     .provider-logo {
         width: 38px;
         height: 38px;
     }
-    
+
     .provider-logo img {
         width: 60%;
         height: 60%;
     }
-    
+
     .provider-name {
         font-size: 14px;
     }
-    
+
     .provider-sub {
         font-size: 11px;
     }
-    
+
     .checkmark {
         font-size: 16px;
     }
-    
+
     .searchBar {
         padding: 0 8px;
     }
-    
+
     .search-input {
         padding: 10px 10px;
         font-size: 13px;
@@ -248,54 +250,54 @@
         font-size: 13px;
         padding: 0 10px;
     }
-    
+
     .dropdown-menu {
         top: calc(100% + 4px);
         border-radius: 10px;
         max-height: 240px;
     }
-    
+
     .options-list {
         padding: 6px;
         max-height: 220px;
     }
-    
+
     .provider-option {
         padding: 10px;
         margin-bottom: 6px;
         border-radius: 8px;
     }
-    
+
     .provider-left {
         gap: 8px;
     }
-    
+
     .provider-logo {
         width: 32px;
         height: 32px;
     }
-    
+
     .provider-logo img {
         width: 55%;
         height: 55%;
     }
-    
+
     .provider-name {
         font-size: 13px;
     }
-    
+
     .provider-sub {
         font-size: 10px;
     }
-    
+
     .checkmark {
         font-size: 14px;
     }
-    
+
     .searchBar {
         padding: 0 6px;
     }
-    
+
     .search-input {
         padding: 8px 8px;
         font-size: 12px;

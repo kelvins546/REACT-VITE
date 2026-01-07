@@ -44,6 +44,10 @@ const Admins = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const [reasonsOpen, setReasonsOpen] = useState(false);
+  const [selectedReason, setSelectedReason] = useState('Inactive');
+  const reasons = ['Inactive','Employee has left the organization', 'Security Concerns', 'Duplicate Account', 'Other'];
+
 
   const [loader, setLoader] = useState({
     show: false,
@@ -649,29 +653,50 @@ const Admins = () => {
                 <strong>{archiveAdmin.name}</strong>? This action will restrict
                 their access to the platform immediately.
               </p>
-              <div className="u-form-group">
-                <label className="u-form-label">Reason for Archiving</label>
-                <select
-                  className="u-form-select"
-
-                  onChange={(e) => setArchiveReason(e.target.value)}
+              <div className="complaint-dropdown">
+                <button
+                  className={`dropdown-button ${reasonsOpen ? 'open' : ''}`}
+                  onClick={() => setReasonsOpen(!reasonsOpen)}
                 >
-                  <option>Inactive</option>
-                  <option>Employee has left the organization</option>
-                  <option>Security Concerns</option>
-                  <option>Duplicate Account</option>
-                  <option>Other</option>
-                </select>
+                  <span>{selectedReason}</span>
+                  <span className="material-symbols-outlined"
+                    style={{
+                      transform: reasonsOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "0.3s"
+                    }}
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </button>
+                {reasonsOpen && (
+                  <ul className="complaints-dropdown-menu options-list">
+                    {reasons.map((cat) => (
+                      <li
+                        key={cat}
+                        className={`dropdown-option ${selectedReason === cat ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedReason(cat);
+                          setReasonsOpen(false);
+                        }}
+                      >
+                        <span>{cat}</span>
+                        {selectedReason === cat && <span className="checkmark material-symbols-outlined">
+                          check
+                        </span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <div className="u-form-group">
+              <div className="u-form-group" style={{ paddingTop: '7px' }}>
                 <label className="u-form-label">
                   Additional Remarks (Optional)
                 </label>
                 <textarea
                   className="u-form-textarea"
                   placeholder="Enter details here..."
-
-                  onChange={(e) => setArchiveReason(e.target.value)}
+                  value={selectedReason}
+                  onChange={(e) => setSelectedReason(e.target.value)}
                 ></textarea>
               </div>
               <div className="u-modal-actions">

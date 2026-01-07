@@ -35,6 +35,9 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showResetModal, setShowResetModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [reasonsOpen, setReasonsOpen] = useState(false);
+  const [selectedReason, setSelectedReason] = useState('Non-payment of Dues');
+  const reasons = ['Non-payment of Dues', 'Violation of Terms', 'Moved Out / Contract Ended', 'Other'];
 
   const sampleUsers = [
     {
@@ -46,7 +49,7 @@ const Users = () => {
       hubs: "2 Registered",
       status: "Active",
       avatar_url: null,
-      color: "#0055ff",
+      color: "#00aa88",
       textColor: "#fff",
     },
     {
@@ -58,7 +61,7 @@ const Users = () => {
       hubs: "1 Registered",
       status: "Active",
       avatar_url: null,
-      color: "#00aa88",
+      color: "#f0f1",
       textColor: "#fff",
     },
     {
@@ -68,9 +71,9 @@ const Users = () => {
       email: "kelvin_manalad@gmail.com",
       location: "Unit 12B - Davao",
       hubs: "0 Registered",
-      status: "Archived",
+      status: "Active",
       avatar_url: null,
-      color: "#ff4444",
+      color: "#22aaff",
       textColor: "#fff",
     },
   ];
@@ -102,11 +105,7 @@ const Users = () => {
     setLoader({ show: true, message: "Archiving User..." });
 
     setTimeout(() => {
-      setUsersList((prev) =>
-        prev.map((u) =>
-          u.id === selectedUser.id ? { ...u, status: "Archived" } : u
-        )
-      );
+      setUsersList((prev) => prev.filter((u) => u.id !== selectedUser.id));
 
       setLoader({ show: false, message: "Processing..." });
       setNotification({
@@ -121,8 +120,6 @@ const Users = () => {
       setSelectedUser(null);
     }, 1200);
   };
-
-
 
   const handleSendReset = () => {
     setLoader({ show: true, message: "Sending..." });
@@ -472,7 +469,7 @@ const Users = () => {
                   <div className="user-name">Jonas Vingegaard</div>
                   <div className="user-meta">Denmark • Resident</div>
 
-                  <span className="status-badge">ARCHIVED ACCOUNT</span>
+                  <span className="status-badge">ACTIVE ACCOUNT</span>
                 </div>
 
                 <div className="info-group">
@@ -597,7 +594,7 @@ const Users = () => {
 
       {showArchiveModal && selectedUser && (
         <div className="u-modal-overlay">
-          <div className="u-modal-container archive-mode">
+          <div className="u-modal-container archive-mode" style={{ overflow: 'hidden' }}>
             <div className="u-modal-header" style={{ borderBottom: "none" }}>
               <div className="u-modal-title" style={{ color: "var(--danger)" }}>
                 <span style={{ color: "#FFAA00" }} className="material-icons">warning</span>
@@ -623,28 +620,50 @@ const Users = () => {
                 <strong>{selectedUser.name}</strong>? This action will restrict
                 their access to the platform immediately.
               </p>
-              <div className="u-form-group">
-                <label className="u-form-label">Reason for Archiving</label>
-                <select
-                  className="u-form-select"
-                  value={archiveReason}
-                  onChange={(e) => setArchiveReason(e.target.value)}
+              <div className="complaint-dropdown">
+                <button
+                  className={`dropdown-button ${reasonsOpen ? 'open' : ''}`}
+                  onClick={() => setReasonsOpen(!reasonsOpen)}
                 >
-                  <option>Non-payment of Dues</option>
-                  <option>Violation of Terms</option>
-                  <option>Moved Out / Contract Ended</option>
-                  <option>Other</option>
-                </select>
+                  <span>{selectedReason}</span>
+                  <span className="material-symbols-outlined"
+                    style={{
+                      transform: reasonsOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "0.3s"
+                    }}
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </button>
+                {reasonsOpen && (
+                  <ul className="complaints-dropdown-menu options-list">
+                    {reasons.map((cat) => (
+                      <li
+                        key={cat}
+                        className={`dropdown-option ${selectedReason === cat ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedReason(cat);
+                          setReasonsOpen(false);
+                        }}
+                      >
+                        <span>{cat}</span>
+                        {selectedReason === cat && <span className="checkmark material-symbols-outlined">
+                          check
+                        </span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <div className="u-form-group">
+              <div className="u-form-group" style={{ paddingTop: '7px' }}>
                 <label className="u-form-label">
                   Additional Remarks (Optional)
                 </label>
                 <textarea
                   className="u-form-textarea"
                   placeholder="Enter details here..."
-                  value={archiveReason}
-                  onChange={(e) => setArchiveReason(e.target.value)}
+                  value={selectedReason}
+                  onChange={(e) => setSelectedReason(e.target.value)}
                 ></textarea>
               </div>
               <div className="u-modal-actions">

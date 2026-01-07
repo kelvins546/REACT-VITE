@@ -35,25 +35,26 @@ const AdminLogin = () => {
   const handleLogin = (e) => {
     e.preventDefault();
 
+    setLoader({
+      show: true,
+      message: "Verifying credentials..."
+    });
+
     setTimeout(() => {
       if (
         email === TEMP_ADMIN.email &&
         password === TEMP_ADMIN.password
       ) {
-        setLoader({
-          show: true,
-          message: "Verifying credentials..."
-        });
         navigate("/");
       } else {
         setLoader({
           show: false,
-          message: "Processing..."
+          message: ""
         });
         setNotification({
           show: true,
           title: "Login failed",
-          message: "Invalid email or password.",
+          message: "Please check your credentials.",
           variant: "error",
           icon: "error",
         });
@@ -283,7 +284,7 @@ const AdminLogin = () => {
                 </button>
               </div>
               <div>
-                <span className="forgot-link" onClick={() => setshowForgotModal(false)}>Back to Login</span>
+                <span style={{ fontSize: "13px", marginTop: '10px' }} className="forgot-link" onClick={() => setshowForgotModal(false)}>Back to Login</span>
               </div>
             </div>
           </div>

@@ -13,6 +13,41 @@ const ArchivedUsers = () => {
   const [search, setSearch] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const [showResetModal, setShowResetModal] = useState(false);
+
+  const handleSendReset = () => {
+    setLoader({ show: true, message: "Sending..." });
+
+    setTimeout(() => {
+
+      setLoader({ show: false, message: "Processing..." });
+      setNotification({
+        show: true,
+        title: "Email Sent",
+        message: "A reset password link has been sent to the user.",
+        variant: "success",
+        icon: "check_circle"
+      });
+
+      setShowResetModal(false);
+      setShowModal(false);
+    }, 1200);
+  };
+
+  const [showModal, setShowModal] = useState(false);
+  const [viewUser, setViewUser] = useState(null);
+  const [viewUserHubs, setViewUserHubs] = useState([]);
+  const [viewStats, setViewStats] = useState({ alerts: 0, registeredHubs: 0 });
+
+  const handleViewDetails = (user) => {
+    setViewUser(user);
+    setViewUserHubs([
+      { id: 1, name: "Hub A" },
+      { id: 2, name: "Hub B" },
+    ]);
+    setViewStats({ alerts: 2, registeredHubs: 2 });
+    setShowModal(true);
+  };
 
   const [archivedUsers, setArchivedUsers] = useState([
     {
@@ -84,7 +119,7 @@ const ArchivedUsers = () => {
 
       setShowRestoreModal(false);
       setSelectedUser(null);
-    }, 2000); 
+    }, 2000);
   };
 
   const handleDelete = () => {
@@ -94,6 +129,10 @@ const ArchivedUsers = () => {
     });
 
     setTimeout(() => {
+      setArchivedUsers(prevUsers =>
+        prevUsers.filter(user => !selectedUsers.includes(user.id))
+      );
+
       setLoader({
         show: false,
         message: "Processing..."
@@ -108,7 +147,7 @@ const ArchivedUsers = () => {
       });
 
       setShowDeleteModal(false);
-      setSelectedUser(null);
+      setSelectedUsers([]);
     }, 2000);
   };
 
@@ -271,6 +310,19 @@ const ArchivedUsers = () => {
                 <td>
                   <div className="action-cell">
                     <button
+                      className="icon-btn"
+                      title="View Details"
+                      onClick={() => handleViewDetails(user)}
+                    >
+                      <span
+                        className="material-icons"
+                        style={{ fontSize: "18px" }}
+                      >
+                        visibility
+                      </span>
+                    </button>
+
+                    <button
                       className="icon-btn btn-restore"
                       onClick={() => {
                         setSelectedUsers([user.id]);
@@ -425,7 +477,13 @@ const ArchivedUsers = () => {
                 <label className="r-form-label">
                   <input
                     type="checkbox"
-                    style={{ marginRight: "10px" }}
+                    style={{
+                      accentColor: "var(--primary)",
+                      width: "18px",
+                      height: "18px",
+                      marginRight: '10px',
+                      transform: 'translateY(24%)',
+                    }}
                     onChange={(e) => setConfirmDelete(e.target.checked)}
                   />
                   I understand that this action cannot be undone
@@ -453,6 +511,176 @@ const ArchivedUsers = () => {
                   Permanently Delete
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showModal && (
+        <div className="u-modal-overlay">
+          <div
+            className="u-modal-container"
+            style={{
+              maxWidth: "900px",
+              width: "95%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+
+            }}
+          >
+            <div className="u-modal-header">
+              <div className="u-modal-title">
+                <span className="material-icons" style={{ color: "#00ff99" }}>
+                  account_circle
+                </span>
+                User Details
+              </div>
+              <button className="u-close-btn" onClick={() => setShowModal(false)}>
+                <span className="material-icons">close</span>
+              </button>
+            </div>
+
+            <div
+              className="u-modal-body"
+              style={{ display: "flex", gap: "24px", padding: "24px", flexWrap: "wrap", scrollbarWidth: "none", }}
+            >
+
+              <div
+                className="profile-card"
+                style={{ width: "320px", flexShrink: 0 }}
+              >
+                <div className="profile-header">
+                  <div
+                    className="avatar-lg"
+                    style={{ background: "#666", color: "#000" }}
+                  >
+                    MP
+                  </div>
+
+                  <div className="user-name">Marco Polo</div>
+                  <div className="user-meta">Unit 105, Tower B • Resident</div>
+
+                  <span className="status-badge">ARCHIVED ACCOUNT</span>
+                </div>
+
+                <div className="info-group">
+                  <div className="info-row">
+                    <span className="info-label">Email</span>
+                    <span className="info-val">
+                      marco.p@email.com
+                    </span>
+                  </div>
+
+                  <div className="info-row">
+                    <span className="info-label">Phone</span>
+                    <span className="info-val">Not Set</span>
+                  </div>
+
+                  <div className="info-row">
+                    <span className="info-label">Joined</span>
+                    <span className="info-val">1/1/2026</span>
+                  </div>
+
+                  <div className="info-row">
+                    <span className="info-label">Archived</span>
+                    <span className="info-val">Oct 10, 2025</span>
+                  </div>
+
+                  <div className="info-row">
+                    <span className="info-label">User ID</span>
+                    <span
+                      className="info-val"
+                      style={{ fontFamily: "monospace", fontSize: "12px" }}
+                    >
+                      ef0bf0a-f3b4-4fad-b401-ebf4b3edd3c8
+                    </span>
+                  </div>
+                </div>
+
+                <div className="btn-group">
+                  <button className="btn-full" onClick={() => setShowResetModal(true)}>
+                    <span className="material-icons">lock_reset</span>
+                    Send Password Reset
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: "16px",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <div className="m-stat-card">
+                    <div className="m-stat-label">REGISTERED HUBS</div>
+                    <div className="m-stat-val">0</div>
+                    <div className="m-stat-sub">Total Devices</div>
+                  </div>
+
+                  <div className="m-stat-card">
+                    <div className="m-stat-label">SAFETY ALERTS</div>
+                    <div className="m-stat-val" style={{ color: "red" }}>
+                      0
+                    </div>
+                    <div className="m-stat-sub" style={{ color: "red" }}>
+                      Critical Faults
+                    </div>
+                  </div>
+                </div>
+
+                <div className="detail-card">
+                  <div className="section-title">
+                    <span
+                      className="material-icons"
+                      style={{ color: "#0055ff" }}
+                    >
+                      router
+                    </span>
+                    Registered Hardware
+                  </div>
+
+                  <div
+                    style={{
+                      padding: "24px",
+                      textAlign: "center",
+                      color: "#666",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    No hubs registered.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showResetModal && (
+        <div className="send-reset-modal-overlay">
+          <div className="send-reset-modal-container">
+            <span className="material-icons send-reset-modal-icon">
+              lock_reset
+            </span>
+            <h3 className="send-reset-modal-title">Send Password Reset</h3>
+            <p className="send-reset-modal-desc">
+              Are you sure you want to send a password reset link to this user?
+            </p>
+            <div className="send-reset-modal-actions">
+              <button
+
+                className="u-btn-cancel"
+                onClick={() => setShowResetModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="u-btn-danger"
+                onClick={handleSendReset}
+              >
+                Send Reset
+              </button>
             </div>
           </div>
         </div>

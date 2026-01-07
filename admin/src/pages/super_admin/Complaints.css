@@ -602,7 +602,7 @@
   }
 
   .c-stat-card {
-    padding: 0;
+    padding: 16px;
     height: 140px;
   }
 }
@@ -718,8 +718,9 @@
   }
 
   .c-stat-card {
-    padding: 5px;
+    padding: 14px;
     gap: 6px;
+    height: 100px;
   }
 
   .c-card-data {
@@ -831,7 +832,8 @@
   transform: rotate(180deg);
 }
 
-.dropdown-menu {
+
+.complaints-dropdown-menu {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
@@ -840,10 +842,14 @@
   background-color: #0f0f0f;
   border-radius: 16px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-  z-index: 20;
+  z-index: 9999;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   animation: dropdownFade 0.18s ease-out forwards;
   transform-origin: top;
+  height: 200px;
 }
 
 @keyframes dropdownFade {
@@ -898,7 +904,7 @@
 }
 
 .checkmark {
-  color: #1f6fff;
+  color: #0055FF;
   font-size: 18px;
   margin-left: 8px;
 }
