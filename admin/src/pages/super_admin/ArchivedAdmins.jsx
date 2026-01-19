@@ -1,114 +1,252 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./ArchivedUsers.css";
 import { PuffLoader } from "react-spinners";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
+import { supabase } from "../../supabaseClient";
 
 const ArchivedAdmins = () => {
+    const navigate = useNavigate();
     const [restoreModal, setShowRestoreModal] = useState(false);
     const [restoreReason, setRestoreReason] = useState("");
+    const [restoreNotes, setRestoreNotes] = useState("");
     const [deleteModal, setShowDeleteModal] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [search, setSearch] = useState("");
     const [confirmDelete, setConfirmDelete] = useState(false);
 
+    const [showResetModal, setShowResetModal] = useState(false);
 
-    const [archivedUsers, setArchivedUsers] = useState([
-        {
-            id: 1,
-            name: "Admin Kelvin",
-            email: "adminkken@email.com",
-            archivedDate: "Oct 10, 2025",
-        },
-        {
-            id: 2,
-            name: "Admin Leo",
-            email: "s.lee@email.com",
-            archivedDate: "Sep 22, 2025",
-        },
-        {
-            id: 3,
-            name: "Kevin Durant",
-            email: "kd.35@nba.com",
-            archivedDate: "Aug 05, 2025",
-        },
-    ]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
-    const filteredUsers = archivedUsers.filter((user) =>
-        `${user.name} ${user.email}`
-            .toLowerCase()
-            .includes(search.toLowerCase())
-    );
+    const [showModal, setShowModal] = useState(false);
+    const [viewUser, setViewUser] = useState(null);
+    const [viewUserHubs, setViewUserHubs] = useState([]);
+    const [viewStats, setViewStats] = useState({ alerts: 0, registeredHubs: 0 });
 
+    const [archivedUsers, setArchivedUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [notification, setNotification] = useState({
         show: false,
         title: "",
         message: "",
         variant: "success",
-        icon: "info"
+        icon: "info",
     });
 
     const [loader, setLoader] = useState({
         show: false,
-        message: "Processing..."
+        message: "Processing...",
     });
+
+    useEffect(() => {
+        const checkSuperAdminAccess = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    navigate("/login");
+                    return;
+                }
+
+                const { data, error } = await supabase
+                    .from("users")
+                    .select("role")
+                    .eq("id", user.id)
+                    .single();
+
+                if (error || data?.role !== "super admin") {
+                    navigate("/");
+                }
+            } catch (err) {
+                console.error("Error checking role:", err);
+                navigate("/");
+            }
+        };
+
+        checkSuperAdminAccess();
+    }, [navigate]);
+
+    const buildFullName = (first, last) =>
+        [first, last].filter(Boolean).join(" ").trim();
+
+    const getInitials = (name) =>
+        name
+            ? name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .substring(0, 2)
+                .toUpperCase()
+            : "??";
+
+    /* =========================
+       FETCH ARCHIVED ADMINS
+       ========================= */
+    const fetchArchivedUsers = async () => {
+        try {
+            setLoading(true);
+
+            const { data, error } = await supabase
+                .from("users")
+                .select("*")
+                .eq("status", "archived")
+                .eq("role", "admin")
+                .order("archived_at", { ascending: false });
+
+            if (error) throw error;
+
+            const mappedUsers = (data || []).map((u) => {
+                const fullName =
+                    buildFullName(u.first_name, u.last_name) || "Unknown Admin";
+
+                return {
+                    id: u.id,
+                    name: fullName,
+                    email: u.email || "No Email",
+                    unit: u.unit_location || "No Unit",
+                    status: "Archived",
+                    role: u.role,
+                    joined_at: u.joined_at,
+                    archivedDate: u.archived_at
+                        ? new Date(u.archived_at).toLocaleDateString()
+                        : "N/A",
+                    phone: u.phone_number || "Not Set",
+                    avatar_url: u.avatar_url,
+                    initials: getInitials(fullName || u.email),
+                    color: "#666",
+                };
+            });
+
+            setArchivedUsers(mappedUsers);
+        } catch (err) {
+            console.error("Error fetching archived admins:", err);
+            setArchivedUsers([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchArchivedUsers();
+    }, []);
 
     useEffect(() => {
         if (!deleteModal) setConfirmDelete(false);
     }, [deleteModal]);
 
-    const handleRestore = () => {
-        setLoader({
-            show: true,
-            message: "Restoring User..."
-        });
+    /* =========================
+       FILTER + PAGINATION
+       ========================= */
+    const filteredUsers = archivedUsers.filter((user) =>
+        `${user.name} ${user.email} ${user.unit}`
+            .toLowerCase()
+            .includes(search.toLowerCase())
+    );
 
-        // Simulate a delay (e.g., 2 seconds) for the restore process
-        setTimeout(() => {
-            setLoader({
-                show: false,
-                message: "Processing..."
-            });
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+    const paginatedUsers = filteredUsers.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
+
+    /* =========================
+       RESTORE USER
+       ========================= */
+    const handleRestore = async () => {
+        if (selectedUsers.length === 0) return;
+
+        setLoader({ show: true, message: "Restoring Admin..." });
+
+        try {
+            const { error } = await supabase
+                .from("users")
+                .update({
+                    status: "active",
+                    archived_at: null,
+                })
+                .in("id", selectedUsers);
+
+            if (error) throw error;
+
+            setArchivedUsers((prev) =>
+                prev.filter((user) => !selectedUsers.includes(user.id))
+            );
 
             setNotification({
                 show: true,
-                title: "User restored",
-                message: "The user has been restored successfully.",
+                title: "Admin restored",
+                message: "The admin has been restored successfully.",
                 variant: "success",
-                icon: "check_circle"
+                icon: "check_circle",
             });
 
             setShowRestoreModal(false);
-            setSelectedUser(null);
-        }, 2000); // Adjust delay as needed
+            setSelectedUsers([]);
+            setRestoreReason("");
+            setRestoreNotes("");
+        } catch (err) {
+            setNotification({
+                show: true,
+                title: "Restore failed",
+                message: err.message,
+                variant: "error",
+                icon: "error",
+            });
+        } finally {
+            setLoader({ show: false, message: "Processing..." });
+        }
     };
 
-    const handleDelete = () => {
-        setLoader({
-            show: true,
-            message: "Deleting User..."
-        });
+    /* =========================
+       DELETE ARCHIVED ADMIN(S)
+       ========================= */
+    const handleDelete = async () => {
+        if (selectedUsers.length === 0) return;
 
-        // Simulate a delay (e.g., 2 seconds) for the delete process
-        setTimeout(() => {
-            setLoader({
-                show: false,
-                message: "Processing..."
-            });
+        setLoader({ show: true, message: "Deleting Admin..." });
+
+        try {
+            const { error } = await supabase
+                .from("users")
+                .delete()
+                .in("id", selectedUsers);
+
+            if (error) throw error;
+
+            setArchivedUsers((prev) =>
+                prev.filter((user) => !selectedUsers.includes(user.id))
+            );
 
             setNotification({
                 show: true,
-                title: "User deleted",
-                message: "The user has been deleted successfully.",
+                title: "Admin deleted",
+                message: `${selectedUsers.length} admin${selectedUsers.length > 1 ? "s" : ""} permanently deleted.`,
                 variant: "success",
-                icon: "check_circle"
+                icon: "check_circle",
             });
 
             setShowDeleteModal(false);
-            setSelectedUser(null);
-        }, 2000); // Adjust delay as needed
+            setSelectedUsers([]);
+            setConfirmDelete(false);
+        } catch (err) {
+            setNotification({
+                show: true,
+                title: "Deletion failed",
+                message: err.message,
+                variant: "error",
+                icon: "error",
+            });
+        } finally {
+            setLoader({ show: false, message: "Processing..." });
+        }
     };
 
     return (
@@ -171,7 +309,7 @@ const ArchivedAdmins = () => {
                         Back to Active
                     </Link>
                     <button
-                        className="btn btn-primary"
+                        className="btn btn-danger2"
                         disabled={selectedUsers.length === 0}
                         onClick={() => setShowDeleteModal(true)}
                         style={{
@@ -182,7 +320,6 @@ const ArchivedAdmins = () => {
                         <span className="material-icons">delete_sweep</span>
                         Clear All
                     </button>
-
 
                 </div>
             </div>
@@ -221,7 +358,8 @@ const ArchivedAdmins = () => {
                     </thead>
                     <tbody>
                         { }
-                        {filteredUsers.map((user) => (
+                        {paginatedUsers.map((user) => (
+
                             <tr key={user.id}>
                                 <td>
                                     <input
@@ -263,8 +401,7 @@ const ArchivedAdmins = () => {
                                 <td style={{ color: "#888" }}>{user.archivedDate}</td>
 
                                 <td>
-                                    <span className="status-dot st-archived"></span>
-                                    <span style={{ color: "#ccc" }}>Archived</span>
+                                    <span className="stat-badge stat-archived">Archived</span>
                                 </td>
 
                                 <td>
@@ -297,24 +434,63 @@ const ArchivedAdmins = () => {
                 </table>
 
                 { }
-                <div className="a-pagination">
-                    <div style={{ fontSize: "14px", color: "#666" }}>
-                        Showing {filteredUsers.length} of {archivedUsers.length}
+                {filteredUsers.length > 0 && (
+                    <div className="a-pagination">
+                        <div style={{ fontSize: "14px", color: "#666" }}>
+                            Showing{" "}
+                            {(currentPage - 1) * itemsPerPage + 1}
+                            {"–"}
+                            {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
+                            {" "}of {filteredUsers.length}
+                        </div>
+
+                        <div style={{ display: "flex", gap: "8px" }}>
+                            <button
+                                className="u-page-btn"
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                                style={{
+                                    opacity: currentPage === 1 ? 0.4 : 1,
+                                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                                }}
+                            >
+                                {"<"}
+                            </button>
+
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                <button
+                                    key={page}
+                                    className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+                                    onClick={() => setCurrentPage(page)}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+
+                            <button
+                                className="u-page-btn"
+                                disabled={currentPage === totalPages}
+                                onClick={() =>
+                                    setCurrentPage((p) => Math.min(p + 1, totalPages))
+                                }
+                                style={{
+                                    opacity: currentPage === totalPages ? 0.4 : 1,
+                                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                                }}
+                            >
+                                {">"}
+                            </button>
+                        </div>
                     </div>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                        <button className="u-page-btn">{"<"}</button>
-                        <button className="u-page-btn active">1</button>
-                        <button className="u-page-btn">2</button>
-                        <button className="u-page-btn">{">"}</button>
-                    </div>
-                </div>
+                )}
+
             </div>
             {restoreModal && (
                 <div className="r-modal-overlay">
                     <div className="r-modal-container restore-mode">
                         <div className="r-modal-header" style={{ borderBottom: "none" }}>
                             <div className="r-modal-title" style={{ color: "var(--success)" }}>
-                                <span className="material-icons">restore</span> Restore Account
+                                <span className="material-icons restore">restore</span> <span>Restore Account</span>
                             </div>
                             <button
                                 className="r-close-btn"
@@ -367,7 +543,7 @@ const ArchivedAdmins = () => {
                                 >
                                     Cancel
                                 </button>
-                                <button className="r-btn-success" onClick={handleRestore}>
+                                <button className="btn btn-primary-modal" onClick={handleRestore}>
                                     <span className="material-icons" style={{ fontSize: "18px" }}>
                                         restore
                                     </span>{" "}
@@ -440,7 +616,7 @@ const ArchivedAdmins = () => {
                                 </button>
 
                                 <button
-                                    className="r-btn-danger"
+                                    className="btn btn-danger2"
                                     onClick={handleDelete}
                                     disabled={!confirmDelete}
                                     style={{

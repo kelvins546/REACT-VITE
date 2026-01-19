@@ -561,7 +561,7 @@
 }
 
 .prio-badge {
-  padding: 4px 5px;
+  padding: 6px 12px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
@@ -570,6 +570,9 @@
   justify-content: center;
   align-items: center;
   gap: 5px;
+  min-width: 100px;
+  width: 100px;
+  box-sizing: border-box;
 }
 
 .prio-high {
@@ -641,7 +644,7 @@
 }
 
 .dropdown-button.open {
-  border-color: #1f6fff;
+  border-color: #333;
 }
 
 .dropdown-button .dropdown-arrow {
@@ -700,7 +703,7 @@
   padding: 14px;
   margin-bottom: 10px;
   background-color: #161616;
-  border-radius: 14px;
+  border-radius: 12px;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease;
   border: 1px solid transparent;
@@ -711,8 +714,8 @@
 }
 
 .dropdown-option.selected {
-  border-color: #1f6fff;
-  box-shadow: inset 0 0 0 1px #1f6fff;
+  border-color: #00A651;
+  box-shadow: inset 0 0 0 1px #00A651;
 }
 
 /* Option Text */

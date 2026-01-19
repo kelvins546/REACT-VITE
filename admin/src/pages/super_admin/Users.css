@@ -225,8 +225,8 @@
 }
 
 .u-btn-danger {
-  background: rgba(255, 68, 68, 0.1);
-  color: var(--warning);
+  background: var(--warning);
+  color: #fff;
   border: 1px solid var(--warning);
   width: 100%;
   display: flex;
@@ -240,9 +240,7 @@
 }
 
 .u-btn-danger:hover {
-  background: var(--warning);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+  background: #cf8a01;
 }
 
 .u-btn-cancel {
@@ -526,10 +524,9 @@
 }
 
 .u-page-btn.active {
-  background: var(--primary);
-  color: #000;
+  background: var(--buttonColor);
+  color: #fff;
   font-weight: 700;
-  border-color: var(--primary);
 }
 
 .send-reset-modal-overlay {

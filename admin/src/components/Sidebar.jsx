@@ -45,15 +45,17 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
       if (user) {
         const { data, error } = await supabase
           .from("users")
-          .select("full_name, role")
+          .select("first_name, last_name, role")
           .eq("id", user.id)
           .single();
 
         if (data && !error) {
+          const fullName = buildDisplayName(data.first_name, data.last_name);
+
           setAdminProfile({
-            name: data.full_name || "Admin",
+            name: fullName,
             role: capitalize(data.role) || "System Admin",
-            initials: getInitials(data.full_name),
+            initials: getInitials(fullName),
           });
         }
       }
@@ -62,15 +64,22 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
     }
   };
 
+  const buildDisplayName = (first, last) => {
+    if (last && first) return `${first} ${last}`;
+    return first || last || "Admin";
+  };
+
   const getInitials = (name) =>
     name
       ? name
+        .replace(",", "") 
         .split(" ")
         .map((n) => n[0])
         .join("")
         .substring(0, 2)
         .toUpperCase()
       : "AD";
+
 
   const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
 
@@ -110,7 +119,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
         <>
           <div className="brand">
             <img
-              src="/Untitled design (1).png"
+              src="/logoNew.png"
               className="brand-logo"
               alt="Logo"
             />
@@ -368,7 +377,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
         <>
           <div className="brand">
             <img
-              src="/Untitled design (1).png"
+              src="/logoNew.png"
               className="brand-logo"
               alt="Logo"
             />
@@ -512,12 +521,12 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             >
               <button className="logoutCancel"
                 onClick={() => setShowLogoutModal(false)}
-                
+
               >
                 Cancel
               </button>
               <button
-                className="logoutbtn"
+                className="btn btn-danger2"
                 onClick={handleLogout}
               >
                 Logout

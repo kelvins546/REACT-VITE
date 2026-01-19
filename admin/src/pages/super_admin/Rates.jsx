@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import "./Rates.css";
+import "../super_admin/Rates.css";
 import "../../components/dropdowns/searchableDropdown.css"
 import { PuffLoader } from "react-spinners";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
+import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
 import meralcoLogo from '../../assets/electricityProviders/MERALCO.png';
 import vecoLogo from '../../assets/electricityProviders/DAVAO LIGHT.png';
 import dlpcLogo from '../../assets/electricityProviders/VECO.png';
@@ -17,6 +18,10 @@ const Rates = () => {
   const [electricityRate, setElectricityRate] = useState("");
   const [description, setDescription] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
+  const [exportFromDate, setExportFromDate] = useState("");
+  const [exportToDate, setExportToDate] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const [notification, setNotification] = useState({
     show: false,
@@ -38,6 +43,29 @@ const Rates = () => {
   };
 
   const DEFAULT_RATE = 9.75;
+
+  
+  const allRates = [
+    { id: 1, date: "Oct 23, 2025", provider: "Meralco", prevRate: "₱11.90", newRate: "₱12.50", reason: "Generation Charge Adj.", status: "Active", updatedBy: "Admin", role: "admin" },
+    { id: 2, date: "Sep 15, 2025", provider: "Meralco", prevRate: "₱12.40", newRate: "₱11.90", reason: "System Optimization", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
+    { id: 3, date: "Aug 01, 2025", provider: "Meralco", prevRate: "₱12.10", newRate: "₱12.40", reason: "Inflation Adjustment", status: "Previous", updatedBy: "Admin", role: "admin" },
+    { id: 4, date: "Jul 12, 2025", provider: "Meralco", prevRate: "₱12.80", newRate: "₱12.10", reason: "Substation Efficiency", status: "Previous", updatedBy: "Admin", role: "admin" },
+    { id: 5, date: "Jun 05, 2025", provider: "Meralco", prevRate: "₱11.50", newRate: "₱12.80", reason: "Summer Peak Pricing", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
+    { id: 6, date: "May 10, 2025", provider: "VECO", prevRate: "₱10.80", newRate: "₱11.20", reason: "Transmission Cost", status: "Previous", updatedBy: "Admin", role: "admin" },
+    { id: 7, date: "Apr 22, 2025", provider: "DLPC", prevRate: "₱10.50", newRate: "₱10.80", reason: "Distribution Fee Adj.", status: "Previous", updatedBy: "Admin", role: "admin" },
+    { id: 8, date: "Mar 15, 2025", provider: "Meralco", prevRate: "₱12.40", newRate: "₱12.80", reason: "Fuel Cost Increase", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
+    { id: 9, date: "Feb 28, 2025", provider: "VECO", prevRate: "₱11.00", newRate: "₱10.80", reason: "System Efficiency", status: "Previous", updatedBy: "Admin", role: "admin" },
+    { id: 10, date: "Jan 20, 2025", provider: "DLPC", prevRate: "₱10.20", newRate: "₱10.50", reason: "Maintenance Cost", status: "Previous", updatedBy: "Admin", role: "admin" },
+    { id: 11, date: "Dec 10, 2024", provider: "Meralco", prevRate: "₱12.10", newRate: "₱12.40", reason: "Year-end Adjustment", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
+    { id: 12, date: "Nov 05, 2024", provider: "VECO", prevRate: "₱10.90", newRate: "₱11.00", reason: "Quarterly Review", status: "Previous", updatedBy: "Admin", role: "admin" },
+  ];
+
+  
+  const totalPages = Math.ceil(allRates.length / itemsPerPage);
+  const paginatedRates = allRates.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const allProviders = [
     'Meralco', 'VECO', 'DLPC',
@@ -85,21 +113,78 @@ const Rates = () => {
     });
 
     setTimeout(() => {
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
+      try {
+        const headers = ["Date Modified", "Provider", "Previous Rate", "New Rate", "Reason / Notes", "Status", "Updated By"];
 
-      setNotification({
-        show: true,
-        title: "Processing",
-        message: "Your report is being exported.",
-        variant: "processing",
-        icon: "progress_activity"
-      });
+        const ratesData = [
+          ["Oct 23, 2025", "Meralco", "₱11.90", "₱12.50", "Generation Charge Adj.", "Active", "Admin"],
+          ["Sep 15, 2025", "Meralco", "₱12.40", "₱11.90", "System Optimization", "Previous", "Admin"],
+          ["Aug 01, 2025", "Meralco", "₱12.10", "₱12.40", "Inflation Adjustment", "Previous", "Admin"],
+          ["Jul 12, 2025", "Meralco", "₱12.80", "₱12.10", "Substation Efficiency", "Previous", "Admin"],
+          ["Jun 05, 2025", "Meralco", "₱11.50", "₱12.80", "Summer Peak Pricing", "Previous", "Admin"],
+        ];
 
-      setShowExportModal(false);
-    }, 2000);
+        let ratesToExport = ratesData;
+
+        const rows = ratesToExport.map((row) =>
+          row.map((cell) =>
+            (cell || "").toString().replace(/₱/g, "P")
+          )
+        );
+
+        const csvContent = [
+          headers.join(","),
+          ...rows.map((row) =>
+            row
+              .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
+              .join(",")
+          ),
+        ].join("\n");
+
+        const BOM = "\uFEFF";
+        const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", `rates_report_${new Date().toISOString().split("T")[0]}.csv`);
+        link.style.visibility = "hidden";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setLoader({
+          show: false,
+          message: "Processing..."
+        });
+
+        setNotification({
+          show: true,
+          title: "Export Successful",
+          message: `Successfully exported ${ratesToExport.length} rate records.`,
+          variant: "success",
+          icon: "check_circle"
+        });
+
+        setShowExportModal(false);
+        setExportFromDate("");
+        setExportToDate("");
+      } catch (error) {
+        setLoader({
+          show: false,
+          message: "Processing..."
+        });
+
+        setNotification({
+          show: true,
+          title: "Export Failed",
+          message: error.message || "Failed to export CSV file.",
+          variant: "error",
+          icon: "error"
+        });
+      }
+    }, 1500);
   }
 
   const handleSelect = (option) => {
@@ -112,10 +197,10 @@ const Rates = () => {
     if (!electricityRate || electricityRate.trim() === "") {
       setNotification({
         show: true,
-        title: "Validation Error",
+        title: "Missing Inputs",
         message: "Please enter an electricity rate.",
-        variant: "error",
-        icon: "error"
+        variant: "warning",
+        icon: "warning"
       });
       return;
     }
@@ -134,10 +219,10 @@ const Rates = () => {
     if (isNaN(electricityRate) || Number(electricityRate) <= 0) {
       setNotification({
         show: true,
-        title: "Missing Inputs",
+        title: "Validation Error",
         message: "Please enter a valid positive number for the electricity rate.",
-        variant: "warning",
-        icon: "warning"
+        variant: "error",
+        icon: "error"
       });
       return;
     }
@@ -200,7 +285,7 @@ const Rates = () => {
           </div>
         </div>
         <button
-          className="btn btn-secondary export-btn"
+          className="btn btn-primary"
           onClick={() => setShowExportModal(true)}
         >
           <span className="material-icons">download</span>
@@ -230,7 +315,7 @@ const Rates = () => {
               </div>
               <span
                 className="material-icons"
-                style={{ color: "var(--accent-blue)", fontSize: "20px" }}
+                style={{ color: "var(--primary)",fontSize: "20px" }}
               >
                 info
               </span>
@@ -253,7 +338,7 @@ const Rates = () => {
               </button>
 
               {isOpen && (
-                <div className="dropdown-menu">
+                <div className="dropdown-menu rates">
                   <div className="searchBar">
                     <input
                       type="text"
@@ -568,153 +653,92 @@ const Rates = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td style={{ color: "#ddd", fontWeight: 400 }}>Oct 23, 2025</td>
-              <td>Meralco</td>
-              <td>
-                <span className="rate-pill">₱11.90</span>
-                <span
-                  style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
-                >
-                  →
-                </span>
-                <span className="rate-pill rate-up">₱12.50</span>
-              </td>
-              <td>Generation Charge Adj.</td>
-              <td>
-                <span className="status-badge sb-active">Active</span>
-              </td>
-              <td>
-                <div className="admin-meta">
-                  <div
-                    className="user-avatar"
-                    style={{ width: "28px", height: "28px", fontSize: "10px" }}
-                  >
-                    AD
-                  </div>
-                  Admin
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td style={{ color: "#ddd", fontWeight: 400 }}>Sep 15, 2025</td>
-              <td>Meralco</td>
-              <td>
-                <span className="rate-pill">₱12.40</span>
-                <span
-                  style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
-                >
-                  →
-                </span>
-                <span className="rate-pill rate-down">₱11.90</span>
-              </td>
-              <td>System Optimization</td>
-              <td>
-                <span className="status-badge sb-archived">Previous</span>
-              </td>
-              <td>
-                <div className="admin-meta">
-                  <div
-                    className="user-avatar"
-                    style={{ width: "28px", height: "28px", fontSize: "10px" }}
-                  >
-                    AD
-                  </div>
-                  Admin
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td style={{ color: "#ddd", fontWeight: 400 }}>Aug 01, 2025</td>
-              <td>Meralco</td>
-              <td>
-                <span className="rate-pill">₱12.10</span>
-                <span
-                  style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
-                >
-                  →
-                </span>
-                <span className="rate-pill rate-up">₱12.40</span>
-              </td>
-              <td>Inflation Adjustment</td>
-              <td>
-                <span className="status-badge sb-archived">Previous</span>
-              </td>
-              <td>
-                <div className="admin-meta">
-                  <div
-                    className="user-avatar"
-                    style={{ width: "28px", height: "28px", fontSize: "10px" }}
-                  >
-                    AD
-                  </div>
-                  Admin
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td style={{ color: "#ddd", fontWeight: 400 }}>Jul 12, 2025</td>
-              <td>Meralco</td>
-              <td>
-                <span className="rate-pill">₱12.80</span>
-                <span
-                  style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
-                >
-                  →
-                </span>
-                <span className="rate-pill rate-down">₱12.10</span>
-              </td>
-              <td>Substation Efficiency</td>
-              <td>
-                <span className="status-badge sb-archived">Previous</span>
-              </td>
-              <td>
-                <div className="admin-meta">
-                  <div
-                    className="user-avatar"
-                    style={{ width: "28px", height: "28px", fontSize: "10px" }}
-                  >
-                    AD
-                  </div>
-                  Admin
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td style={{ color: "#ddd", fontWeight: 400 }}>Jun 05, 2025</td>
-              <td>Meralco</td>
-              <td>
-                <span className="rate-pill">₱11.50</span>
-                <span
-                  style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
-                >
-                  →
-                </span>
-                <span className="rate-pill rate-up">₱12.80</span>
-              </td>
-              <td>Summer Peak Pricing</td>
-              <td>
-                <span className="status-badge sb-archived">Previous</span>
-              </td>
-              <td>
-                <div className="admin-meta">
-                  <div
-                    className="user-avatar"
-                    style={{ width: "28px", height: "28px", fontSize: "10px" }}
-                  >
-                    AD
-                  </div>
-                  Admin
-                </div>
-              </td>
-            </tr>
+            {paginatedRates.map((rate) => {
+              const isIncrease = parseFloat(rate.newRate.replace('₱', '')) > parseFloat(rate.prevRate.replace('₱', ''));
+              return (
+                <tr key={rate.id}>
+                  <td style={{ color: "#ddd", fontWeight: 400 }}>{rate.date}</td>
+                  <td>{rate.provider}</td>
+                  <td>
+                    <span className="rate-pill">{rate.prevRate}</span>
+                    <span
+                      style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
+                    >
+                      →
+                    </span>
+                    <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>{rate.newRate}</span>
+                  </td>
+                  <td>{rate.reason}</td>
+                  <td>
+                    <span className={`stat-badge ${rate.status === 'Active' ? 'stat-active' : 'stat-review'}`}>{rate.status}</span>
+                  </td>
+                  <td>
+                    <div className="admin-meta">
+                      <div
+                        className="user-avatar"
+                        style={{ 
+                          width: "28px", 
+                          height: "28px", 
+                          fontSize: "10px",
+                          background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
+                        }}
+                      >
+                        {rate.role === "super admin" ? "SA" : "AD"}
+                      </div>
+                      {rate.updatedBy}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+        <div className="a-pagination">
+        <div style={{ fontSize: "14px", color: "#666" }}>
+          Showing{" "}
+          {(currentPage - 1) * itemsPerPage + 1}
+          {"–"}
+          {Math.min(currentPage * itemsPerPage, allRates.length)}
+          {" "}of {allRates.length}
+        </div>
+
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            className="u-page-btn"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            style={{
+              opacity: currentPage === 1 ? 0.4 : 1,
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            }}
+          >
+            {"<"}
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            className="u-page-btn"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            style={{
+              opacity: currentPage === totalPages ? 0.4 : 1,
+              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+            }}
+          >
+            {">"}
+          </button>
+        </div>
       </div>
+      </div>      
 
       {showModal && (
         <div className="modal-overlay">
@@ -784,7 +808,7 @@ const Rates = () => {
               borderRadius: "12px",
               border: "1px solid #333333",
               padding: "20px",
-              maxWidth: "330px",
+              maxWidth: "380px",
               width: "100%",
               textAlign: "center",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
@@ -798,7 +822,7 @@ const Rates = () => {
                 style={{
                   fontSize: "35px",
                   marginTop: "10px",
-                  color: "#0055FF",
+                  color: "#00A651",
                 }}
               >
                 download
@@ -817,19 +841,81 @@ const Rates = () => {
                 Export CSV File
               </span>
               <span style={{ fontSize: "12px", color: "#aaa" }}>
-                Would you like to export utility rates data report?
+                Select a date range to filter rates by date (optional)
               </span>
             </div>
 
-            <div className="export-footer">
+            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "6px" }}>From Date</label>
+                  <CalendarDropdown
+                    value={exportFromDate}
+                    onChange={setExportFromDate}
+                    placeholder="MM/DD/YY"
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "6px" }}>To Date</label>
+                  <CalendarDropdown
+                    value={exportToDate}
+                    onChange={setExportToDate}
+                    placeholder="MM/DD/YY"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="export-footer" style={{ marginTop: "20px" }}>
               <button
-                className="r-btn-secondary"
-                onClick={() => setShowExportModal(false)}
+                style={{
+                  background: "#2a2a2a",
+                  border: "1px solid #444",
+                  color: "#ccc",
+                  padding: "10px 16px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  flex: 1,
+                  fontWeight: "600",
+                  transition: "0.2s"
+                }}
+                onClick={() => {
+                  setShowExportModal(false);
+                  setExportFromDate("");
+                  setExportToDate("");
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = "#333";
+                  e.target.style.color = "#fff";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = "#2a2a2a";
+                  e.target.style.color = "#ccc";
+                }}
               >
                 Cancel
               </button>
 
-              <button className="r-btn-primary" onClick={handleExport}>
+              <button
+                style={{
+                  background: "#00A651",
+                  color: "#fff",
+                  padding: "10px 16px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  flex: 1,
+                  fontWeight: "600",
+                  border: "none",
+                  transition: "0.2s"
+                }}
+                onClick={handleExport}
+                onMouseEnter={(e) => {
+                  e.target.style.opacity = "0.9";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.opacity = "1";
+                }}
+              >
                 Export
               </button>
             </div>

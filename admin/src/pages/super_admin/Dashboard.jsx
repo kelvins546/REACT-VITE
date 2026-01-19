@@ -1,5 +1,6 @@
 import React from "react";
 import "./Dashboard.css";
+import '../../styles/stat_pills.css';
 
 const Dashboard = () => {
   return (
@@ -94,7 +95,7 @@ const Dashboard = () => {
               </td>
               <td style={{ fontWeight: 600, color: "#fff" }}>Hub Offline</td>
               <td>
-                <span className="status-badge st-open">OPEN</span>
+                <span className="stat-badge stat-open">UNRESOLVED</span>
               </td>
             </tr>
             <tr>
@@ -111,7 +112,7 @@ const Dashboard = () => {
                 Rate Discrepancy
               </td>
               <td>
-                <span className="status-badge st-review">IN REVIEW</span>
+                <span className="stat-badge stat-review">IN REVIEW</span>
               </td>
             </tr>
             <tr>
@@ -126,7 +127,7 @@ const Dashboard = () => {
               </td>
               <td style={{ fontWeight: 600, color: "#fff" }}>Wifi Update</td>
               <td>
-                <span className="status-badge st-solved">RESOLVED</span>
+                <span className="stat-badge st-solved">RESOLVED</span>
               </td>
             </tr>
           </tbody>

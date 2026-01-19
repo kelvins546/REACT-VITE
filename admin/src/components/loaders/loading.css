@@ -23,7 +23,7 @@
 }
 
 .gradient-loader {
-  background: linear-gradient(90deg, #0055ff, #00ff99);
+  background: #fff;
   border-radius: 50%;
   width: 40px;
   height: 40px;

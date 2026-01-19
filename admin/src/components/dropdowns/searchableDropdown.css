@@ -22,7 +22,7 @@
 }
 
 .dropdown-button.open {
-    border-color: #1f6fff;
+   /* border-color: #00A651 ; */
 }
 
 .dropdown-menu {
@@ -41,6 +41,10 @@
     align-items: stretch;
     animation: dropdownFade 0.18s ease-out forwards;
     transform-origin: top;
+}
+
+.dropdown-menu.rates {
+    height: 320px;
 }
 
 @keyframes dropdownFade {
@@ -104,8 +108,8 @@
 }
 
 .provider-option.selected {
-    border-color: #1f6fff;
-    box-shadow: inset 0 0 0 1px #1f6fff;
+    border-color: #00A651;
+    box-shadow: inset 0 0 0 1px #00A651;
 }
 
 .provider-left {
@@ -158,7 +162,7 @@
 }
 
 .checkmark {
-    color: #1f6fff;
+    color: #00A651 !important;
     font-size: 18px;
     margin-left: 8px;
 }

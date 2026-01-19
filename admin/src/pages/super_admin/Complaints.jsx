@@ -290,7 +290,7 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-badge st-open">OPEN</span>
+                <span className="stat-badge stat-open">UNRESOLVED</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -343,7 +343,7 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-badge st-review">IN REVIEW</span>
+                <span className="stat-badge stat-review">IN REVIEW</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -396,7 +396,7 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-badge st-solved">RESOLVED</span>
+                <span className="stat-badge stat-solved">RESOLVED</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -465,7 +465,7 @@ const Complaints = () => {
               </div>
               <div className="c-modal-row">
                 <span className="c-modal-label">Status</span>
-                <span className="status-badge st-open">OPEN</span>
+                <span className="stat-badge stat-open">OPEN</span>
               </div>
               <div className="c-modal-row">
                 <span className="c-modal-label">Priority</span>

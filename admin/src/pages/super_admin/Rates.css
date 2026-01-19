@@ -30,7 +30,7 @@
   border-radius: 16px;
   padding: 30px;
   border: 1px solid var(--border);
-  border-top: 4px solid var(--accent-blue);
+  border-top: 4px solid #00A651;
   height: 420px;
   display: flex;
   flex-direction: column;
@@ -43,7 +43,6 @@
   font-weight: 800;
   color: #87ceeb;
   letter-spacing: -2px;
-  text-shadow: 0 0 30px rgba(0, 85, 255, 0.25);
 }
 
 .rate-details {
@@ -78,7 +77,7 @@
   border-radius: 16px;
   padding: 30px;
   border: 1px solid var(--border);
-  border-top: 4px solid var(--warning);
+  border-top: 4px solid #FFD700;
   height: 420px;
   display: flex;
   flex-direction: column;
@@ -188,17 +187,29 @@
   color: #888;
 }
 
-
+/* Table styling for rate pills */
+td:has(.rate-pill) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
 
 .rate-pill {
   background: #2a2a2a;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 6px 5px;
+  border-radius: 4px;
   font-family: "Inter", monospace;
   color: #ccc;
-  font-weight: 500;
-  font-size: 13px;
+  font-weight: 600;
+  font-size: 11px;
   border: 1px solid #333;
+  width: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .rate-up {
@@ -206,6 +217,7 @@
   border-color: rgba(255, 68, 68, 0.2);
   color: var(--danger);
   font-weight: 700;
+  width: 52px;
 }
 
 .rate-down {
@@ -213,6 +225,7 @@
   border-color: rgba(0, 255, 153, 0.2);
   color: var(--primary);
   font-weight: 700;
+  width: 52px;
 }
 
 .admin-meta {
@@ -223,13 +236,22 @@
   font-size: 13px;
 }
 
+.rate-icon-info {
+  color: #00A651 !important;
+  font-size: 18px !important;
+}
+
 .status-badge {
-  padding: 6px 12px;
+  width: 120px;
+  padding: 6px 8px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sb-active {

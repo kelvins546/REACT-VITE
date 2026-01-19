@@ -561,7 +561,7 @@
 }
 
 .prio-badge {
-  padding: 4px 5px;
+  padding: 6px 12px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
@@ -570,6 +570,9 @@
   justify-content: center;
   align-items: center;
   gap: 5px;
+  min-width: 100px;
+  width: 100px;
+  box-sizing: border-box;
 }
 
 .prio-high {
@@ -829,7 +832,7 @@
 }
 
 .dropdown-button.open {
-  border-color: #1f6fff;
+  /*border-color: #1f6fff; */
 }
 
 .dropdown-button .dropdown-arrow {

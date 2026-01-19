@@ -1,55 +1,65 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import "./Users.css";
 import { PuffLoader } from "react-spinners";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
+import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
+
+const buildFullName = (first, last) =>
+  [first, last].filter(Boolean).join(" ").trim();
 
 const Users = () => {
+  const navigate = useNavigate();
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [showExportModal, setShowExportModal] = useState(false);
-
-  const handleExport = () => {
-    setLoader({
-      show: true,
-      message: "Exporting Report..."
-    });
-
-    setTimeout(() => {
-      setLoader({
-        show: false,
-        message: "Processing..."
-      });
-
-      setNotification({
-        show: true,
-        title: "Processing",
-        message: "Your report is being exported.",
-        variant: "processing",
-        icon: "progress_activity"
-      });
-
-      setShowExportModal(false);
-    }, 2000);
-  }
+  const [exportFromDate, setExportFromDate] = useState("");
+  const [exportToDate, setExportToDate] = useState("");
 
   const [notification, setNotification] = useState({
     show: false,
     title: "",
     message: "",
     variant: "success",
-    icon: "info"
+    icon: "info",
   });
 
   const [loader, setLoader] = useState({
     show: false,
-    message: "Processing..."
+    message: "Processing...",
   });
+
+  useEffect(() => {
+    const checkSuperAdminAccess = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          navigate("/login");
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        if (error || data?.role !== "super admin") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.error("Error checking role:", err);
+        navigate("/");
+      }
+    };
+
+    checkSuperAdminAccess();
+  }, [navigate]);
 
   const [showModal, setShowModal] = useState(false);
   const [viewUser, setViewUser] = useState(null);
@@ -80,16 +90,118 @@ const Users = () => {
     fetchUsers();
   }, []);
 
+  const handleExport = () => {
+    setLoader({
+      show: true,
+      message: "Exporting Report..."
+    });
+
+    setTimeout(() => {
+      try {
+        let usersToExport = filteredUsers;
+
+        if (exportFromDate || exportToDate) {
+          usersToExport = filteredUsers.filter((user) => {
+            const joinedDate = new Date(user.joined_at);
+            
+            if (exportFromDate) {
+              const fromDate = new Date(exportFromDate);
+              if (joinedDate < fromDate) return false;
+            }
+            
+            if (exportToDate) {
+              const toDate = new Date(exportToDate);
+              toDate.setHours(23, 59, 59, 999); 
+              if (joinedDate > toDate) return false;
+            }
+            
+            return true;
+          });
+        }
+
+        const headers = ["Name", "Email", "Phone", "Street Address", "City", "Region", "Zip Code", "Status", "Registered Hubs", "Joined Date"];
+
+        const rows = usersToExport.map((user) => [
+          user.name,
+          user.email,
+          user.phone_number,
+          user.street_address,
+          user.city,
+          user.region,
+          user.zip_code,
+          user.status,
+          user.hubs.replace(" Registered", ""), 
+          new Date(user.joined_at).toLocaleDateString(),
+        ]);
+
+        const csvContent = [
+          headers.join(","),
+          ...rows.map((row) =>
+            row
+              .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`) 
+              .join(",")
+          ),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", `users_report_${new Date().toISOString().split("T")[0]}.csv`);
+        link.style.visibility = "hidden";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setLoader({
+          show: false,
+          message: "Processing..."
+        });
+
+        setNotification({
+          show: true,
+          title: "Export Successful",
+          message: `Successfully exported ${usersToExport.length} user records.`,
+          variant: "success",
+          icon: "check_circle"
+        });
+
+        setShowExportModal(false);
+        setExportFromDate("");
+        setExportToDate("");
+      } catch (error) {
+        setLoader({
+          show: false,
+          message: "Processing..."
+        });
+
+        setNotification({
+          show: true,
+          title: "Export Failed",
+          message: error.message || "Failed to export CSV file.",
+          variant: "error",
+          icon: "error"
+        });
+      }
+    }, 1500);
+  }
+
+  /* =========================
+     FETCH USERS (FIXED)
+  ========================= */
   const fetchUsers = async () => {
     try {
       setLoading(true);
 
-      const { data: usersData, error: usersError } = await supabase
+      const { data: usersData, error } = await supabase
         .from("users")
         .select("*")
+        .eq("status", "active")
         .order("joined_at", { ascending: false });
 
-      if (usersError) throw usersError;
+      if (error) throw error;
 
       const visibleUsers = usersData.filter(
         (u) => u.role !== "super admin" && u.role !== "admin"
@@ -97,40 +209,50 @@ const Users = () => {
 
       const userIds = visibleUsers.map((u) => u.id);
       let hubsData = [];
+
       if (userIds.length > 0) {
-        const { data: fetchedHubs } = await supabase
+        const { data } = await supabase
           .from("hubs")
           .select("user_id, last_seen")
           .in("user_id", userIds);
-        hubsData = fetchedHubs || [];
+
+        hubsData = data || [];
       }
 
       const mappedUsers = visibleUsers.map((u) => {
+        const fullName =
+          buildFullName(u.first_name, u.last_name) || "Unknown User";
+
         const totalHubsCount = hubsData.filter(
           (h) => h.user_id === u.id
         ).length;
 
         return {
           id: u.id,
-          initials: getInitials(u.full_name),
-          name: u.full_name,
-          email: u.email,
-          location: u.unit_location || "No Location",
+          initials: getInitials(fullName || u.email),
+          name: fullName,
+          email: u.email || "No Email",
+          location: u.street_address || "Not Set",
+          region: u.region || "Not Set",
+          city: u.city || "Not Set",
+          zip_code: u.zip_code || "Not Set",
+          street_address: u.street_address || "Not Set",
+          phone_number: u.phone_number || "Not Set",
           hubs: `${totalHubsCount} Registered`,
-          status: capitalize(u.status),
+          status: capitalize(u.status || "inactive"),
           role: u.role,
           joined_at: u.joined_at,
-          phone: u.phone_number,
+          phone: u.phone_number || "Not Set",
           avatar_url: u.avatar_url,
-          color: getAvatarColor(u.full_name),
+          color: getAvatarColor(fullName),
           textColor: "#fff",
           borderColor: "transparent",
         };
       });
 
       setUsersList(mappedUsers);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+    } catch (err) {
+      console.error("Error fetching users:", err);
     } finally {
       setLoading(false);
     }
@@ -178,58 +300,69 @@ const Users = () => {
   const handleConfirmArchive = async () => {
     setLoader({
       show: true,
-      message: "Archiving User..."
+      message: "Archiving User...",
     });
+
     if (!selectedUser) {
       setLoader({
         show: false,
-        message: "Processing..."
+        message: "Processing...",
       });
       return;
     }
 
     try {
+      const now = new Date().toISOString();
+
       const { error } = await supabase
         .from("users")
-        .update({ status: "archived" })
+        .update({
+          status: "archived",
+          archived_at: now,
+        })
         .eq("id", selectedUser.id);
 
       if (error) throw error;
 
       setUsersList((prev) =>
         prev.map((u) =>
-          u.id === selectedUser.id ? { ...u, status: "Archived" } : u
+          u.id === selectedUser.id
+            ? { ...u, status: "Archived", archived_at: now }
+            : u
         )
       );
+
       setNotification({
         show: true,
         title: "User archived",
         message: "The user has been archived successfully.",
         variant: "warning",
-        icon: "archive"
-      });
-      setShowArchiveModal(false);
-      setSelectedUser(null);
-      setLoader({
-        show: false,
-        message: "Processing..."
+        icon: "archive",
       });
 
+      setShowArchiveModal(false);
+      setSelectedUser(null);
     } catch (err) {
       setNotification({
         show: true,
-        title: "Archived failed",
+        title: "Archive failed",
         message: err.message,
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
+    } finally {
       setLoader({
         show: false,
-        message: "Processing..."
+        message: "Processing...",
       });
     }
   };
 
+
+
+  /* =========================
+     HELPERS
+  ========================= */
   const getInitials = (name) =>
     name
       ? name
@@ -239,23 +372,37 @@ const Users = () => {
         .substring(0, 2)
         .toUpperCase()
       : "??";
-  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
+
+  const capitalize = (s) =>
+    s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+
   const getAvatarColor = (name) => {
     const colors = ["#0055ff", "#00ff99", "#ffaa00", "#ff4444", "#9d00ff"];
-    if (!name) return colors[0];
-    return colors[name.length % colors.length];
+    return colors[(name || "").length % colors.length];
   };
 
+  /* =========================
+     SEARCH + PAGINATION
+  ========================= */
   const filteredUsers = usersList.filter(
     (u) =>
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+      (u.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.email || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  useEffect(() => {
+    if (currentPage < 1) setCurrentPage(1);
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
 
   return (
     <>
@@ -346,7 +493,7 @@ const Users = () => {
                 </th>*/}
 
                 <th>User Profile</th>
-                <th>Unit / Location</th>
+                <th>Street Address</th>
                 <th>Registered Hubs</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -423,24 +570,19 @@ const Users = () => {
                     <td>{user.hubs}</td>
                     <td>
                       <span
-                        className="status-dot"
-                        style={{
-                          background:
-                            user.status === "Active"
-                              ? "var(--primary)"
-                              : "#666",
-                          boxShadow:
-                            user.status === "Active"
-                              ? "0 0 8px rgba(0, 255, 153, 0.4)"
-                              : "none",
-                        }}
-                      ></span>{" "}
-                      {user.status}
+                        className={`stat-badge ${
+                          user.status === "Active"
+                            ? "stat-active"
+                            : "stat-archived"
+                        }`}
+                      >
+                        {user.status}
+                      </span>
                     </td>
                     <td>
                       <div className="action-cell">
                         <button
-                          className="icon-btn"
+                          className="icon-btn btn-view"
                           title="View Details"
                           onClick={() => handleViewDetails(user)}
                         >
@@ -453,7 +595,7 @@ const Users = () => {
                         </button>
                         {user.status !== "Archived" && (
                           <button
-                            className="icon-btn"
+                            className="icon-btn archive-user-btn"
                             title="Archive User"
                             onClick={() => handleArchiveClick(user)}
                           >
@@ -475,28 +617,49 @@ const Users = () => {
         )}
 
         {!loading && (
-          <div className="u-pagination">
+          <div className="a-pagination">
             <div style={{ fontSize: "14px", color: "#666" }}>
               Showing{" "}
-              {paginatedUsers.length > 0
-                ? (currentPage - 1) * itemsPerPage + 1
-                : 0}
-              -{Math.min(currentPage * itemsPerPage, filteredUsers.length)} of{" "}
-              {filteredUsers.length}
+              {(currentPage - 1) * itemsPerPage + 1}
+              {"–"}
+              {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
+              {" "}of {filteredUsers.length}
             </div>
+
             <div style={{ display: "flex", gap: "8px" }}>
               <button
                 className="u-page-btn"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                style={{
+                  opacity: currentPage === 1 ? 0.4 : 1,
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                }}
               >
                 {"<"}
               </button>
-              <button className="u-page-btn active">{currentPage}</button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+
               <button
                 className="u-page-btn"
                 disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((p) => p + 1)}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
+                style={{
+                  opacity: currentPage === totalPages ? 0.4 : 1,
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
+                }}
               >
                 {">"}
               </button>
@@ -566,9 +729,10 @@ const Users = () => {
                   <div className="user-meta">
                     {viewUser.location} • {capitalize(viewUser.role)}
                   </div>
-                  <span
-                    className={`status-badge ${viewUser.status === "Active" ? "st-active-badge" : ""
-                      }`}
+                  <span style={{width: "400px"}}
+                    className={`status-badge ${
+                      viewUser.status === "Active" ? "stat" : "stat-archived"
+                    }`}
                   >
                     {viewUser.status} Account
                   </span>
@@ -583,6 +747,30 @@ const Users = () => {
                     <span className="info-label">Phone</span>
                     <span className="info-val">
                       {viewUser.phone || "Not Set"}
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Street Address</span>
+                    <span className="info-val">
+                      {viewUser.location || "Not Set"}
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">City</span>
+                    <span className="info-val">
+                      {viewUser.city || "Not Set"}
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Region</span>
+                    <span className="info-val">
+                      {viewUser.region || "Not Set"}
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Zip Code</span>
+                    <span className="info-val">
+                      {viewUser.zip_code || "Not Set"}
                     </span>
                   </div>
                   <div className="info-row">
@@ -729,7 +917,7 @@ const Users = () => {
             </p>
             <div className="send-reset-modal-actions">
               <button
-                
+
                 className="u-btn-cancel"
                 onClick={() => setShowResetModal(false)}
               >
@@ -803,18 +991,18 @@ const Users = () => {
                 <textarea
                   className="u-form-textarea"
                   placeholder="Enter details here..."
-                  value={archiveReason}
-                  onChange={(e) => setArchiveReason(e.target.value)}
+                /* value={archiveReason} */
+                /*onChange={(e) => setArchiveReason(e.target.value)}*/
                 ></textarea>
               </div>
               <div className="u-modal-actions">
                 <button
-                  className="u-btn-cancel"
+                  className="btn-cancel"
                   onClick={() => setShowArchiveModal(false)}
                 >
                   Cancel
                 </button>
-                <button className="u-btn-danger" onClick={handleConfirmArchive}>
+                <button className="btn-danger" onClick={handleConfirmArchive}>
                   <span className="material-icons" style={{ fontSize: "18px" }}>
                     archive
                   </span>{" "}
@@ -833,7 +1021,7 @@ const Users = () => {
               borderRadius: "12px",
               border: "1px solid #333333",
               padding: "20px",
-              maxWidth: "330px",
+              maxWidth: "380px",
               width: "100%",
               textAlign: "center",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
@@ -847,7 +1035,7 @@ const Users = () => {
                 style={{
                   fontSize: "35px",
                   marginTop: "10px",
-                  color: "#0055FF",
+                  color: "#00A651",
                 }}
               >
                 download
@@ -866,19 +1054,44 @@ const Users = () => {
                 Export CSV File
               </span>
               <span style={{ fontSize: "12px", color: "#aaa" }}>
-                Would you like to export user data report?
+                Select a date range to filter users by joined date (optional)
               </span>
             </div>
 
-            <div className="export-footer">
+            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "6px" }}>From Date</label>
+                  <CalendarDropdown
+                    value={exportFromDate}
+                    onChange={setExportFromDate}
+                    placeholder="MM/DD/YY"
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "6px" }}>To Date</label>
+                  <CalendarDropdown
+                    value={exportToDate}
+                    onChange={setExportToDate}
+                    placeholder="MM/DD/YY"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="export-footer" style={{ marginTop: "20px" }}>
               <button
                 className="r-btn-secondary"
-                onClick={() => setShowExportModal(false)}
+                onClick={() => {
+                  setShowExportModal(false);
+                  setExportFromDate("");
+                  setExportToDate("");
+                }}
               >
                 Cancel
               </button>
 
-              <button className="r-btn-primary" onClick={handleExport}>
+              <button style={{width: "100%", justifyContent:"center"}}className="btn-primary" onClick={handleExport}>
                 Export
               </button>
             </div>

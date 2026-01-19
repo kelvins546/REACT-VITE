@@ -1,16 +1,17 @@
 :root {
-  --bg-dark: #0f0f0f;
+  --bg-dark: #18191a;
   --bg-panel: #161616;
-  --bg-card: #1a1a1a;
-  --border: #333;
+  --bg-card: #242526;
+  --border: #3a3b3c;
   --primary: #00ff99;
   --accent-blue: #0055ff;
   --danger: #ff4444;
   --warning: #ffaa00;
   --text-main: #ffffff;
-  --text-sub: #888;
+  --text-sub: #D0D2D6;
   --sidebar-width: 280px;
   --comp-height: 48px;
+  --buttonColor: #00A651;
 }
 
 * {
@@ -97,6 +98,10 @@ body {
   height: 100%;
 }
 
+.restore {
+  color:#00ff99;
+}
+
 .btn {
   height: var(--comp-height);
   padding: 0 20px;
@@ -114,13 +119,27 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(90deg, #0055ff, #00ff99);
-  color: #000;
+  background: #00A651;
+  color: #fff;
   border: none;
 }
 
 .btn-primary:hover {
   opacity: 0.9;
+  
+}
+
+.btn-primary-modal {
+  background: #00A651;
+  color: #fff;
+  border: none;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-primary-modal:hover {
+  opacity: 0.9;
+  
 }
 
 .btn-secondary {
@@ -132,6 +151,64 @@ body {
 .btn-secondary:hover {
   background: #333;
   color: #fff;
+}
+
+.btn-danger {
+  background: var(--warning);
+  color: #fff;
+  border: 1px solid var(--warning);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+.btn-danger2 {
+  background: #ef4444;
+  color: #fff;
+  border: 1px solid #ef4444;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  gap: 8px;
+  width: 100%;
+  font-size: 14px;
+}
+
+.btn-danger2:hover {
+ background: #ef4444df;
+}
+
+.btn-cancel {
+  width: 100%;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  opacity: 0.9;
 }
 
 .table-container {

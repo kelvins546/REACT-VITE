@@ -17,7 +17,7 @@ export const LoadingPopup = ({ show, message = "Loading...", Loader, color = "#f
                         {Loader && <Loader color={color} size={100} />}
                         <p style={{
                             color: '#ffffff',
-                            background: 'linear-gradient(90deg, #0055ff, #00ff99)',
+                            background: "#fff",
                             WebkitBackgroundClip: 'text',
                             backgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',

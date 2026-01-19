@@ -48,7 +48,8 @@ export function PopupNotification({
         return () => clearTimeout(timer);
     }, [show, duration, onClose]);
 
-    const styles = VARIANTS[variant];
+    const styles = VARIANTS[variant] || VARIANTS.success;
+
 
     return (
         <AnimatePresence>

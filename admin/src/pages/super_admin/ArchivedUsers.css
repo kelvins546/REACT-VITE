@@ -61,6 +61,12 @@
   border-color: #2563eb;
 }
 
+.btn-view:hover {
+  background: rgba(0, 255, 153, 0.1);
+  color: var(--primary);
+  border-color: #fff;
+}
+
 .btn-restore:hover {
   background: rgba(0, 255, 153, 0.1);
   color: var(--primary);
@@ -319,8 +325,8 @@
 }
 
 .r-btn-cancel:hover {
-    background: #333;
-    color: #fff;
+  background: #333;
+  color: #fff;
 }
 
 .r-modal-container.delete-mode {
