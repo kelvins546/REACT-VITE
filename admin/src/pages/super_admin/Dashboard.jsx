@@ -41,7 +41,7 @@ const Dashboard = () => {
 
       console.log('Resident count:', count);
       setTotalUsers(count || 0);
-      setPreviousMonthUsers(Math.floor((count || 0) )); // brokken logic
+      setPreviousMonthUsers(Math.floor((count || 0) )); // brok
       
       setLoading(false);
     } catch (error) {
