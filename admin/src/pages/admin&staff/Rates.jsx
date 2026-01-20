@@ -21,7 +21,7 @@ const Rates = () => {
   const [exportFromDate, setExportFromDate] = useState("");
   const [exportToDate, setExportToDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const [notification, setNotification] = useState({
     show: false,
@@ -44,6 +44,7 @@ const Rates = () => {
 
   const DEFAULT_RATE = 9.75;
 
+  
   const allRates = [
     { id: 1, date: "Oct 23, 2025", provider: "Meralco", prevRate: "₱11.90", newRate: "₱12.50", reason: "Generation Charge Adj.", status: "Active", updatedBy: "Admin", role: "admin" },
     { id: 2, date: "Sep 15, 2025", provider: "Meralco", prevRate: "₱12.40", newRate: "₱11.90", reason: "System Optimization", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
@@ -59,6 +60,7 @@ const Rates = () => {
     { id: 12, date: "Nov 05, 2024", provider: "VECO", prevRate: "₱10.90", newRate: "₱11.00", reason: "Quarterly Review", status: "Previous", updatedBy: "Admin", role: "admin" },
   ];
 
+  
   const totalPages = Math.ceil(allRates.length / itemsPerPage);
   const paginatedRates = allRates.slice(
     (currentPage - 1) * itemsPerPage,
@@ -138,7 +140,7 @@ const Rates = () => {
               .join(",")
           ),
         ].join("\n");
-        
+
         const BOM = "\uFEFF";
         const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
         const link = document.createElement("a");
@@ -283,7 +285,7 @@ const Rates = () => {
           </div>
         </div>
         <button
-          className="btn btn-secondary export-btn"
+          className="btn btn-primary"
           onClick={() => setShowExportModal(true)}
         >
           <span className="material-icons">download</span>
@@ -313,7 +315,7 @@ const Rates = () => {
               </div>
               <span
                 className="material-icons"
-                style={{ fontSize: "20px" }}
+                style={{ color: "#FFD700",fontSize: "20px" }}
               >
                 info
               </span>
@@ -336,7 +338,7 @@ const Rates = () => {
               </button>
 
               {isOpen && (
-                <div className="dropdown-menu">
+                <div className="dropdown-menu rates">
                   <div className="searchBar">
                     <input
                       type="text"
@@ -674,9 +676,9 @@ const Rates = () => {
                     <div className="admin-meta">
                       <div
                         className="user-avatar"
-                        style={{
-                          width: "28px",
-                          height: "28px",
+                        style={{ 
+                          width: "28px", 
+                          height: "28px", 
                           fontSize: "10px",
                           background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
                         }}
@@ -691,10 +693,7 @@ const Rates = () => {
             })}
           </tbody>
         </table>
-      </div>
-
-      {/* PAGINATION */}
-      <div className="a-pagination">
+        <div className="a-pagination">
         <div style={{ fontSize: "14px", color: "#666" }}>
           Showing{" "}
           {(currentPage - 1) * itemsPerPage + 1}
@@ -739,6 +738,7 @@ const Rates = () => {
           </button>
         </div>
       </div>
+      </div>      
 
       {showModal && (
         <div className="modal-overlay">

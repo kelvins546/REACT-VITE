@@ -293,7 +293,7 @@ const AdminLogin = () => {
             >
               <div>
                 <button
-                  className="c-btn-modal mark-btn-resolve"
+                  className="btn btn-primary-modal"
                   onClick={handleSendLink}
                 >
                   Send Link

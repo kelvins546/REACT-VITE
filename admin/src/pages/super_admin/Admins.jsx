@@ -421,7 +421,7 @@ const Admins = () => {
         show={loader.show}
         message={loader.message}
         Loader={PuffLoader}
-        color="#0055ff"
+        color="#ffd700"
       />
       <div className="page-header">
         <div>
@@ -474,151 +474,152 @@ const Admins = () => {
       </div>
 
       <div className="table-container">
-        {loading ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              padding: "50px",
-            }}
-          >
-            <PuffLoader color="#0055ff" size={40} />
-          </div>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Profile</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedAdmins.length === 0 ? (
+        <div className="table-container-scrollable">
+          {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "50px",
+              }}
+            >
+              <PuffLoader color="#ffd700" size={40} />
+            </div>
+          ) : (
+            <table>
+              <thead>
                 <tr>
-                  <td
-                    colSpan="4"
-                    style={{
-                      textAlign: "center",
-                      padding: "24px",
-                      color: "#666",
-                      fontSize: "14px",
-                    }}
-                  >
-                    No admins found.
-                  </td>
+                  <th>Profile</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ) : (
-                paginatedAdmins.map((admin) => (
-                  <tr
-                    key={admin.id}
-                    style={{ opacity: admin.status === "archived" ? 0.5 : 1 }}
-                  >
-                    <td>
-                      <div className="user-cell">
-                        <div
-                          className="u-avatar"
-                          style={{ background: admin.color }}
-                        >
-                          {admin.initials}
-                        </div>
-                        <div style={{ fontWeight: 600, color: "#fff" }}>
-                          {admin.name}
-                          {admin.role === "super admin" && (
-                            <span
-                              className="material-icons"
-                              style={{
-                                fontSize: "12px",
-                                color: "#ffd700",
-                                marginLeft: "6px",
-                              }}
-                              title="Super Admin"
-                            >
-                              verified
-                            </span>
-                          )}
-                          <br />
-                          <span
-                            style={{
-                              fontSize: "13px",
-                              color: "#666",
-                              fontWeight: 400,
-                            }}
-                          >
-                            {admin.email}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`stat-badge ${
-                          admin.role === "super admin"
-                            ? "stat-super-admin"
-                            : "stat-admin"
-                        }`}
-                      >
-                        {admin.role === "super admin" ? "Super Admin" : "Admin"}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`stat-badge ${
-                          admin.status === "archived"
-                            ? "stat-archived"
-                            : "stat-active"
-                        }`}
-                      >
-                        {admin.status === "archived" ? "Archived" : "Active"}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="action-cell">
-                        {(admin.role !== "super admin" ||
-                          currentUserRole === "super admin") && (
-                            <button
-                              className="icon-btn edit-user-btn"
-                              title="Edit Admin"
-                              onClick={() => openEditModal(admin)}
-                            >
-                              <span
-                                className="material-icons"
-                                style={{ fontSize: "18px" }}
-                              >
-                                edit
-                              </span>
-                            </button>
-                          )}
-
-                        {admin.role !== "super admin" &&
-                          admin.status !== "archived" && (
-                            <button
-                              className="icon-btn archive-user-btn"
-                              title="Archive Admin"
-                              onClick={() => openArchiveModal(admin)}
-                            >
-                              <span
-                                className="material-icons"
-                                style={{ fontSize: "18px" }}
-                              >
-                                archive
-                              </span>
-                            </button>
-                          )}
-                      </div>
+              </thead>
+              <tbody>
+                {paginatedAdmins.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      style={{
+                        textAlign: "center",
+                        padding: "24px",
+                        color: "#666",
+                        fontSize: "14px",
+                      }}
+                    >
+                      No admins found.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
+                ) : (
+                  paginatedAdmins.map((admin) => (
+                    <tr
+                      key={admin.id}
+                      style={{ opacity: admin.status === "archived" ? 0.5 : 1 }}
+                    >
+                      <td>
+                        <div className="user-cell">
+                          <div
+                            className="u-avatar"
+                            style={{ background: admin.color }}
+                          >
+                            {admin.initials}
+                          </div>
+                          <div style={{ fontWeight: 600, color: "#fff" }}>
+                            {admin.name}
+                            {admin.role === "super admin" && (
+                              <span
+                                className="material-icons"
+                                style={{
+                                  fontSize: "12px",
+                                  color: "#ffd700",
+                                  marginLeft: "6px",
+                                }}
+                                title="Super Admin"
+                              >
+                                verified
+                              </span>
+                            )}
+                            <br />
+                            <span
+                              style={{
+                                fontSize: "13px",
+                                color: "#666",
+                                fontWeight: 400,
+                              }}
+                            >
+                              {admin.email}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
 
-          </table>
+                      <td>
+                        <span
+                          className={`stat-badge ${admin.role === "super admin"
+                            ? "stat-super-admin"
+                            : "stat-admin"
+                            }`}
+                        >
+                          {admin.role === "super admin" ? "Super Admin" : "Admin"}
+                        </span>
+                      </td>
 
-        )}
+                      <td>
+                        <span
+                          className={`stat-badge ${admin.status === "archived"
+                            ? "stat-archived"
+                            : "stat-active"
+                            }`}
+                        >
+                          {admin.status === "archived" ? "Archived" : "Active"}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="action-cell">
+                          {(admin.role !== "super admin" ||
+                            currentUserRole === "super admin") && (
+                              <button
+                                className="icon-btn edit-user-btn"
+                                title="Edit Admin"
+                                onClick={() => openEditModal(admin)}
+                              >
+                                <span
+                                  className="material-icons"
+                                  style={{ fontSize: "18px" }}
+                                >
+                                  edit
+                                </span>
+                              </button>
+                            )}
+
+                          {admin.role !== "super admin" &&
+                            admin.status !== "archived" && (
+                              <button
+                                className="icon-btn archive-user-btn"
+                                title="Archive Admin"
+                                onClick={() => openArchiveModal(admin)}
+                              >
+                                <span
+                                  className="material-icons"
+                                  style={{ fontSize: "18px" }}
+                                >
+                                  archive
+                                </span>
+                              </button>
+                            )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+
+            </table>
+
+
+          )}
+        </div>
         {!loading && (
           <div className="a-pagination">
             <div style={{ fontSize: "14px", color: "#666" }}>
@@ -673,12 +674,15 @@ const Admins = () => {
         )}
       </div>
 
+
       { }
       {showCreateModal && (
         <div className="a-modal-overlay">
           <div className="a-modal-container">
             <div className="a-modal-header">
-              <div className="a-modal-title">Create New Admin</div>
+              <div className="u-modal-title"><span class="material-symbols-outlined">
+                person_add
+              </span><span>Create New Admin</span></div>
               <button
                 className="a-close-btn"
                 onClick={() => setShowCreateModal(false)}
@@ -841,7 +845,9 @@ const Admins = () => {
         <div className="a-modal-overlay">
           <div className="a-modal-container" style={{ maxWidth: "400px" }}>
             <div className="a-modal-header">
-              <div className="a-modal-title">Edit Admin</div>
+              <div className="u-modal-title"><span class="material-symbols-outlined">
+                edit
+              </span><span>Edit Admin</span></div>
               <button
                 className="a-close-btn"
                 onClick={() => setShowEditModal(false)}

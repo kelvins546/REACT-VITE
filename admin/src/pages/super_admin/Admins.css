@@ -46,13 +46,6 @@
   gap: 8px;
 }
 
-.table-container {
-  background-color: #1a1a1a;
-  border-radius: 12px;
-  border: 1px solid #333;
-  overflow: hidden;
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -262,7 +255,7 @@ td {
 }
 
 .a-input-wrapper:focus-within {
-  border-color: #0055ff;
+  border-color: var(--primary);
   background: #161616;
 }
 

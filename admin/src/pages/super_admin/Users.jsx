@@ -69,7 +69,6 @@ const Users = () => {
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [archiveReason, setArchiveReason] = useState("");
-  const [showResetModal, setShowResetModal] = useState(false);
 
   const checkHubStatus = (lastSeen) => {
     if (!lastSeen) return false;
@@ -103,18 +102,18 @@ const Users = () => {
         if (exportFromDate || exportToDate) {
           usersToExport = filteredUsers.filter((user) => {
             const joinedDate = new Date(user.joined_at);
-            
+
             if (exportFromDate) {
               const fromDate = new Date(exportFromDate);
               if (joinedDate < fromDate) return false;
             }
-            
+
             if (exportToDate) {
               const toDate = new Date(exportToDate);
-              toDate.setHours(23, 59, 59, 999); 
+              toDate.setHours(23, 59, 59, 999);
               if (joinedDate > toDate) return false;
             }
-            
+
             return true;
           });
         }
@@ -130,7 +129,7 @@ const Users = () => {
           user.region,
           user.zip_code,
           user.status,
-          user.hubs.replace(" Registered", ""), 
+          user.hubs.replace(" Registered", ""),
           new Date(user.joined_at).toLocaleDateString(),
         ]);
 
@@ -138,7 +137,7 @@ const Users = () => {
           headers.join(","),
           ...rows.map((row) =>
             row
-              .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`) 
+              .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
               .join(",")
           ),
         ].join("\n");
@@ -188,9 +187,6 @@ const Users = () => {
     }, 1500);
   }
 
-  /* =========================
-     FETCH USERS (FIXED)
-  ========================= */
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -358,11 +354,6 @@ const Users = () => {
     }
   };
 
-
-
-  /* =========================
-     HELPERS
-  ========================= */
   const getInitials = (name) =>
     name
       ? name
@@ -381,9 +372,6 @@ const Users = () => {
     return colors[(name || "").length % colors.length];
   };
 
-  /* =========================
-     SEARCH + PAGINATION
-  ========================= */
   const filteredUsers = usersList.filter(
     (u) =>
       (u.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -421,7 +409,7 @@ const Users = () => {
         show={loader.show}
         message={loader.message}
         Loader={PuffLoader}
-        color="#0055ff"
+        color="#ffd700"
       />
       <div className="page-header">
         <div className="page-title">User Management</div>
@@ -467,21 +455,22 @@ const Users = () => {
       </div>
 
       <div className="table-container">
-        {loading ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              padding: "50px",
-            }}
-          >
-            <PuffLoader color="#0055ff" size={40} />
-          </div>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                {/* <th style={{ width: "50px" }}>
+        <div className="table-container-scrollable">
+          {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "50px",
+              }}
+            >
+              <PuffLoader color="#ffd700" size={40} />
+            </div>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  {/* <th style={{ width: "50px" }}>
                   <input
                     type="checkbox"
                     style={{
@@ -492,34 +481,34 @@ const Users = () => {
                   />
                 </th>*/}
 
-                <th>User Profile</th>
-                <th>Street Address</th>
-                <th>Registered Hubs</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedUsers.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    style={{
-                      textAlign: "center",
-                      padding: "20px",
-                      color: "#666",
-                    }}
-                  >
-                    No users found.
-                  </td>
+                  <th>User Profile</th>
+                  <th>Street Address</th>
+                  <th>Registered Hubs</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ) : (
-                paginatedUsers.map((user, index) => (
-                  <tr
-                    key={user.id || index}
-                    style={{ opacity: user.status === "Archived" ? 0.5 : 1 }}
-                  >
-                    {/* <td>
+              </thead>
+              <tbody>
+                {paginatedUsers.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      style={{
+                        textAlign: "center",
+                        padding: "20px",
+                        color: "#666",
+                      }}
+                    >
+                      No users found.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedUsers.map((user, index) => (
+                    <tr
+                      key={user.id || index}
+                      style={{ opacity: user.status === "Archived" ? 0.5 : 1 }}
+                    >
+                      {/* <td>
                       <input
                         type="checkbox"
                         style={{
@@ -530,91 +519,91 @@ const Users = () => {
                       />
                     </td> */}
 
-                    <td>
-                      <div className="user-cell">
-                        {user.avatar_url ? (
-                          <img
-                            src={user.avatar_url}
-                            alt={user.name}
-                            className="u-avatar"
-                            style={{ objectFit: "cover" }}
-                          />
-                        ) : (
-                          <div
-                            className="u-avatar"
-                            style={{
-                              background: user.color,
-                              color: user.textColor,
-                            }}
-                          >
-                            {user.initials}
-                          </div>
-                        )}
+                      <td>
+                        <div className="user-cell">
+                          {user.avatar_url ? (
+                            <img
+                              src={user.avatar_url}
+                              alt={user.name}
+                              className="u-avatar"
+                              style={{ objectFit: "cover" }}
+                            />
+                          ) : (
+                            <div
+                              className="u-avatar"
+                              style={{
+                                background: user.color,
+                                color: user.textColor,
+                              }}
+                            >
+                              {user.initials}
+                            </div>
+                          )}
 
-                        <div style={{ fontWeight: 600, color: "#fff" }}>
-                          {user.name}
-                          <br />
-                          <span
-                            style={{
-                              fontSize: "13px",
-                              color: "#666",
-                              fontWeight: 400,
-                            }}
-                          >
-                            {user.email}
-                          </span>
+                          <div style={{ fontWeight: 600, color: "#fff" }}>
+                            {user.name}
+                            <br />
+                            <span
+                              style={{
+                                fontSize: "13px",
+                                color: "#666",
+                                fontWeight: 400,
+                              }}
+                            >
+                              {user.email}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>{user.location}</td>
-                    <td>{user.hubs}</td>
-                    <td>
-                      <span
-                        className={`stat-badge ${
-                          user.status === "Active"
+                      </td>
+                      <td>{user.location}</td>
+                      <td>{user.hubs}</td>
+                      <td>
+                        <span
+                          className={`stat-badge ${user.status === "Active"
                             ? "stat-active"
                             : "stat-archived"
-                        }`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-cell">
-                        <button
-                          className="icon-btn btn-view"
-                          title="View Details"
-                          onClick={() => handleViewDetails(user)}
+                            }`}
                         >
-                          <span
-                            className="material-icons"
-                            style={{ fontSize: "18px" }}
-                          >
-                            visibility
-                          </span>
-                        </button>
-                        {user.status !== "Archived" && (
+                          {user.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-cell">
                           <button
-                            className="icon-btn archive-user-btn"
-                            title="Archive User"
-                            onClick={() => handleArchiveClick(user)}
+                            className="icon-btn btn-view"
+                            title="View Details"
+                            onClick={() => handleViewDetails(user)}
                           >
                             <span
                               className="material-icons"
                               style={{ fontSize: "18px" }}
                             >
-                              archive
+                              visibility
                             </span>
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
+                          {user.status !== "Archived" && (
+                            <button
+                              className="icon-btn archive-user-btn"
+                              title="Archive User"
+                              onClick={() => handleArchiveClick(user)}
+                            >
+                              <span
+                                className="material-icons"
+                                style={{ fontSize: "18px" }}
+                              >
+                                archive
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
 
         {!loading && (
           <div className="a-pagination">
@@ -685,7 +674,7 @@ const Users = () => {
               <div className="u-modal-title">
                 <span
                   className="material-icons"
-                  style={{ color: "var(--primary)" }}
+
                 >
                   account_circle
                 </span>
@@ -701,12 +690,12 @@ const Users = () => {
 
             <div
               className="u-modal-body"
-              style={{ display: "flex", gap: "25px", padding: "25px" }}
+              style={{ display: "flex", gap: "24px", padding: "24px", flexWrap: "wrap", scrollbarWidth: "none" }}
             >
               { }
               <div
                 className="profile-card"
-                style={{ width: "320px", flexShrink: 0, height: "fit-content" }}
+                style={{ width: "380px", flexShrink: 0 }}
               >
                 <div className="profile-header">
                   {viewUser.avatar_url ? (
@@ -727,15 +716,10 @@ const Users = () => {
 
                   <div className="user-name">{viewUser.name}</div>
                   <div className="user-meta">
-                    {viewUser.location} • {capitalize(viewUser.role)}
+                    • {capitalize(viewUser.role)}
                   </div>
-                  <span style={{width: "400px"}}
-                    className={`status-badge ${
-                      viewUser.status === "Active" ? "stat" : "stat-archived"
-                    }`}
-                  >
-                    {viewUser.status} Account
-                  </span>
+
+                  <span className="stat-badge stat-active">ACTIVE ACCOUNT</span>
                 </div>
 
                 <div className="info-group">
@@ -783,38 +767,21 @@ const Users = () => {
                     <span className="info-label">User ID</span>
                     <span
                       className="info-val"
-                      style={{
-                        fontFamily: "monospace",
-                        color: "#888",
-                        fontSize: "11px",
-                      }}
+                      style={{ fontFamily: "monospace", fontSize: "12px" }}
                     >
                       {viewUser.id}
                     </span>
                   </div>
                 </div>
-
-                <div className="btn-group">
-                  <button
-                    className="btn-full"
-                    onClick={() => setShowResetModal(true)}
-                  >
-                    <span className="material-icons">lock_reset</span> Send
-                    Password Reset
-                  </button>
-                </div>
               </div>
 
               { }
-              <div
-                style={{ flex: 1, display: "flex", flexDirection: "column" }}
-              >
-                { }
+              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "15px",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                    gap: "16px",
                     marginBottom: "20px",
                   }}
                 >
@@ -825,30 +792,13 @@ const Users = () => {
                       Total Devices
                     </div>
                   </div>
-
-                  <div className="m-stat-card" style={{ width: "100%" }}>
-                    <div className="m-stat-label">Safety Alerts</div>
-                    <div
-                      className="m-stat-val"
-                      style={{ color: "var(--danger)" }}
-                    >
-                      {viewStats.alerts}
-                    </div>
-                    <div
-                      className="m-stat-sub"
-                      style={{ color: "var(--danger)" }}
-                    >
-                      Critical Faults
-                    </div>
-                  </div>
                 </div>
 
-                { }
                 <div className="detail-card">
                   <div className="section-title">
                     <span
                       className="material-icons"
-                      style={{ color: "var(--accent-blue)" }}
+                      style={{ color: "#0055ff" }}
                     >
                       router
                     </span>
@@ -900,44 +850,6 @@ const Users = () => {
                   )}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showResetModal && (
-        <div className="send-reset-modal-overlay">
-          <div className="send-reset-modal-container">
-            <span className="material-icons send-reset-modal-icon">
-              lock_reset
-            </span>
-            <h3 className="send-reset-modal-title">Send Password Reset</h3>
-            <p className="send-reset-modal-desc">
-              Are you sure you want to send a password reset link to this user?
-            </p>
-            <div className="send-reset-modal-actions">
-              <button
-
-                className="u-btn-cancel"
-                onClick={() => setShowResetModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="u-btn-danger"
-                onClick={() => {
-                  setShowResetModal(false);
-                  setNotification({
-                    show: true,
-                    title: "Email Sent",
-                    message: "A reset password link has been sent to the user.",
-                    variant: "success",
-                    icon: "check_circle"
-                  });
-                }}
-              >
-                Send Reset
-              </button>
             </div>
           </div>
         </div>
@@ -1091,7 +1003,7 @@ const Users = () => {
                 Cancel
               </button>
 
-              <button style={{width: "100%", justifyContent:"center"}}className="btn-primary" onClick={handleExport}>
+              <button style={{ width: "100%", justifyContent: "center" }} className="btn-primary" onClick={handleExport}>
                 Export
               </button>
             </div>

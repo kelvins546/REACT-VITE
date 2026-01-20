@@ -51,7 +51,7 @@ const ProtectedRoute = () => {
         show
         message="Loading..."
         Loader={PuffLoader}
-        color="#0055ff"
+        color="#ffd700"
       />
     );
   }

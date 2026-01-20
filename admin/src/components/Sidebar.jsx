@@ -290,7 +290,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               </div>
             </NavLink>
 
-            <NavLink
+            {/*<NavLink
               to={role === 'super admin' ? '/complaints' : '/admin/complaints'}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
@@ -310,7 +310,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                   </motion.span>
                 )}
               </AnimatePresence>
-            </NavLink>
+            </NavLink> */}
           </nav>
 
           <div
@@ -431,14 +431,14 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               <span className="material-icons">paid</span>
             </NavLink>
 
-            <NavLink
+           {/*} <NavLink
               to={role === 'super admin' ? '/complaints' : '/admin/complaints'}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
             >
               <span className="material-icons">report_problem</span>
-            </NavLink>
+            </NavLink> */}
           </nav>
 
           <div

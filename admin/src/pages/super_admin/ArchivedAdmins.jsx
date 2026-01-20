@@ -82,9 +82,6 @@ const ArchivedAdmins = () => {
                 .toUpperCase()
             : "??";
 
-    /* =========================
-       FETCH ARCHIVED ADMINS
-       ========================= */
     const fetchArchivedUsers = async () => {
         try {
             setLoading(true);
@@ -137,9 +134,6 @@ const ArchivedAdmins = () => {
         if (!deleteModal) setConfirmDelete(false);
     }, [deleteModal]);
 
-    /* =========================
-       FILTER + PAGINATION
-       ========================= */
     const filteredUsers = archivedUsers.filter((user) =>
         `${user.name} ${user.email} ${user.unit}`
             .toLowerCase()
@@ -157,9 +151,6 @@ const ArchivedAdmins = () => {
         setCurrentPage(1);
     }, [search]);
 
-    /* =========================
-       RESTORE USER
-       ========================= */
     const handleRestore = async () => {
         if (selectedUsers.length === 0) return;
 
@@ -308,7 +299,7 @@ const ArchivedAdmins = () => {
                         </span>
                         Back to Active
                     </Link>
-                    <button
+                    {/* <button
                         className="btn btn-danger2"
                         disabled={selectedUsers.length === 0}
                         onClick={() => setShowDeleteModal(true)}
@@ -319,17 +310,30 @@ const ArchivedAdmins = () => {
                     >
                         <span className="material-icons">delete_sweep</span>
                         Clear All
-                    </button>
+                    </button>*/}
+
 
                 </div>
             </div>
 
             { }
             <div className="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style={{ width: "50px" }}>
+                {loading ? (
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            padding: "50px",
+                        }}
+                    >
+                        <PuffLoader color="#ffd700" size={40} />
+                    </div>
+                ) : (
+                    <table>
+                        <thead>
+
+                            <tr>
+                                {/*<th style={{ width: "50px" }}>
                                 <input
                                     style={{
                                         accentColor: "var(--primary)",
@@ -348,90 +352,93 @@ const ArchivedAdmins = () => {
                                     }
                                 />
 
-                            </th>
-                            <th>User Profile</th>
+                            </th> */}
 
-                            <th>Archived Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { }
-                        {paginatedUsers.map((user) => (
+                                <th>User Profile</th>
 
-                            <tr key={user.id}>
-                                <td>
-                                    <input
-                                        style={{
-                                            accentColor: "var(--primary)",
-                                            width: "18px",
-                                            height: "18px",
-                                        }}
-                                        type="checkbox"
-                                        checked={selectedUsers.includes(user.id)}
-                                        onChange={(e) =>
-                                            setSelectedUsers((prev) =>
-                                                e.target.checked
-                                                    ? [...prev, user.id]
-                                                    : prev.filter((id) => id !== user.id)
-                                            )
-                                        }
-                                    />
-                                </td>
-
-                                <td>
-                                    <div className="user-cell">
-                                        <div className="u-avatar">
-                                            {user.name
-                                                .split(" ")
-                                                .map((n) => n[0])
-                                                .join("")}
-                                        </div>
-                                        <div style={{ fontWeight: 600 }}>
-                                            {user.name}
-                                            <br />
-                                            <span style={{ fontSize: "13px", color: "#666" }}>
-                                                {user.email}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td style={{ color: "#888" }}>{user.archivedDate}</td>
-
-                                <td>
-                                    <span className="stat-badge stat-archived">Archived</span>
-                                </td>
-
-                                <td>
-                                    <div className="action-cell">
-                                        <button
-                                            className="icon-btn btn-restore"
-                                            onClick={() => {
-                                                setSelectedUsers([user.id]);
-                                                setShowRestoreModal(true);
-                                            }}
-                                        >
-                                            <span className="material-icons">restore_from_trash</span>
-                                        </button>
-
-                                        <button
-                                            className="icon-btn btn-delete"
-                                            onClick={() => {
-                                                setSelectedUsers([user.id]);
-                                                setShowDeleteModal(true);
-                                            }}
-                                        >
-                                            <span className="material-icons">delete_forever</span>
-                                        </button>
-                                    </div>
-                                </td>
+                                <th>Archived Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
-                        ))}
+                        </thead>
+                        <tbody>
+                            { }
+                            {paginatedUsers.map((user) => (
 
-                    </tbody>
-                </table>
+                                <tr key={user.id}>
+                                    {/*<td>
+                                        <input
+                                            style={{
+                                                accentColor: "var(--primary)",
+                                                width: "18px",
+                                                height: "18px",
+                                            }}
+                                            type="checkbox"
+                                            checked={selectedUsers.includes(user.id)}
+                                            onChange={(e) =>
+                                                setSelectedUsers((prev) =>
+                                                    e.target.checked
+                                                        ? [...prev, user.id]
+                                                        : prev.filter((id) => id !== user.id)
+                                                )
+                                            }
+                                        />
+                                    </td>*/}
+
+
+                                    <td>
+                                        <div className="user-cell">
+                                            <div className="u-avatar">
+                                                {user.name
+                                                    .split(" ")
+                                                    .map((n) => n[0])
+                                                    .join("")}
+                                            </div>
+                                            <div style={{ fontWeight: 600 }}>
+                                                {user.name}
+                                                <br />
+                                                <span style={{ fontSize: "13px", color: "#666" }}>
+                                                    {user.email}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td style={{ color: "#888" }}>{user.archivedDate}</td>
+
+                                    <td>
+                                        <span className="stat-badge stat-archived">Archived</span>
+                                    </td>
+
+                                    <td>
+                                        <div className="action-cell">
+                                            <button
+                                                className="icon-btn btn-restore"
+                                                onClick={() => {
+                                                    setSelectedUsers([user.id]);
+                                                    setShowRestoreModal(true);
+                                                }}
+                                            >
+                                                <span className="material-icons">restore_from_trash</span>
+                                            </button>
+                                            {/*<button
+                                                className="icon-btn btn-delete"
+                                                onClick={() => {
+                                                    setSelectedUsers([user.id]);
+                                                    setShowDeleteModal(true);
+                                                }}
+                                            >
+                                                <span className="material-icons">delete_forever</span>
+                                            </button> */}
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+
+                        </tbody>
+                    </table>
+                )}
 
                 { }
                 {filteredUsers.length > 0 && (
@@ -490,7 +497,7 @@ const ArchivedAdmins = () => {
                     <div className="r-modal-container restore-mode">
                         <div className="r-modal-header" style={{ borderBottom: "none" }}>
                             <div className="r-modal-title" style={{ color: "var(--success)" }}>
-                                <span className="material-icons restore">restore</span> <span>Restore Account</span>
+                                <span className="material-icons restore">restore</span> <span style={{ color: "var(--primary)" }}>Restore Account</span>
                             </div>
                             <button
                                 className="r-close-btn"

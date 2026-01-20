@@ -44,7 +44,7 @@ const Rates = () => {
 
   const DEFAULT_RATE = 9.75;
 
-  
+
   const allRates = [
     { id: 1, date: "Oct 23, 2025", provider: "Meralco", prevRate: "₱11.90", newRate: "₱12.50", reason: "Generation Charge Adj.", status: "Active", updatedBy: "Admin", role: "admin" },
     { id: 2, date: "Sep 15, 2025", provider: "Meralco", prevRate: "₱12.40", newRate: "₱11.90", reason: "System Optimization", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
@@ -60,7 +60,7 @@ const Rates = () => {
     { id: 12, date: "Nov 05, 2024", provider: "VECO", prevRate: "₱10.90", newRate: "₱11.00", reason: "Quarterly Review", status: "Previous", updatedBy: "Admin", role: "admin" },
   ];
 
-  
+
   const totalPages = Math.ceil(allRates.length / itemsPerPage);
   const paginatedRates = allRates.slice(
     (currentPage - 1) * itemsPerPage,
@@ -86,6 +86,8 @@ const Rates = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState('Meralco');
+  const [selectedYear, setSelectedYear] = useState('2025');
+  const [isYearOpen, setIsYearOpen] = useState(false);
 
   const searchLower = searchTerm.toLowerCase();
 
@@ -275,7 +277,7 @@ const Rates = () => {
         show={loader.show}
         message={loader.message}
         Loader={PuffLoader}
-        color="#0055ff"
+        color="#ffd700"
       />
       <div className="page-header">
         <div>
@@ -294,7 +296,7 @@ const Rates = () => {
 
       </div>
       <div className="rates-scroll">
-        <div className="rates-grid">
+        <div className="rates-container">
           <div className="rate-card">
             <div
               style={{
@@ -315,7 +317,7 @@ const Rates = () => {
               </div>
               <span
                 className="material-icons"
-                style={{ color: "var(--primary)",fontSize: "20px" }}
+                style={{ color: "#FFf", fontSize: "20px" }}
               >
                 info
               </span>
@@ -457,288 +459,109 @@ const Rates = () => {
             </button>
           </div>
 
-          <div className="trend-card">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ fontWeight: 700, color: "#fff", fontSize: "16px" }}>
-                Rate Trend
-              </div>
-              <div className="trend-toggle">
-                <div className={`tt-opt ${showMonthlyTrend === true ? 'active' : ''}`} onClick={() => setshowMonthlyTrend(true) & setshowYearlyTrend(false) & setshowTrendStatsMonthly(true) & setshowTrendStatsYearly(false)}>Monthly</div>
-                <div className={`tt-opt ${showYearlyTrend === true ? 'active' : ''}`} onClick={() => setshowYearlyTrend(true) & setshowMonthlyTrend(false) & setshowTrendStatsYearly(true) & setshowTrendStatsMonthly(false)}>Yearly</div>
-              </div>
+          <div className="table-container">
+            <div className="table-container-scrollable">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date Modified</th>
+                    <th>Provider</th>
+                    <th>Rate Change</th>
+                    <th>Reason / Notes</th>
+                    <th>Status</th>
+                    <th>Updated By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedRates.map((rate) => {
+                    const isIncrease = parseFloat(rate.newRate.replace('₱', '')) > parseFloat(rate.prevRate.replace('₱', ''));
+                    return (
+                      <tr key={rate.id}>
+                        <td style={{ color: "#ddd", fontWeight: 400 }}>{rate.date}</td>
+                        <td>{rate.provider}</td>
+                        <td>
+                          <span className="rate-pill">{rate.prevRate}</span>
+                          <span
+                            style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
+                          >
+                            →
+                          </span>
+                          <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>{rate.newRate}</span>
+                        </td>
+                        <td>{rate.reason}</td>
+                        <td>
+                          <span className={`stat-badge ${rate.status === 'Active' ? 'stat-active' : 'stat-review'}`}>{rate.status}</span>
+                        </td>
+                        <td>
+                          <div className="admin-meta">
+                            <div
+                              className="user-avatar"
+                              style={{
+                                width: "28px",
+                                height: "28px",
+                                fontSize: "10px",
+                                background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
+                              }}
+                            >
+                              {rate.role === "super admin" ? "SA" : "AD"}
+                            </div>
+                            {rate.updatedBy}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-            <div className="trend-stats-text">
-              {showTrendStatYearly && (
-                <>
-                  <div>
-                    HIGH <span className="ts-val">₱12.50</span>
-                  </div>
-                  <div>
-                    LOW <span className="ts-val-low">₱8.50</span>
-                  </div>
-                </>
-              )}
-              {showTrendStatsMonthly && (
-                <>
-                  <div>
-                    HIGH <span className="ts-val">₱21.00</span>
-                  </div>
-                  <div>
-                    LOW <span className="ts-val-low">₱10.50</span>
-                  </div>
-                </>
-              )}
-            </div>
+            <div className="a-pagination">
+              <div style={{ fontSize: "14px", color: "#666" }}>
+                Showing{" "}
+                {(currentPage - 1) * itemsPerPage + 1}
+                {"–"}
+                {Math.min(currentPage * itemsPerPage, allRates.length)}
+                {" "}of {allRates.length}
+              </div>
 
-            <div
-              className="chart-box animate-chart"
-              key={showYearlyTrend ? "yearly" : "monthly"}
-            >
-              {showYearlyTrend && (
-                <>
-                  <div className="bar-group">
-                    <div className="bar-val">₱8.50</div>
-                    <div className="bar" style={{ height: "30%" }}></div>
-                    <div className="bar-label">2015</div>
-                  </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  className="u-page-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  style={{
+                    opacity: currentPage === 1 ? 0.4 : 1,
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {"<"}
+                </button>
 
-                  <div className="bar-group">
-                    <div className="bar-val">₱8.90</div>
-                    <div className="bar" style={{ height: "35%" }}></div>
-                    <div className="bar-label">2016</div>
-                  </div>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
 
-                  <div className="bar-group">
-                    <div className="bar-val">₱9.20</div>
-                    <div className="bar" style={{ height: "38%" }}></div>
-                    <div className="bar-label">2017</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱9.50</div>
-                    <div className="bar" style={{ height: "40%" }}></div>
-                    <div className="bar-label">2018</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱9.80</div>
-                    <div className="bar" style={{ height: "45%" }}></div>
-                    <div className="bar-label">2019</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱10.20</div>
-                    <div className="bar" style={{ height: "50%" }}></div>
-                    <div className="bar-label">2020</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱10.50</div>
-                    <div className="bar" style={{ height: "55%" }}></div>
-                    <div className="bar-label">2021</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱11.10</div>
-                    <div className="bar" style={{ height: "65%" }}></div>
-                    <div className="bar-label">2022</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱11.80</div>
-                    <div className="bar" style={{ height: "80%" }}></div>
-                    <div className="bar-label">2023</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val high">₱12.10</div>
-                    <div className="bar active" style={{ height: "88%" }}></div>
-                    <div className="bar-label">2024</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val curr">₱12.50</div>
-                    <div className="bar current" style={{ height: "98%" }}></div>
-                    <div className="bar-label">2025</div>
-                  </div>
-                </>
-              )}
-
-              {showMonthlyTrend && (
-                <>
-                  <div className="bar-group">
-                    <div className="bar-val">₱10.50</div>
-                    <div className="bar" style={{ height: "30%" }}></div>
-                    <div className="bar-label">Jan</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱12.50</div>
-                    <div className="bar" style={{ height: "32%" }}></div>
-                    <div className="bar-label">Feb</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱13.00</div>
-                    <div className="bar" style={{ height: "33%" }}></div>
-                    <div className="bar-label">Mar</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱12.50</div>
-                    <div className="bar" style={{ height: "32%" }}></div>
-                    <div className="bar-label">Apr</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱10.50</div>
-                    <div className="bar" style={{ height: "30%" }}></div>
-                    <div className="bar-label">May</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱14.50</div>
-                    <div className="bar" style={{ height: "40%" }}></div>
-                    <div className="bar-label">Jun</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱19.00</div>
-                    <div className="bar" style={{ height: "50%" }}></div>
-                    <div className="bar-label">Jul</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱14.50</div>
-                    <div className="bar" style={{ height: "40%" }}></div>
-                    <div className="bar-label">Aug</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱15.75</div>
-                    <div className="bar" style={{ height: "41%" }}></div>
-                    <div className="bar-label">Sep</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱16.25</div>
-                    <div className="bar" style={{ height: "42%" }}></div>
-                    <div className="bar-label">Oct</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱17.00</div>
-                    <div className="bar active" style={{ height: "45%" }}></div>
-                    <div className="bar-label">Nov</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val high">₱21.00</div>
-                    <div className="bar current" style={{ height: "60%" }}></div>
-                    <div className="bar-label">Dec</div>
-                  </div>
-                </>
-              )}
-
+                <button
+                  className="u-page-btn"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  style={{
+                    opacity: currentPage === totalPages ? 0.4 : 1,
+                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {">"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Date Modified</th>
-              <th>Provider</th>
-              <th>Rate Change</th>
-              <th>Reason / Notes</th>
-              <th>Status</th>
-              <th>Updated By</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedRates.map((rate) => {
-              const isIncrease = parseFloat(rate.newRate.replace('₱', '')) > parseFloat(rate.prevRate.replace('₱', ''));
-              return (
-                <tr key={rate.id}>
-                  <td style={{ color: "#ddd", fontWeight: 400 }}>{rate.date}</td>
-                  <td>{rate.provider}</td>
-                  <td>
-                    <span className="rate-pill">{rate.prevRate}</span>
-                    <span
-                      style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
-                    >
-                      →
-                    </span>
-                    <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>{rate.newRate}</span>
-                  </td>
-                  <td>{rate.reason}</td>
-                  <td>
-                    <span className={`stat-badge ${rate.status === 'Active' ? 'stat-active' : 'stat-review'}`}>{rate.status}</span>
-                  </td>
-                  <td>
-                    <div className="admin-meta">
-                      <div
-                        className="user-avatar"
-                        style={{ 
-                          width: "28px", 
-                          height: "28px", 
-                          fontSize: "10px",
-                          background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
-                        }}
-                      >
-                        {rate.role === "super admin" ? "SA" : "AD"}
-                      </div>
-                      {rate.updatedBy}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <div className="a-pagination">
-        <div style={{ fontSize: "14px", color: "#666" }}>
-          Showing{" "}
-          {(currentPage - 1) * itemsPerPage + 1}
-          {"–"}
-          {Math.min(currentPage * itemsPerPage, allRates.length)}
-          {" "}of {allRates.length}
-        </div>
-
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            className="u-page-btn"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            style={{
-              opacity: currentPage === 1 ? 0.4 : 1,
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-            }}
-          >
-            {"<"}
-          </button>
-
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              className={`u-page-btn ${page === currentPage ? "active" : ""}`}
-              onClick={() => setCurrentPage(page)}
-            >
-              {page}
-            </button>
-          ))}
-
-          <button
-            className="u-page-btn"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            style={{
-              opacity: currentPage === totalPages ? 0.4 : 1,
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-            }}
-          >
-            {">"}
-          </button>
-        </div>
-      </div>
-      </div>      
 
       {showModal && (
         <div className="modal-overlay">

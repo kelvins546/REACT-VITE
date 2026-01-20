@@ -89,7 +89,7 @@ const Complaints = () => {
         show={loader.show}
         message={loader.message}
         Loader={PuffLoader}
-        color="#0055ff"
+        color="#ffd700"
       />
       <div className="page-header">
         <div className="page-title">Complaints Management</div>
@@ -290,12 +290,12 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-badge st-open">OPEN</span>
+                <span className="stat-badge stat-open">UNRESOLVED</span>
               </td>
               <td>
                 <div className="action-cell">
                   <button
-                    className="icon-btn"
+                    className="icon-btn btn-view"
                     title="View Details"
                     onClick={() => setShowModal(true)}
                   >
@@ -343,7 +343,7 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-badge st-review">IN REVIEW</span>
+                <span className="stat-badge stat-review">IN REVIEW</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -396,7 +396,7 @@ const Complaints = () => {
                 </span>
               </td>
               <td>
-                <span className="status-badge st-solved">RESOLVED</span>
+                <span className="stat-badge stat-solved">RESOLVED</span>
               </td>
               <td>
                 <div className="action-cell">
@@ -465,7 +465,7 @@ const Complaints = () => {
               </div>
               <div className="c-modal-row">
                 <span className="c-modal-label">Status</span>
-                <span className="status-badge st-open">OPEN</span>
+                <span className="stat-badge stat-open">OPEN</span>
               </div>
               <div className="c-modal-row">
                 <span className="c-modal-label">Priority</span>
@@ -497,7 +497,7 @@ const Complaints = () => {
               {!isReplying ? (
                 <div className="c-modal-footer">
                   <button
-                    className="c-btn-modal c-btn-reply"
+                    className="logoutCancel" style={{width:"100%"}}
                     onClick={() => setIsReplying(true)}
                   >
                     <span
@@ -508,7 +508,7 @@ const Complaints = () => {
                     </span>
                     Reply
                   </button>
-                  <button className="c-btn-modal mark-btn-resolve" onClick={() => setShowConfirmResolve(true)}>
+                  <button className="btn btn-primary-modal" onClick={() => setShowConfirmResolve(true)}>
                     <span
                       className="material-icons"
                       style={{ fontSize: "18px" }}
@@ -529,13 +529,13 @@ const Complaints = () => {
                   />
                   <div className="c-reply-actions">
                     <button
-                      className="c-btn-modal c-btn-cancel"
+                      className="logoutCancel"
                       onClick={() => setIsReplying(false)}
                     >
                       Cancel
                     </button>
                     <button
-                      className="c-btn-modal mark-btn-resolve"
+                      className="btn btn-primary-modal"
                       onClick={handleSendReply}
                     >
                       <span

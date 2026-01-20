@@ -159,12 +159,13 @@
 }
 
 .u-modal-body {
-  padding: 40px;
+  padding: 24px;
   overflow-y: auto;
   background: var(--bg-dark);
-  display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 30px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  scrollbar-width: none;
 }
 
 .u-archive-body {
@@ -308,13 +309,27 @@
 }
 
 .status-badge {
+  background: rgba(255, 170, 0, 0.1);
+  color: var(--warning);
   padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  display: inline-block;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 170, 0, 0.3);
+}
+
+.status-badge.status-active {
+  background: rgba(0, 255, 153, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(0, 255, 153, 0.3);
+}
+
+.status-badge.status-archived {
+  background: rgba(100, 100, 100, 0.1);
+  color: #999;
+  border: 1px solid rgba(100, 100, 100, 0.3);
 }
 
 .st-active-badge {
