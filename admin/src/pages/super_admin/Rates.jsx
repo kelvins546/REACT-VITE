@@ -24,7 +24,7 @@ const Rates = () => {
   const [selected, setSelected] = useState('Meralco (Commercial)');
   const [selectedYear, setSelectedYear] = useState('2025');
   const [isYearOpen, setIsYearOpen] = useState(false);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const [notification, setNotification] = useState({
     show: false,

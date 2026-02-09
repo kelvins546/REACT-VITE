@@ -418,6 +418,7 @@ const Admins = () => {
     }
 
     const fullName = buildFullName(newAdmin.first_name, newAdmin.last_name);
+    const digits = code.split("");
 
     await emailjs.send(
       EMAILJS_SERVICE_ID,
@@ -426,6 +427,12 @@ const Admins = () => {
         to_email: newAdmin.email,
         to_name: fullName || newAdmin.email,
         otp_code: code,
+        d1: digits[0],
+        d2: digits[1],
+        d3: digits[2],
+        d4: digits[3],
+        d5: digits[4],
+        d6: digits[5],
       },
       EMAILJS_PUBLIC_KEY
     );

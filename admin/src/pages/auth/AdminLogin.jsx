@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotModal, setshowForgotModal] = useState(false);
-  const [forgotStep, setForgotStep] = useState("email"); // email | otp | reset
+  const [forgotStep, setForgotStep] = useState("email");
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotOtp, setForgotOtp] = useState("");
   const [forgotOtpExpiresAt, setForgotOtpExpiresAt] = useState(0);
@@ -38,6 +38,13 @@ const AdminLogin = () => {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
   const OTP_TTL_MS = 5 * 60 * 1000;
   const OTP_RESEND_COOLDOWN_MS = 3 * 60 * 1000;
+
+  const formatMs = (ms) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     const checkSession = async () => {
@@ -172,15 +179,41 @@ const AdminLogin = () => {
       return;
     }
 
-    setLoader({ show: true, message: "Sending OTP..." });
+    if (Date.now() < forgotOtpResendAt) {
+      setForgotStep("otp");
+      setNotification({
+        show: true,
+        title: "Cooldown active",
+        message: `Please wait ${Math.ceil((forgotOtpResendAt - Date.now()) / 1000)}s before requesting a new code.`,
+        variant: "info",
+        icon: "timer"
+      });
+      return;
+    }
+
+    setLoader({ show: true, message: "Verifying account..." });
     try {
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("role")
+        .eq("email", forgotEmail)
+        .single();
+
+      if (userError || !userData) {
+        throw new Error("Account not found or access denied.");
+      }
+
+      if (userData.role !== "admin" && userData.role !== "super admin") {
+        throw new Error("Access Denied: You do not have permission to reset password.");
+      }
+
+      setLoader({ show: true, message: "Sending OTP..." });
       const { error } = await supabase.auth.signInWithOtp({
         email: forgotEmail,
         options: { shouldCreateUser: false },
       });
       if (error) throw error;
 
-      setForgotOtp("");
       setForgotOtpExpiresAt(Date.now() + OTP_TTL_MS);
       setForgotOtpResendAt(Date.now() + OTP_RESEND_COOLDOWN_MS);
       setForgotStep("otp");
@@ -424,7 +457,7 @@ const AdminLogin = () => {
               borderRadius: "12px",
               border: "1px solid #333333",
               padding: "20px",
-              maxWidth: "330px",
+              maxWidth: "420px",
               width: "100%",
               textAlign: "center",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
@@ -495,7 +528,7 @@ const AdminLogin = () => {
               {forgotStep === "otp" && (
                 <>
                   <span style={{ fontSize: "12px", color: "#aaa" }}>
-                    Enter the 6-digit OTP sent to {forgotEmail}.
+                    Enter the 6-digit OTP sent to
                   </span>
                   <div
                     style={{
@@ -515,7 +548,7 @@ const AdminLogin = () => {
                     >
                       OTP Code
                     </label>
-                    <div className="input-wrapper" style={{ background: 'transparent', border: 'none', padding: 0, display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                    <div className="input-wrapper" style={{ background: 'transparent', border: 'none', padding: 0, display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center',alignContent: 'center', width: '100%'}}>
                       {Array.from({ length: 6 }).map((_, index) => (
                         <input
                           key={index}

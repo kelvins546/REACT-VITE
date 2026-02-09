@@ -22,7 +22,7 @@ const Rates = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState('Meralco (Commercial)');
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const [notification, setNotification] = useState({
     show: false,
