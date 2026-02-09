@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "./Complaints.css";
 import { PuffLoader } from "react-spinners";
-import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
-import { PopupNotification } from "../../components/notifications/PopUpNotification";
+import { LoadingPopup } from "../src/components/loaders/LoadingPopUp";
+import { PopupNotification } from "../src/components/notifications/PopUpNotification";
 
 const Complaints = () => {
   const [notification, setNotification] = useState({

@@ -1,27 +1,30 @@
-import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import "../super_admin/Rates.css";
 import "../../components/dropdowns/searchableDropdown.css"
 import { PuffLoader } from "react-spinners";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
-import meralcoLogo from '../../assets/electricityProviders/MERALCO.png';
-import vecoLogo from '../../assets/electricityProviders/DAVAO LIGHT.png';
-import dlpcLogo from '../../assets/electricityProviders/VECO.png';
+import { supabase } from "../../supabaseClient";
 
 const Rates = () => {
   const [showModal, setShowModal] = useState(false);
-  const [showMonthlyTrend, setshowMonthlyTrend] = useState(false);
-  const [showYearlyTrend, setshowYearlyTrend] = useState(true);
-  const [showTrendStatsMonthly, setshowTrendStatsMonthly] = useState(false);
-  const [showTrendStatYearly, setshowTrendStatsYearly] = useState(true);
   const [electricityRate, setElectricityRate] = useState("");
   const [description, setDescription] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportFromDate, setExportFromDate] = useState("");
   const [exportToDate, setExportToDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [loadingRates, setLoadingRates] = useState(true);
+  const [rateRows, setRateRows] = useState([]);
+  const [rateLogs, setRateLogs] = useState([]);
+  const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "admin", id: null });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState('Meralco (Commercial)');
+  const [selectedYear, setSelectedYear] = useState('2025');
+  const [isYearOpen, setIsYearOpen] = useState(false);
+  const itemsPerPage = 10;
 
   const [notification, setNotification] = useState({
     show: false,
@@ -37,57 +40,59 @@ const Rates = () => {
   });
 
   const MAJOR_PROVIDERS = {
-    Meralco: 12.5,
-    VECO: 11.2,
-    DLPC: 10.8
+    "Meralco (Industrial)": 9.80,
+    "Meralco (Commercial)": 10.50,
+    "Visayan Electric (VECO) (Commercial)": 10.15,
+    "Davao Light (DLPC)": 10.24
   };
 
   const DEFAULT_RATE = 9.75;
 
+  const parseSelection = (selection) => {
+    let name = selection;
+    let type = "Residential";
 
-  const allRates = [
-    { id: 1, date: "Oct 23, 2025", provider: "Meralco", prevRate: "₱11.90", newRate: "₱12.50", reason: "Generation Charge Adj.", status: "Active", updatedBy: "Admin", role: "admin" },
-    { id: 2, date: "Sep 15, 2025", provider: "Meralco", prevRate: "₱12.40", newRate: "₱11.90", reason: "System Optimization", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
-    { id: 3, date: "Aug 01, 2025", provider: "Meralco", prevRate: "₱12.10", newRate: "₱12.40", reason: "Inflation Adjustment", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 4, date: "Jul 12, 2025", provider: "Meralco", prevRate: "₱12.80", newRate: "₱12.10", reason: "Substation Efficiency", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 5, date: "Jun 05, 2025", provider: "Meralco", prevRate: "₱11.50", newRate: "₱12.80", reason: "Summer Peak Pricing", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
-    { id: 6, date: "May 10, 2025", provider: "VECO", prevRate: "₱10.80", newRate: "₱11.20", reason: "Transmission Cost", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 7, date: "Apr 22, 2025", provider: "DLPC", prevRate: "₱10.50", newRate: "₱10.80", reason: "Distribution Fee Adj.", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 8, date: "Mar 15, 2025", provider: "Meralco", prevRate: "₱12.40", newRate: "₱12.80", reason: "Fuel Cost Increase", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
-    { id: 9, date: "Feb 28, 2025", provider: "VECO", prevRate: "₱11.00", newRate: "₱10.80", reason: "System Efficiency", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 10, date: "Jan 20, 2025", provider: "DLPC", prevRate: "₱10.20", newRate: "₱10.50", reason: "Maintenance Cost", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 11, date: "Dec 10, 2024", provider: "Meralco", prevRate: "₱12.10", newRate: "₱12.40", reason: "Year-end Adjustment", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
-    { id: 12, date: "Nov 05, 2024", provider: "VECO", prevRate: "₱10.90", newRate: "₱11.00", reason: "Quarterly Review", status: "Previous", updatedBy: "Admin", role: "admin" },
-  ];
+    if (selection.includes("(Industrial)")) {
+      name = selection.replace("(Industrial)", "").trim();
+      type = "Industrial";
+    } else if (selection.includes("(Commercial)")) {
+      name = selection.replace("(Commercial)", "").trim();
+      type = "Commercial";
+    } else if (selection.includes("(Residential)")) {
+      name = selection.replace("(Residential)", "").trim();
+      type = "Residential";
+    }
+    return { name, type };
+  };
 
+  const { name: selectedProvider, type: selectedType } = parseSelection(selected);
+  const filteredLogs = rateLogs.filter((log) => log.providerName === selectedProvider && (log.rateType === selectedType || (selectedType === "Residential" && log.rateType === "standard")));
 
-  const totalPages = Math.ceil(allRates.length / itemsPerPage);
-  const paginatedRates = allRates.slice(
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const paginatedRates = filteredLogs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   const allProviders = [
-    'Meralco', 'VECO', 'DLPC',
-    'Abreco', 'AEC', 'AKELKO', 'ALECO', 'ANECO', 'ANTECO', 'ASELCO', 'AURELCO',
-    'BALAMBAN', 'BANELCO', 'BASSELCO', 'BATANELCO', 'BETELEC I', 'BATELIC II',
-    'BENECO', 'BILECO', 'BISELCO', 'BOHECO I', 'BOHECO II', 'BUSECO',
-    'CAGELCO I', 'CAGELCO II', 'CAMELCO', 'CANORECO', 'CAPELCO',
-    'CASURECO I', 'CASURECO II', 'CASURECO III', 'CASURECO IV',
-    'CEBECCO I', 'CEBECCO II', 'CEBECCO III', 'CELCOR', 'CENPELCO',
-    'CEPALCO', 'CLPC', 'COTELCO', 'DASURECO', 'DECORP', 'DIELCO',
-    'DORELCO', 'ESAMELCO', 'FLECO', 'GUIMELCO', 'IFELCO',
-    'ILECO I', 'ILECO II', 'ILECO III', 'ILPI', 'INEC',
-    'ISECO', 'ISELCO I', 'ISELCO II', 'KAELCO', 'LANECO',
-    'LEYECO II', 'LEYECO III', 'LEYECO IV', 'LEYEVO V',
-    'LUELCO', 'MAGELCO', 'MARELCO', 'MECO', 'MOPRECO'
+    'ABRECO', 'AEC (Albay)', 'AKELCO', 'ALECO', 'ANECO', 'ANTECO', 'ASELCO', 'AURELCO',
+    'BALAMBAN', 'BANELCO', 'BASELCO', 'BATANELCO', 'BATELEC I', 'BATELEC II', 'BENECO',
+    'BILECO', 'BISELCO', 'BOHECO I', 'BOHECO II', 'BUSECO', 'CAGELCO I', 'CAGELCO II',
+    'CAMELCO', 'CANORECO', 'CAPELCO', 'CASURECO I', 'CASURECO II', 'CASURECO III',
+    'CASURECO IV', 'CEBECO I', 'CEBECO II', 'CEBECO III', 'CELCOR', 'CENPELCO', 'CEPALCO',
+    'CLPC (Calamba)', 'COTELCO', 'DASURECO', 'Davao Light (DLPC)', 'DECORP', 'DIELCO',
+    'DORELCO', 'ESAMELCO', 'FLECO', 'GUIMELCO', 'IFELCO', 'ILECO I', 'ILECO II', 'ILECO III',
+    'ILPI (Iligan)', 'INEC', 'ISECO', 'ISELCO I', 'ISELCO II', 'KAELCO', 'LANECO',
+    'LEYECO II', 'LEYECO III', 'LEYECO IV', 'LEYECO V', 'LUELCO', 'MAGELCO', 'MARELCO',
+    'MECO (Mactan)', 'MOPRECO', 'MORESCO I', 'MORESCO II', 'NEECO I', 'NEECO II',
+    'NOCECO', 'NONECO', 'NORECO I', 'NORECO II', 'NORSAMELCO', 'NUVELCO', 'OMECO', 'ORMECO',
+    'PALECO', 'PANELCO I', 'PANELCO III', 'PELCO I', 'PELCO II', 'PELCO III', 'PENELCO',
+    'QUEZELCO I', 'QUEZELCO II', 'QUIRELCO', 'ROMELCO', 'SAMELCO I', 'SAMELCO II',
+    'SOCOTECO I', 'SOCOTECO II', 'SOLECO', 'SUKELCO', 'SURNECO', 'SURSECO', 'TARELCO I',
+    'TARELCO II', 'TAWELCO', 'Visayan Electric (VECO)', 'ZAMCELCO', 'ZAMECO I', 'ZAMECO II',
+    'ZAMSURECO', 'ZANECO'
   ].sort((a, b) => a.localeCompare(b));
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState('Meralco');
-  const [selectedYear, setSelectedYear] = useState('2025');
-  const [isYearOpen, setIsYearOpen] = useState(false);
 
   const searchLower = searchTerm.toLowerCase();
 
@@ -99,14 +104,274 @@ const Rates = () => {
     .filter(p => p.toLowerCase().includes(searchLower));
 
   const providerLogos = {
-    'Meralco': meralcoLogo,
-    'DLPC': dlpcLogo,
-    'VECO': vecoLogo,
+    'Meralco (Industrial)': "./MERALCO.png",
+    'Meralco (Commercial)': "./MERALCO.png",
+    'Davao Light (DLPC)': "./DAVAO LIGHT.png",
+    'Visayan Electric (VECO) (Commercial)': "./VECO.png",
+    'ABRECO': "./ABRECO.png",
+    'AEC (Albay)': "./AEC.png",
+    'AKELCO': "./AKELCO.png",
+    'ALECO': "./ALECO.png",
+    'ANECO': "./ANECO.png",
+    'ANTECO': "./ANTECO.png",
+    'ASELCO': "./ASELCO.png",
+    'AURELCO': "./AURELCO.png",
+    'BALAMBAN': "./BALAMBAN.png",
+    'BANELCO': "./BANELCO.png",
+    'BASELCO': "./BASELCO.png",
+    'BATANELCO': "./BATANELCO.png",
+    'BATELEC I': "./BATELEC I.png",
+    'BATELEC II': "./BATELEC II.png",
+    'BENECO': "./BENECO.png",
+    'BILECO': "./BILECO.png",
+    'BISELCO': "./BISELCO.png",
+    'BOHECO I': "./BOHECO I.png",
+    'BOHECO II': "./BOHECO II.png",
+    'BUSECO': "./BUSECO.png",
+    'CAGELCO I': "./CAGELCO I.png",
+    'CAGELCO II': "./CAGELCO II.png",
+    'CAMELCO': "./CAMELCO.png",
+    'CANORECO': "./CANORECO.png",
+    'CAPELCO': "./CAPELCO.png",
+    'CASURECO I': "./CASURECO I.png",
+    'CASURECO II': "./CASURECO II.png",
+    'CASURECO III': "./CASURECO III.png",
+    'CASURECO IV': "./CASURECO IV.png",
+    'CEBECO I': "./CEBECO I.png",
+    'CEBECO II': "./CEBECO II.png",
+    'CEBECO III': "./CEBECO III.png",
+    'CELCOR': "./CELCOR.png",
+    'CENPELCO': "./CENPELCO.png",
+    'CEPALCO': "./CEPALCO.png",
+    'CLPC (Calamba)': "./CLPC.png",
+    'COTELCO': "./COTELCO.png",
+    'DASURECO': "./DASURECO.png",
+    'DECORP': "./DECORP.png",
+    'DIELCO': "./DIELCO.png",
+    'DORELCO': "./DORELCO.png",
+    'ESAMELCO': "./ESAMELCO.png",
+    'FLECO': "./FLECO.png",
+    'GUIMELCO': "./GUIMELCO.png",
+    'IFELCO': "./IFELCO I.png",
+    'ILECO I': "./ILECO I.png",
+    'ILECO II': "./ILECO II.png",
+    'ILECO III': "./ILECO III.png",
+    'ILPI (Iligan)': "./ILPI.png",
+    'INEC': "./INEC.png",
+    'ISECO': "./ISECO.png",
+    'ISELCO I': "./ISELCO I.png",
+    'ISELCO II': "./ISELCO II.png",
+    'KAELCO': "./KAELCO.png",
+    'LANECO': "./LANECO.png",
+    'LEYECO II': "./LEYECO II.png",
+    'LEYECO III': "./LEYECO III.png",
+    'LEYECO IV': "./LEYECO IV.png",
+    'LEYECO V': "./LEYECO V.png",
+    'LUELCO': "./LUELCO.png",
+    'MAGELCO': "./MAGELCO.png",
+    'MARELCO': "./MARELCO.png",
+    'MECO (Mactan)': "./MECO.png",
+    'MOPRECO': "./MOPRECO.png",
+    'MORESCO I': "./MORESCO I.png",
+    'MORESCO II': "./MORESCO II.png",
+    'NEECO I': "./NEECO I.png",
+    'NEECO II': "./NEECO II.png",
+    'NON  ECO': "./NONECO.png",
+    'NORECO I': "./NORECO I.png",
+    'NORECO II': "./NORECO II.png",
+    'NORSAMELCO': "./NORSAMELCO.png",
+    'NUVELCO': "./NUVELCO.png",
+    'OMECO': "./OMECO.png",
+    'ORMECO': "./ORMECO.png",
+    'PALECO': "./PALECO.png",
+    'PANELCO I': "./PANELCO I.png",
+    'PANELCO III': "./PANELCO III.png",
+    'PELCO I': "./PELCO I.png",
+    'PELCO II': "./PELCO II.png",
+    'PELCO III': "./PELCO III.png",
+    'PENELCO': "./PENELCO.png",
+    'QUEZELCO I': "./QUEZELCO I.png",
+    'QUEZELCO II': "./QUEZELCO II.png",
+    'QUIRELCO': "./QUIRELCO.png",
+    'ROMELCO': "./ROMELCO.png",
+    'SAMELCO I': "./SAMELCO I.png",
+    'SAMELCO II': "./SAMELCO II.png",
+    'SOCOTECO I': "./SOCOTECO I.png",
+    'SOCOTECO II': "./SOCOTECO II.png",
+    'SOLECO': "./SOLECO.png",
+    'SUKELCO': "./SUKELCO.png",
+    'SURNECO': "./SURENCO.png",
+    'SURSECO': "./SURSECO.png",
+    'TARELCO I': "./TARELCO I.png",
+    'TARELCO II': "./TARELCO II.png",
+    'TAWELCO': "./TAWELCO.png",
+    'Visayan Electric (VECO)': "./VECO.png",
+    'ZAMCELCO': "./ZAMCELCO.png",
+    'ZAMECO I': "./ZAMECO I.png",
+    'ZAMECO II': "./ZAMECO II.png",
+    'ZAMSURECO': "./ZAMSURECO.png",
+    'ZANECO': "./ZANECO.png",
   };
 
   const filteredOptions = allProviders.filter(option =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const formatCurrency = (value) => {
+    const num = Number(value);
+    if (Number.isNaN(num)) return "₱0.00";
+    return `₱${num.toFixed(2)}`;
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return "";
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return iso;
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  };
+
+  const formatMovement = (movement) => {
+    const num = Number(movement || 0);
+    const sign = num > 0 ? "+" : "";
+    return `${sign}${num.toFixed(2)}`;
+  };
+
+  const getProviderRate = (name) => {
+    const { name: providerName, type } = parseSelection(name);
+    const match = rateRows.find((row) => row.provider_name === providerName && row.rate_type === type && (row.status || "").toLowerCase() === "active");
+    if (match?.rate_per_kwh != null) return Number(match.rate_per_kwh);
+    if (Object.prototype.hasOwnProperty.call(MAJOR_PROVIDERS, name)) {
+      return MAJOR_PROVIDERS[name];
+    }
+    return DEFAULT_RATE;
+  };
+
+  const getCurrentRate = () => {
+    const { name, type } = parseSelection(selected);
+    return rateRows.find(
+      (row) =>
+        row.provider_name === name &&
+        row.rate_type === type &&
+        (row.status || "").toLowerCase() === "active"
+    ) || rateRows.find((row) => row.provider_name === name && row.rate_type === type) || null;
+  };
+
+  const loadCurrentUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
+    if (!user) return;
+
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("first_name,last_name,role,email")
+      .eq("id", user.id)
+      .single();
+
+    const name =
+      [userRow?.first_name, userRow?.last_name].filter(Boolean).join(" ") ||
+      userRow?.email ||
+      "Admin";
+
+    setCurrentUser({ name, role: userRow?.role || "admin", id: user.id });
+  };
+
+  const fetchRates = async () => {
+    setLoadingRates(true);
+    try {
+      const { data: ratesData, error: ratesError } = await supabase
+        .from("utility_rates")
+        .select("*")
+        .order("provider_name", { ascending: true });
+      if (ratesError) throw ratesError;
+
+      const { data: logsData, error: logsError } = await supabase
+        .from("utility_rates_logs")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (logsError) throw logsError;
+
+      // Fetch user details for logs manually to avoid FK issues
+      const userIds = [...new Set((logsData || []).map(l => l.updated_by).filter(Boolean))];
+      let usersMap = {};
+      if (userIds.length > 0) {
+        const { data: usersData } = await supabase
+          .from('users')
+          .select('id, first_name, last_name, role')
+          .in('id', userIds);
+        
+        if (usersData) {
+          usersData.forEach(u => {
+            usersMap[u.id] = u;
+          });
+        }
+      }
+
+      setRateRows(ratesData || []);
+      setRateLogs(
+        (logsData || []).map((row) => {
+          const newRate = Number(row.rate_per_kwh || 0);
+          const movement = Number(row.movement || 0);
+          const prevRate = newRate - movement;
+          const status = (row.status || "previous").toLowerCase();
+          
+          const user = usersMap[row.updated_by];
+          const updaterName = user 
+            ? `${user.first_name} ${user.last_name}`.trim() 
+            : (row.updated_by === currentUser.id ? currentUser.name : "Admin");
+          const updaterRole = user ? user.role : "admin";
+
+          let providerDisplay = row.provider_name;
+          if (row.rate_type && row.rate_type !== 'standard') {
+             providerDisplay += ` (${row.rate_type})`;
+          }
+
+          return {
+            id: row.id,
+            date: formatDate(row.effective_date || row.created_at),
+            rawDate: row.effective_date || row.created_at,
+            provider: providerDisplay,
+            providerName: row.provider_name,
+            rateType: row.rate_type,
+            prevRate: formatCurrency(prevRate),
+            newRate: formatCurrency(newRate),
+            reason: row.reason || "--",
+            status: status === "active" ? "Active" : "Previous",
+            updatedBy: updaterName,
+            role: updaterRole,
+          };
+        })
+      );
+    } catch (error) {
+      setNotification({
+        show: true,
+        title: "Load Failed",
+        message: error.message || "Failed to load utility rates.",
+        variant: "error",
+        icon: "error"
+      });
+    } finally {
+      setLoadingRates(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCurrentUser();
+    fetchRates();
+  }, []);
+
+  useEffect(() => {
+    if (filteredLogs.length === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+      return;
+    }
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [filteredLogs, totalPages, currentPage]);
 
   const handleExport = () => {
     setLoader({
@@ -118,18 +383,29 @@ const Rates = () => {
       try {
         const headers = ["Date Modified", "Provider", "Previous Rate", "New Rate", "Reason / Notes", "Status", "Updated By"];
 
-        const ratesData = [
-          ["Oct 23, 2025", "Meralco", "₱11.90", "₱12.50", "Generation Charge Adj.", "Active", "Admin"],
-          ["Sep 15, 2025", "Meralco", "₱12.40", "₱11.90", "System Optimization", "Previous", "Admin"],
-          ["Aug 01, 2025", "Meralco", "₱12.10", "₱12.40", "Inflation Adjustment", "Previous", "Admin"],
-          ["Jul 12, 2025", "Meralco", "₱12.80", "₱12.10", "Substation Efficiency", "Previous", "Admin"],
-          ["Jun 05, 2025", "Meralco", "₱11.50", "₱12.80", "Summer Peak Pricing", "Previous", "Admin"],
-        ];
+        let ratesToExport = filteredLogs;
 
-        let ratesToExport = ratesData;
+        if (exportFromDate) {
+          const fromDate = new Date(exportFromDate);
+          ratesToExport = ratesToExport.filter(log => new Date(log.rawDate) >= fromDate);
+        }
+
+        if (exportToDate) {
+          const toDate = new Date(exportToDate);
+          toDate.setHours(23, 59, 59, 999);
+          ratesToExport = ratesToExport.filter(log => new Date(log.rawDate) <= toDate);
+        }
 
         const rows = ratesToExport.map((row) =>
-          row.map((cell) =>
+          [
+            row.date,
+            row.provider,
+            row.prevRate,
+            row.newRate,
+            row.reason,
+            row.status,
+            row.updatedBy,
+          ].map((cell) =>
             (cell || "").toString().replace(/₱/g, "P")
           )
         );
@@ -235,9 +511,57 @@ const Rates = () => {
     });
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-      setLoader({ show: false, message: "" });
+      const { name: providerName, type: rateType } = parseSelection(selected);
+
+      const newRate = Number(electricityRate);
+      const currentRate = getCurrentRate();
+      const prevRate = currentRate?.rate_per_kwh != null ? Number(currentRate.rate_per_kwh) : null;
+      const movement = prevRate != null ? newRate - prevRate : 0;
+      const effectiveDate = new Date().toISOString();
+
+      const payload = {
+        provider_name: providerName,
+        rate_per_kwh: newRate,
+        effective_date: effectiveDate,
+        movement,
+        reason: description,
+        status: "active",
+        updated_by: user.id,
+        rate_type: rateType,
+      };
+
+      const { data: updatedRows, error: updateError } = await supabase
+        .from("utility_rates")
+        .update(payload)
+        .eq("provider_name", providerName)
+        .eq("rate_type", rateType)
+        .select();
+
+      if (updateError) throw updateError;
+
+      if (!updatedRows || updatedRows.length === 0) {
+        const { error: insertError } = await supabase
+          .from("utility_rates")
+          .insert(payload);
+        if (insertError) throw insertError;
+      }
+
+      await supabase
+        .from("utility_rates_logs")
+        .update({ status: "previous" })
+        .eq("provider_name", providerName)
+        .eq("rate_type", rateType)
+        .eq("status", "active");
+
+      const { error: logError } = await supabase
+        .from("utility_rates_logs")
+        .insert(payload);
+      if (logError) throw logError;
+
+      setLoader({ show: false, message: "Processing..." });
 
       setNotification({
         show: true,
@@ -248,8 +572,11 @@ const Rates = () => {
       });
 
       setShowModal(false);
+      setElectricityRate("");
+      setDescription("");
+      fetchRates();
     } catch (error) {
-      setLoader({ show: false, message: "" });
+      setLoader({ show: false, message: "Processing..." });
       setNotification({
         show: true,
         title: "Update Failed",
@@ -259,6 +586,14 @@ const Rates = () => {
       });
     }
   };
+
+  const currentRate = getCurrentRate();
+  const currentRateValue =
+    currentRate?.rate_per_kwh != null ? Number(currentRate.rate_per_kwh) : getProviderRate(selected);
+  const currentMovement = Number(currentRate?.movement || 0);
+  const movementClass = currentMovement >= 0 ? "rd-val red" : "rd-val green";
+  const displayRate = formatCurrency(currentRateValue).replace("₱", "₱ ");
+  const displayDate = currentRate?.effective_date || currentRate?.created_at || "";
 
   return (
     <>
@@ -359,6 +694,8 @@ const Rates = () => {
 
                         {majorProviders.map((name) => {
                           const isSelected = selected === name;
+                          const logoKey = providerLogos[name];
+                          const logoSrc = logoKey ? `/provider_images/${logoKey.replace('./', '')}` : null;
 
                           return (
                             <li
@@ -368,8 +705,8 @@ const Rates = () => {
                             >
                               <div className="provider-left">
                                 <div className="provider-logo">
-                                  {providerLogos[name] ? (
-                                    <img src={providerLogos[name]} alt={name} />
+                                  {logoSrc ? (
+                                    <img src={logoSrc} alt={name} />
                                   ) : (
                                     <span>{name.charAt(0)}</span>
                                   )}
@@ -378,7 +715,7 @@ const Rates = () => {
                                 <div className="provider-info">
                                   <div className="provider-name">{name}</div>
                                   <div className="provider-sub">
-                                    Rate: ₱ {MAJOR_PROVIDERS[name].toFixed(2)} / kWh
+                                    Rate: ₱ {getProviderRate(name).toFixed(2)} / kWh
                                   </div>
                                 </div>
                               </div>
@@ -398,6 +735,8 @@ const Rates = () => {
 
                         {otherProviders.map((name) => {
                           const isSelected = selected === name;
+                          const logoKey = providerLogos[name];
+                          const logoSrc = logoKey ? `/provider_images/${logoKey.replace('./', '')}` : null;
 
                           return (
                             <li
@@ -406,14 +745,18 @@ const Rates = () => {
                               className={`provider-option ${isSelected ? "selected" : ""}`}
                             >
                               <div className="provider-left">
-                                <div className="provider-logo gray">
-                                  <span>{name.charAt(0)}</span>
+                                <div className="provider-logo">
+                                  {logoSrc ? (
+                                    <img src={logoSrc} alt={name} />
+                                  ) : (
+                                    <span>{name.charAt(0)}</span>
+                                  )}
                                 </div>
 
                                 <div className="provider-info">
                                   <div className="provider-name">{name}</div>
                                   <div className="provider-sub muted">
-                                    Rate: ₱ {DEFAULT_RATE.toFixed(2)} / kWh
+                                    Rate: ₱ {getProviderRate(name).toFixed(2)} / kWh
                                   </div>
                                 </div>
                               </div>
@@ -436,24 +779,28 @@ const Rates = () => {
 
 
             <div style={{ margin: "25px 0" }}>
-              <div className="rate-main">₱ 12.50</div>
+              <div className="rate-main">{displayRate}</div>
               <div style={{ color: "#888", fontSize: "14px" }}>per kWh</div>
             </div>
 
             <div className="rate-details">
               <div>
                 <div className="rd-label">Effective Date</div>
-                <div className="rd-val">Oct 23, 2025</div>
+                <div className="rd-val">{displayDate ? formatDate(displayDate) : "--"}</div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div className="rd-label">Movement</div>
-                <div className="rd-val red">+0.60</div>
+                <div className={movementClass}>{formatMovement(currentMovement)}</div>
               </div>
             </div>
 
             <button
               className="btn btn-primary"
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                setElectricityRate(currentRateValue.toString());
+                setDescription("");
+                setShowModal(true);
+              }}
             >
               Update Rate
             </button>
@@ -473,55 +820,77 @@ const Rates = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedRates.map((rate) => {
-                    const isIncrease = parseFloat(rate.newRate.replace('₱', '')) > parseFloat(rate.prevRate.replace('₱', ''));
-                    return (
-                      <tr key={rate.id}>
-                        <td style={{ color: "#ddd", fontWeight: 400 }}>{rate.date}</td>
-                        <td>{rate.provider}</td>
-                        <td>
-                          <span className="rate-pill">{rate.prevRate}</span>
-                          <span
-                            style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
-                          >
-                            →
-                          </span>
-                          <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>{rate.newRate}</span>
-                        </td>
-                        <td>{rate.reason}</td>
-                        <td>
-                          <span className={`stat-badge ${rate.status === 'Active' ? 'stat-active' : 'stat-review'}`}>{rate.status}</span>
-                        </td>
-                        <td>
-                          <div className="admin-meta">
-                            <div
-                              className="user-avatar"
-                              style={{
-                                width: "28px",
-                                height: "28px",
-                                fontSize: "10px",
-                                background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
-                              }}
-                            >
-                              {rate.role === "super admin" ? "SA" : "AD"}
+                  {loadingRates ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center", padding: "30px" }}>
+                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                          <PuffLoader color="#ffd700" size={28} />
+                        </div>
+                      </td>
+                    </tr>
+                  ) : paginatedRates.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center", padding: "24px", color: "#666" }}>
+                        No rate logs found for {selected}.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedRates.map((rate) => {
+                      const isIncrease = parseFloat(rate.newRate.replace(/[^\d.-]/g, '')) > parseFloat(rate.prevRate.replace(/[^\d.-]/g, ''));
+                      return (
+                        <tr key={rate.id}>
+                          <td style={{ color: "#ddd", fontWeight: 400 }}>{rate.date}</td>
+                          <td>{rate.provider}</td>
+                          <td>
+                            <div className="rate-change-cell">
+                              <span className="rate-pill">{rate.prevRate}</span>
+                              <span
+                                style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
+                              >
+                                →
+                              </span>
+                              <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>{rate.newRate}</span>
                             </div>
-                            {rate.updatedBy}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          </td>
+                          <td>{rate.reason}</td>
+                          <td>
+                            <span className={`stat-badge ${rate.status === 'Active' ? 'stat-active' : 'stat-review'}`}>{rate.status}</span>
+                          </td>
+                          <td>
+                            <div className="admin-meta">
+                              <div
+                                className="user-avatar"
+                                style={{
+                                  width: "28px",
+                                  height: "28px",
+                                  fontSize: "10px",
+                                  background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
+                                }}
+                              >
+                                {rate.role === "super admin" ? "SA" : "AD"}
+                              </div>
+                              {rate.updatedBy}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
             <div className="a-pagination">
               <div style={{ fontSize: "14px", color: "#666" }}>
-                Showing{" "}
-                {(currentPage - 1) * itemsPerPage + 1}
-                {"–"}
-                {Math.min(currentPage * itemsPerPage, allRates.length)}
-                {" "}of {allRates.length}
-              </div>
+              {filteredLogs.length === 0 ? (
+                "Showing 0–0 of 0"
+              ) : (
+                <>
+                  Showing {(currentPage - 1) * itemsPerPage + 1}
+                  {"–"}
+                  {Math.min(currentPage * itemsPerPage, filteredLogs.length)} of {filteredLogs.length}
+                </>
+              )}
+            </div>
 
               <div style={{ display: "flex", gap: "8px" }}>
                 <button
@@ -573,7 +942,7 @@ const Rates = () => {
               <input
                 type="text"
                 className="form-input"
-                defaultValue="Meralco (Metro Manila)"
+                value={selected}
                 readOnly
                 style={{
                   background: "#1a1a1a",

@@ -46,7 +46,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-
+  height: fit-content;
+  align-self: start;
 }
 
 .table-container-scrollable {
@@ -120,7 +121,7 @@
 }
 
 .rate-main {
-  font-size: 64px;
+  font-size: 54px;
   font-weight: 800;
   color: #fff;
   letter-spacing: -2px;
@@ -152,6 +153,10 @@
 
 .rd-val.red {
   color: var(--danger);
+}
+
+.rd-val.green {
+  color: var(--primary);
 }
 
 .trend-card {
@@ -217,7 +222,8 @@
   flex: 1;
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 12px;
   margin-top: 20px;
   border-bottom: 1px solid #333;
   padding-bottom: 5px;
@@ -270,7 +276,7 @@
 }
 
 /* Table styling for rate pills */
-td:has(.rate-pill) {
+.rate-change-cell {
   display: flex;
   align-items: center;
   gap: 4px;

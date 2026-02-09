@@ -5,16 +5,18 @@ import { PuffLoader } from "react-spinners";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
 import { supabase } from "../../supabaseClient";
+import "../../components/dropdowns/searchableDropdown.css";
 
 const ArchivedAdmins = () => {
     const navigate = useNavigate();
     const [restoreModal, setShowRestoreModal] = useState(false);
-    const [restoreReason, setRestoreReason] = useState("");
+    const [restoreReason, setRestoreReason] = useState("Payment Received");
     const [restoreNotes, setRestoreNotes] = useState("");
     const [deleteModal, setShowDeleteModal] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [search, setSearch] = useState("");
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [isRestoreReasonDropdownOpen, setIsRestoreReasonDropdownOpen] = useState(false);
 
     const [showResetModal, setShowResetModal] = useState(false);
 
@@ -181,7 +183,7 @@ const ArchivedAdmins = () => {
 
             setShowRestoreModal(false);
             setSelectedUsers([]);
-            setRestoreReason("");
+            setRestoreReason("Payment Received");
             setRestoreNotes("");
         } catch (err) {
             setNotification({
@@ -521,16 +523,50 @@ const ArchivedAdmins = () => {
                             </p>
                             <div className="r-form-group">
                                 <label className="r-form-label">Reason for Restoration</label>
-                                <select
-                                    className="r-form-select"
-                                    value={restoreReason}
-                                    onChange={(e) => setRestoreReason(e.target.value)}
-                                >
-                                    <option>Payment Received</option>
-                                    <option>Terms Violation Resolved</option>
-                                    <option>Contract Renewed</option>
-                                    <option>Other</option>
-                                </select>
+                                <div className="a-input-wrapper" style={{ position: "relative", borderColor: "#333", background: "#1a1a1a", borderRadius: "12px", padding: "14px", display: "flex", alignItems: "center" }}>
+                                    <button
+                                        type="button"
+                                        className="a-form-input"
+                                        style={{
+                                            textAlign: "left",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            width: "100%",
+                                            paddingRight: 0,
+                                            background: "transparent",
+                                            border: "none",
+                                            color: "#fff",
+                                            fontSize: "14px"
+                                        }}
+                                        onClick={() => setIsRestoreReasonDropdownOpen(!isRestoreReasonDropdownOpen)}
+                                    >
+                                        <span style={{ color: "#fff", fontSize: "14px" }}>
+                                            {restoreReason || "Payment Received"}
+                                        </span>
+                                        <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isRestoreReasonDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+                                            keyboard_arrow_down
+                                        </span>
+                                    </button>
+
+                                    {isRestoreReasonDropdownOpen && (
+                                        <div className="dropdown-menu" style={{ width: "100%", zIndex: 100 }}>
+                                            <ul className="options-list">
+                                                {["Payment Received", "Terms Violation Resolved", "Contract Renewed", "Other"].map((reason) => (
+                                                    <li
+                                                        key={reason}
+                                                        className={`provider-option ${restoreReason === reason ? "selected" : ""}`}
+                                                        onClick={() => { setRestoreReason(reason); setIsRestoreReasonDropdownOpen(false); }}
+                                                    >
+                                                        <div className="provider-info"><div className="provider-name">{reason}</div></div>
+                                                        {restoreReason === reason && <span className="checkmark material-symbols-outlined">check</span>}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="r-form-group">
                                 <label className="r-form-label">
@@ -539,7 +575,7 @@ const ArchivedAdmins = () => {
                                 <textarea
                                     className="r-form-textarea"
                                     placeholder="Enter details here..."
-                                    value={restoreReason}
+                                    value={restoreNotes}
                                     onChange={(e) => setRestoreNotes(e.target.value)}
                                 ></textarea>
                             </div>

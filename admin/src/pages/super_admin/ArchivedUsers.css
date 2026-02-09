@@ -449,3 +449,27 @@
   flex-direction: column;
   gap: 0;
 }
+
+.avatar-md {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Image grayscale */
+.avatar-archived {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
+/* Initials fallback */
+.avatar-archived-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #555;
+  color: #fff;
+  font-weight: 600;
+  opacity: 0.6;
+}

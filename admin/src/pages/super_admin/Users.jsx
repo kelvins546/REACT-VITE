@@ -6,6 +6,7 @@ import { PuffLoader } from "react-spinners";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
 import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
+import "../../components/dropdowns/searchableDropdown.css";
 
 const buildFullName = (first, last) =>
   [first, last].filter(Boolean).join(" ").trim();
@@ -68,7 +69,8 @@ const Users = () => {
 
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [archiveReason, setArchiveReason] = useState("");
+  const [archiveReason, setArchiveReason] = useState("Non-payment of Dues");
+  const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] = useState(false);
 
   const checkHubStatus = (lastSeen) => {
     if (!lastSeen) return false;
@@ -289,7 +291,7 @@ const Users = () => {
 
   const handleArchiveClick = (user) => {
     setSelectedUser(user);
-    setArchiveReason("");
+    setArchiveReason("Non-payment of Dues");
     setShowArchiveModal(true);
   };
 
@@ -482,7 +484,7 @@ const Users = () => {
                 </th>*/}
 
                   <th>User Profile</th>
-                  <th>Street Address</th>
+                  <th>City</th>
                   <th>Registered Hubs</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -555,7 +557,7 @@ const Users = () => {
                           </div>
                         </div>
                       </td>
-                      <td>{user.location}</td>
+                      <td>{user.city}</td>
                       <td>{user.hubs}</td>
                       <td>
                         <span
@@ -885,16 +887,50 @@ const Users = () => {
               </p>
               <div className="u-form-group">
                 <label className="u-form-label">Reason for Archiving</label>
-                <select
-                  className="u-form-select"
-                  value={archiveReason}
-                  onChange={(e) => setArchiveReason(e.target.value)}
-                >
-                  <option>Non-payment of Dues</option>
-                  <option>Violation of Terms</option>
-                  <option>Moved Out / Contract Ended</option>
-                  <option>Other</option>
-                </select>
+                <div className="a-input-wrapper" style={{ position: "relative", borderColor: "#333", background: "#1a1a1a", borderRadius: "12px", padding: "14px", display: "flex", alignItems: "center" }}>
+                  <button
+                    type="button"
+                    className="a-form-input"
+                    style={{
+                      textAlign: "left",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                      paddingRight: 0,
+                      background: "transparent",
+                      border: "none",
+                      color: "#fff",
+                      fontSize: "14px"
+                    }}
+                    onClick={() => setIsArchiveReasonDropdownOpen(!isArchiveReasonDropdownOpen)}
+                  >
+                    <span style={{ color: "#fff", fontSize: "14px" }}>
+                      {archiveReason || "Non-payment of Dues"}
+                    </span>
+                    <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isArchiveReasonDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+                      keyboard_arrow_down
+                    </span>
+                  </button>
+
+                  {isArchiveReasonDropdownOpen && (
+                    <div className="dropdown-menu" style={{ width: "100%", zIndex: 100 }}>
+                      <ul className="options-list">
+                        {["Non-payment of Dues", "Violation of Terms", "Moved Out / Contract Ended", "Other"].map((reason) => (
+                          <li
+                            key={reason}
+                            className={`provider-option ${archiveReason === reason ? "selected" : ""}`}
+                            onClick={() => { setArchiveReason(reason); setIsArchiveReasonDropdownOpen(false); }}
+                          >
+                            <div className="provider-info"><div className="provider-name">{reason}</div></div>
+                            {archiveReason === reason && <span className="checkmark material-symbols-outlined">check</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="u-form-group">
                 <label className="u-form-label">

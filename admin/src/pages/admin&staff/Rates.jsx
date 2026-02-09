@@ -1,27 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../super_admin/Rates.css";
 import "../../components/dropdowns/searchableDropdown.css"
 import { PuffLoader } from "react-spinners";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
-import meralcoLogo from '../../assets/electricityProviders/MERALCO.png';
-import vecoLogo from '../../assets/electricityProviders/DAVAO LIGHT.png';
-import dlpcLogo from '../../assets/electricityProviders/VECO.png';
+import { supabase } from "../../supabaseClient";
 
 const Rates = () => {
   const [showModal, setShowModal] = useState(false);
-  const [showMonthlyTrend, setshowMonthlyTrend] = useState(false);
-  const [showYearlyTrend, setshowYearlyTrend] = useState(true);
-  const [showTrendStatsMonthly, setshowTrendStatsMonthly] = useState(false);
-  const [showTrendStatYearly, setshowTrendStatsYearly] = useState(true);
   const [electricityRate, setElectricityRate] = useState("");
   const [description, setDescription] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportFromDate, setExportFromDate] = useState("");
   const [exportToDate, setExportToDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [loadingRates, setLoadingRates] = useState(true);
+  const [rateRows, setRateRows] = useState([]);
+  const [rateLogs, setRateLogs] = useState([]);
+  const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "admin", id: null });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState('Meralco (Commercial)');
+  const itemsPerPage = 10;
 
   const [notification, setNotification] = useState({
     show: false,
@@ -37,55 +38,59 @@ const Rates = () => {
   });
 
   const MAJOR_PROVIDERS = {
-    Meralco: 12.5,
-    VECO: 11.2,
-    DLPC: 10.8
+    "Meralco (Industrial)": 9.80,
+    "Meralco (Commercial)": 10.50,
+    "Visayan Electric (VECO) (Commercial)": 10.15,
+    "Davao Light (DLPC)": 10.24
   };
 
   const DEFAULT_RATE = 9.75;
 
-  
-  const allRates = [
-    { id: 1, date: "Oct 23, 2025", provider: "Meralco", prevRate: "₱11.90", newRate: "₱12.50", reason: "Generation Charge Adj.", status: "Active", updatedBy: "Admin", role: "admin" },
-    { id: 2, date: "Sep 15, 2025", provider: "Meralco", prevRate: "₱12.40", newRate: "₱11.90", reason: "System Optimization", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
-    { id: 3, date: "Aug 01, 2025", provider: "Meralco", prevRate: "₱12.10", newRate: "₱12.40", reason: "Inflation Adjustment", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 4, date: "Jul 12, 2025", provider: "Meralco", prevRate: "₱12.80", newRate: "₱12.10", reason: "Substation Efficiency", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 5, date: "Jun 05, 2025", provider: "Meralco", prevRate: "₱11.50", newRate: "₱12.80", reason: "Summer Peak Pricing", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
-    { id: 6, date: "May 10, 2025", provider: "VECO", prevRate: "₱10.80", newRate: "₱11.20", reason: "Transmission Cost", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 7, date: "Apr 22, 2025", provider: "DLPC", prevRate: "₱10.50", newRate: "₱10.80", reason: "Distribution Fee Adj.", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 8, date: "Mar 15, 2025", provider: "Meralco", prevRate: "₱12.40", newRate: "₱12.80", reason: "Fuel Cost Increase", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
-    { id: 9, date: "Feb 28, 2025", provider: "VECO", prevRate: "₱11.00", newRate: "₱10.80", reason: "System Efficiency", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 10, date: "Jan 20, 2025", provider: "DLPC", prevRate: "₱10.20", newRate: "₱10.50", reason: "Maintenance Cost", status: "Previous", updatedBy: "Admin", role: "admin" },
-    { id: 11, date: "Dec 10, 2024", provider: "Meralco", prevRate: "₱12.10", newRate: "₱12.40", reason: "Year-end Adjustment", status: "Previous", updatedBy: "Super Admin", role: "super admin" },
-    { id: 12, date: "Nov 05, 2024", provider: "VECO", prevRate: "₱10.90", newRate: "₱11.00", reason: "Quarterly Review", status: "Previous", updatedBy: "Admin", role: "admin" },
-  ];
+  const parseSelection = (selection) => {
+    let name = selection;
+    let type = "Residential";
 
-  
-  const totalPages = Math.ceil(allRates.length / itemsPerPage);
-  const paginatedRates = allRates.slice(
+    if (selection.includes("(Industrial)")) {
+      name = selection.replace("(Industrial)", "").trim();
+      type = "Industrial";
+    } else if (selection.includes("(Commercial)")) {
+      name = selection.replace("(Commercial)", "").trim();
+      type = "Commercial";
+    } else if (selection.includes("(Residential)")) {
+      name = selection.replace("(Residential)", "").trim();
+      type = "Residential";
+    }
+    return { name, type };
+  };
+
+  const { name: selectedProvider, type: selectedType } = parseSelection(selected);
+  const filteredLogs = rateLogs.filter((log) => log.providerName === selectedProvider && (log.rateType === selectedType || (selectedType === "Residential" && log.rateType === "standard")));
+
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const paginatedRates = filteredLogs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   const allProviders = [
-    'Meralco', 'VECO', 'DLPC',
-    'Abreco', 'AEC', 'AKELKO', 'ALECO', 'ANECO', 'ANTECO', 'ASELCO', 'AURELCO',
-    'BALAMBAN', 'BANELCO', 'BASSELCO', 'BATANELCO', 'BETELEC I', 'BATELIC II',
-    'BENECO', 'BILECO', 'BISELCO', 'BOHECO I', 'BOHECO II', 'BUSECO',
-    'CAGELCO I', 'CAGELCO II', 'CAMELCO', 'CANORECO', 'CAPELCO',
-    'CASURECO I', 'CASURECO II', 'CASURECO III', 'CASURECO IV',
-    'CEBECCO I', 'CEBECCO II', 'CEBECCO III', 'CELCOR', 'CENPELCO',
-    'CEPALCO', 'CLPC', 'COTELCO', 'DASURECO', 'DECORP', 'DIELCO',
-    'DORELCO', 'ESAMELCO', 'FLECO', 'GUIMELCO', 'IFELCO',
-    'ILECO I', 'ILECO II', 'ILECO III', 'ILPI', 'INEC',
-    'ISECO', 'ISELCO I', 'ISELCO II', 'KAELCO', 'LANECO',
-    'LEYECO II', 'LEYECO III', 'LEYECO IV', 'LEYEVO V',
-    'LUELCO', 'MAGELCO', 'MARELCO', 'MECO', 'MOPRECO'
+    'ABRECO', 'AEC (Albay)', 'AKELCO', 'ALECO', 'ANECO', 'ANTECO', 'ASELCO', 'AURELCO',
+    'BALAMBAN', 'BANELCO', 'BASELCO', 'BATANELCO', 'BATELEC I', 'BATELEC II', 'BENECO',
+    'BILECO', 'BISELCO', 'BOHECO I', 'BOHECO II', 'BUSECO', 'CAGELCO I', 'CAGELCO II',
+    'CAMELCO', 'CANORECO', 'CAPELCO', 'CASURECO I', 'CASURECO II', 'CASURECO III',
+    'CASURECO IV', 'CEBECO I', 'CEBECO II', 'CEBECO III', 'CELCOR', 'CENPELCO', 'CEPALCO',
+    'CLPC (Calamba)', 'COTELCO', 'DASURECO', 'Davao Light (DLPC)', 'DECORP', 'DIELCO',
+    'DORELCO', 'ESAMELCO', 'FLECO', 'GUIMELCO', 'IFELCO', 'ILECO I', 'ILECO II', 'ILECO III',
+    'ILPI (Iligan)', 'INEC', 'ISECO', 'ISELCO I', 'ISELCO II', 'KAELCO', 'LANECO',
+    'LEYECO II', 'LEYECO III', 'LEYECO IV', 'LEYECO V', 'LUELCO', 'MAGELCO', 'MARELCO',
+    'MECO (Mactan)', 'MOPRECO', 'MORESCO I', 'MORESCO II', 'NEECO I', 'NEECO II',
+    'NOCECO', 'NONECO', 'NORECO I', 'NORECO II', 'NORSAMELCO', 'NUVELCO', 'OMECO', 'ORMECO',
+    'PALECO', 'PANELCO I', 'PANELCO III', 'PELCO I', 'PELCO II', 'PELCO III', 'PENELCO',
+    'QUEZELCO I', 'QUEZELCO II', 'QUIRELCO', 'ROMELCO', 'SAMELCO I', 'SAMELCO II',
+    'SOCOTECO I', 'SOCOTECO II', 'SOLECO', 'SUKELCO', 'SURNECO', 'SURSECO', 'TARELCO I',
+    'TARELCO II', 'TAWELCO', 'Visayan Electric (VECO)', 'ZAMCELCO', 'ZAMECO I', 'ZAMECO II',
+    'ZAMSURECO', 'ZANECO'
   ].sort((a, b) => a.localeCompare(b));
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState('Meralco');
 
   const searchLower = searchTerm.toLowerCase();
 
@@ -97,14 +102,173 @@ const Rates = () => {
     .filter(p => p.toLowerCase().includes(searchLower));
 
   const providerLogos = {
-    'Meralco': meralcoLogo,
-    'DLPC': dlpcLogo,
-    'VECO': vecoLogo,
+    'Meralco (Residential)': "MERALCO.png",
+    'Meralco (Industrial)': "MERALCO.png",
+    'Meralco (Commercial)': "MERALCO.png",
+    'Davao Light (DLPC)': "DAVAO LIGHT.png",
+    'Visayan Electric (VECO)': "VECO.png",
+    'Visayan Electric (VECO) (Commercial)': "VECO.png",
   };
 
   const filteredOptions = allProviders.filter(option =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const formatCurrency = (value) => {
+    const num = Number(value);
+    if (Number.isNaN(num)) return "₱0.00";
+    return `₱${num.toFixed(2)}`;
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return "";
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return iso;
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  };
+
+  const formatMovement = (movement) => {
+    const num = Number(movement || 0);
+    const sign = num > 0 ? "+" : "";
+    return `${sign}${num.toFixed(2)}`;
+  };
+
+  const getProviderRate = (name) => {
+    const { name: providerName, type } = parseSelection(name);
+    const match = rateRows.find((row) => row.provider_name === providerName && row.rate_type === type && (row.status || "").toLowerCase() === "active");
+    if (match?.rate_per_kwh != null) return Number(match.rate_per_kwh);
+    if (Object.prototype.hasOwnProperty.call(MAJOR_PROVIDERS, name)) {
+      return MAJOR_PROVIDERS[name];
+    }
+    return DEFAULT_RATE;
+  };
+
+  const getCurrentRate = () => {
+    const { name, type } = parseSelection(selected);
+    return rateRows.find(
+      (row) =>
+        row.provider_name === name &&
+        row.rate_type === type &&
+        (row.status || "").toLowerCase() === "active"
+    ) || rateRows.find((row) => row.provider_name === name && row.rate_type === type) || null;
+  };
+
+  const loadCurrentUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
+    if (!user) return;
+
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("first_name,last_name,role,email")
+      .eq("id", user.id)
+      .single();
+
+    const name =
+      [userRow?.first_name, userRow?.last_name].filter(Boolean).join(" ") ||
+      userRow?.email ||
+      "Admin";
+
+    setCurrentUser({ name, role: userRow?.role || "admin", id: user.id });
+  };
+
+  const fetchRates = async () => {
+    setLoadingRates(true);
+    try {
+      const { data: ratesData, error: ratesError } = await supabase
+        .from("utility_rates")
+        .select("*")
+        .order("provider_name", { ascending: true });
+      if (ratesError) throw ratesError;
+
+      const { data: logsData, error: logsError } = await supabase
+        .from("utility_rates_logs")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (logsError) throw logsError;
+
+      // Fetch user details for logs manually to avoid FK issues
+      const userIds = [...new Set((logsData || []).map(l => l.updated_by).filter(Boolean))];
+      let usersMap = {};
+      if (userIds.length > 0) {
+        const { data: usersData } = await supabase
+          .from('users')
+          .select('id, first_name, last_name, role')
+          .in('id', userIds);
+        
+        if (usersData) {
+          usersData.forEach(u => {
+            usersMap[u.id] = u;
+          });
+        }
+      }
+
+      setRateRows(ratesData || []);
+      setRateLogs(
+        (logsData || []).map((row) => {
+          const newRate = Number(row.rate_per_kwh || 0);
+          const movement = Number(row.movement || 0);
+          const prevRate = newRate - movement;
+          const status = (row.status || "previous").toLowerCase();
+          
+          const user = usersMap[row.updated_by];
+          const updaterName = user 
+            ? `${user.first_name} ${user.last_name}`.trim() 
+            : (row.updated_by === currentUser.id ? currentUser.name : "Admin");
+          const updaterRole = user ? user.role : "admin";
+
+          let providerDisplay = row.provider_name;
+          if (row.rate_type && row.rate_type !== 'standard') {
+             providerDisplay += ` (${row.rate_type})`;
+          }
+
+          return {
+            id: row.id,
+            date: formatDate(row.effective_date || row.created_at),
+            rawDate: row.effective_date || row.created_at,
+            provider: providerDisplay,
+            providerName: row.provider_name,
+            rateType: row.rate_type,
+            prevRate: formatCurrency(prevRate),
+            newRate: formatCurrency(newRate),
+            reason: row.reason || "--",
+            status: status === "active" ? "Active" : "Previous",
+            updatedBy: updaterName,
+            role: updaterRole,
+          };
+        })
+      );
+    } catch (error) {
+      setNotification({
+        show: true,
+        title: "Load Failed",
+        message: error.message || "Failed to load utility rates.",
+        variant: "error",
+        icon: "error"
+      });
+    } finally {
+      setLoadingRates(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCurrentUser();
+    fetchRates();
+  }, []);
+
+  useEffect(() => {
+    if (filteredLogs.length === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+      return;
+    }
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [filteredLogs, totalPages, currentPage]);
 
   const handleExport = () => {
     setLoader({
@@ -116,18 +280,30 @@ const Rates = () => {
       try {
         const headers = ["Date Modified", "Provider", "Previous Rate", "New Rate", "Reason / Notes", "Status", "Updated By"];
 
-        const ratesData = [
-          ["Oct 23, 2025", "Meralco", "₱11.90", "₱12.50", "Generation Charge Adj.", "Active", "Admin"],
-          ["Sep 15, 2025", "Meralco", "₱12.40", "₱11.90", "System Optimization", "Previous", "Admin"],
-          ["Aug 01, 2025", "Meralco", "₱12.10", "₱12.40", "Inflation Adjustment", "Previous", "Admin"],
-          ["Jul 12, 2025", "Meralco", "₱12.80", "₱12.10", "Substation Efficiency", "Previous", "Admin"],
-          ["Jun 05, 2025", "Meralco", "₱11.50", "₱12.80", "Summer Peak Pricing", "Previous", "Admin"],
-        ];
+        let ratesToExport = filteredLogs;
 
-        let ratesToExport = ratesData;
+        if (exportFromDate) {
+          const fromDate = new Date(exportFromDate);
+          ratesToExport = ratesToExport.filter(log => new Date(log.rawDate) >= fromDate);
+        }
+
+        if (exportToDate) {
+          const toDate = new Date(exportToDate);
+          // Set to end of day to include logs on the 'to' date
+          toDate.setHours(23, 59, 59, 999);
+          ratesToExport = ratesToExport.filter(log => new Date(log.rawDate) <= toDate);
+        }
 
         const rows = ratesToExport.map((row) =>
-          row.map((cell) =>
+          [
+            row.date,
+            row.provider,
+            row.prevRate,
+            row.newRate,
+            row.reason,
+            row.status,
+            row.updatedBy,
+          ].map((cell) =>
             (cell || "").toString().replace(/₱/g, "P")
           )
         );
@@ -233,9 +409,59 @@ const Rates = () => {
     });
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-      setLoader({ show: false, message: "" });
+      const { name: providerName, type: rateType } = parseSelection(selected);
+
+      const newRate = Number(electricityRate);
+      const currentRate = getCurrentRate();
+      const prevRate = currentRate?.rate_per_kwh != null ? Number(currentRate.rate_per_kwh) : null;
+      const movement = prevRate != null ? newRate - prevRate : 0;
+      const effectiveDate = new Date().toISOString();
+
+      const payload = {
+        provider_name: providerName,
+        rate_per_kwh: newRate,
+        effective_date: effectiveDate,
+        movement,
+        reason: description,
+        status: "active",
+        updated_by: user.id,
+        rate_type: rateType,
+      };
+
+      // Try to update the existing rate first to avoid duplicates
+      const { data: updatedRows, error: updateError } = await supabase
+        .from("utility_rates")
+        .update(payload)
+        .eq("provider_name", providerName)
+        .eq("rate_type", rateType)
+        .select();
+
+      if (updateError) throw updateError;
+
+      // If no row was updated (it doesn't exist), then insert a new one
+      if (!updatedRows || updatedRows.length === 0) {
+        const { error: insertError } = await supabase
+          .from("utility_rates")
+          .insert(payload);
+        if (insertError) throw insertError;
+      }
+
+      await supabase
+        .from("utility_rates_logs")
+        .update({ status: "previous" })
+        .eq("provider_name", providerName)
+        .eq("rate_type", rateType)
+        .eq("status", "active");
+
+      const { error: logError } = await supabase
+        .from("utility_rates_logs")
+        .insert(payload);
+      if (logError) throw logError;
+
+      setLoader({ show: false, message: "Processing..." });
 
       setNotification({
         show: true,
@@ -246,8 +472,11 @@ const Rates = () => {
       });
 
       setShowModal(false);
+      setElectricityRate("");
+      setDescription("");
+      fetchRates();
     } catch (error) {
-      setLoader({ show: false, message: "" });
+      setLoader({ show: false, message: "Processing..." });
       setNotification({
         show: true,
         title: "Update Failed",
@@ -257,6 +486,14 @@ const Rates = () => {
       });
     }
   };
+
+  const currentRate = getCurrentRate();
+  const currentRateValue =
+    currentRate?.rate_per_kwh != null ? Number(currentRate.rate_per_kwh) : getProviderRate(selected);
+  const currentMovement = Number(currentRate?.movement || 0);
+  const movementClass = currentMovement > 0 ? "rd-val red" : currentMovement < 0 ? "rd-val green" : "rd-val";
+  const displayRate = formatCurrency(currentRateValue).replace("₱", "₱ ");
+  const displayDate = currentRate?.effective_date || currentRate?.created_at || "";
 
   return (
     <>
@@ -275,7 +512,7 @@ const Rates = () => {
         show={loader.show}
         message={loader.message}
         Loader={PuffLoader}
-        color="#0055ff"
+        color="#ffd700"
       />
       <div className="page-header">
         <div>
@@ -294,7 +531,7 @@ const Rates = () => {
 
       </div>
       <div className="rates-scroll">
-        <div className="rates-grid">
+        <div className="rates-container">
           <div className="rate-card">
             <div
               style={{
@@ -315,7 +552,7 @@ const Rates = () => {
               </div>
               <span
                 className="material-icons"
-                style={{ color: "#FFD700",fontSize: "20px" }}
+                style={{ color: "#FFf", fontSize: "20px" }}
               >
                 info
               </span>
@@ -367,7 +604,7 @@ const Rates = () => {
                               <div className="provider-left">
                                 <div className="provider-logo">
                                   {providerLogos[name] ? (
-                                    <img src={providerLogos[name]} alt={name} />
+                                    <img src={`/provider_images/${providerLogos[name]}`} alt={name} />
                                   ) : (
                                     <span>{name.charAt(0)}</span>
                                   )}
@@ -376,7 +613,7 @@ const Rates = () => {
                                 <div className="provider-info">
                                   <div className="provider-name">{name}</div>
                                   <div className="provider-sub">
-                                    Rate: ₱ {MAJOR_PROVIDERS[name].toFixed(2)} / kWh
+                                    Rate: ₱ {getProviderRate(name).toFixed(2)} / kWh
                                   </div>
                                 </div>
                               </div>
@@ -411,7 +648,7 @@ const Rates = () => {
                                 <div className="provider-info">
                                   <div className="provider-name">{name}</div>
                                   <div className="provider-sub muted">
-                                    Rate: ₱ {DEFAULT_RATE.toFixed(2)} / kWh
+                                    Rate: ₱ {getProviderRate(name).toFixed(2)} / kWh
                                   </div>
                                 </div>
                               </div>
@@ -434,311 +671,158 @@ const Rates = () => {
 
 
             <div style={{ margin: "25px 0" }}>
-              <div className="rate-main">₱ 12.50</div>
+              <div className="rate-main">{displayRate}</div>
               <div style={{ color: "#888", fontSize: "14px" }}>per kWh</div>
             </div>
 
             <div className="rate-details">
               <div>
                 <div className="rd-label">Effective Date</div>
-                <div className="rd-val">Oct 23, 2025</div>
+                <div className="rd-val">{displayDate ? formatDate(displayDate) : "--"}</div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div className="rd-label">Movement</div>
-                <div className="rd-val red">+0.60</div>
+                <div className={movementClass}>{formatMovement(currentMovement)}</div>
               </div>
             </div>
 
             <button
               className="btn btn-primary"
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                setElectricityRate(currentRateValue.toString());
+                setDescription("");
+                setShowModal(true);
+              }}
             >
               Update Rate
             </button>
           </div>
 
-          <div className="trend-card">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ fontWeight: 700, color: "#fff", fontSize: "16px" }}>
-                Rate Trend
-              </div>
-              <div className="trend-toggle">
-                <div className={`tt-opt ${showMonthlyTrend === true ? 'active' : ''}`} onClick={() => setshowMonthlyTrend(true) & setshowYearlyTrend(false) & setshowTrendStatsMonthly(true) & setshowTrendStatsYearly(false)}>Monthly</div>
-                <div className={`tt-opt ${showYearlyTrend === true ? 'active' : ''}`} onClick={() => setshowYearlyTrend(true) & setshowMonthlyTrend(false) & setshowTrendStatsYearly(true) & setshowTrendStatsMonthly(false)}>Yearly</div>
-              </div>
+          <div className="table-container">
+            <div className="table-container-scrollable">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date Modified</th>
+                    <th>Provider</th>
+                    <th>Rate Change</th>
+                    <th>Reason / Notes</th>
+                    <th>Status</th>
+                    <th>Updated By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loadingRates ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center", padding: "30px" }}>
+                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                          <PuffLoader color="#ffd700" size={28} />
+                        </div>
+                      </td>
+                    </tr>
+                  ) : paginatedRates.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center", padding: "24px", color: "#666" }}>
+                        No rate logs found for {selected}.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedRates.map((rate) => {
+                      const isIncrease = parseFloat(rate.newRate.replace(/[^\d.-]/g, '')) > parseFloat(rate.prevRate.replace(/[^\d.-]/g, ''));
+                      return (
+                        <tr key={rate.id}>
+                          <td style={{ color: "#ddd", fontWeight: 400 }}>{rate.date}</td>
+                          <td>{rate.provider}</td>
+                          <td>
+                            <div className="rate-change-cell">
+                              <span className="rate-pill">{rate.prevRate}</span>
+                              <span
+                                style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
+                              >
+                                →
+                              </span>
+                              <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>{rate.newRate}</span>
+                            </div>
+                          </td>
+                          <td>{rate.reason}</td>
+                          <td>
+                            <span className={`stat-badge ${rate.status === 'Active' ? 'stat-active' : 'stat-review'}`}>{rate.status}</span>
+                          </td>
+                          <td>
+                            <div className="admin-meta">
+                              <div
+                                className="user-avatar"
+                                style={{
+                                  width: "28px",
+                                  height: "28px",
+                                  fontSize: "10px",
+                                  background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
+                                }}
+                              >
+                                {rate.role === "super admin" ? "SA" : "AD"}
+                              </div>
+                              {rate.updatedBy}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
-            <div className="trend-stats-text">
-              {showTrendStatYearly && (
+            <div className="a-pagination">
+              <div style={{ fontSize: "14px", color: "#666" }}>
+              {filteredLogs.length === 0 ? (
+                "Showing 0–0 of 0"
+              ) : (
                 <>
-                  <div>
-                    HIGH <span className="ts-val">₱12.50</span>
-                  </div>
-                  <div>
-                    LOW <span className="ts-val-low">₱8.50</span>
-                  </div>
-                </>
-              )}
-              {showTrendStatsMonthly && (
-                <>
-                  <div>
-                    HIGH <span className="ts-val">₱21.00</span>
-                  </div>
-                  <div>
-                    LOW <span className="ts-val-low">₱10.50</span>
-                  </div>
+                  Showing {(currentPage - 1) * itemsPerPage + 1}
+                  {"–"}
+                  {Math.min(currentPage * itemsPerPage, filteredLogs.length)} of {filteredLogs.length}
                 </>
               )}
             </div>
 
-            <div
-              className="chart-box animate-chart"
-              key={showYearlyTrend ? "yearly" : "monthly"}
-            >
-              {showYearlyTrend && (
-                <>
-                  <div className="bar-group">
-                    <div className="bar-val">₱8.50</div>
-                    <div className="bar" style={{ height: "30%" }}></div>
-                    <div className="bar-label">2015</div>
-                  </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  className="u-page-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  style={{
+                    opacity: currentPage === 1 ? 0.4 : 1,
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {"<"}
+                </button>
 
-                  <div className="bar-group">
-                    <div className="bar-val">₱8.90</div>
-                    <div className="bar" style={{ height: "35%" }}></div>
-                    <div className="bar-label">2016</div>
-                  </div>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
 
-                  <div className="bar-group">
-                    <div className="bar-val">₱9.20</div>
-                    <div className="bar" style={{ height: "38%" }}></div>
-                    <div className="bar-label">2017</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱9.50</div>
-                    <div className="bar" style={{ height: "40%" }}></div>
-                    <div className="bar-label">2018</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱9.80</div>
-                    <div className="bar" style={{ height: "45%" }}></div>
-                    <div className="bar-label">2019</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱10.20</div>
-                    <div className="bar" style={{ height: "50%" }}></div>
-                    <div className="bar-label">2020</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱10.50</div>
-                    <div className="bar" style={{ height: "55%" }}></div>
-                    <div className="bar-label">2021</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱11.10</div>
-                    <div className="bar" style={{ height: "65%" }}></div>
-                    <div className="bar-label">2022</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val">₱11.80</div>
-                    <div className="bar" style={{ height: "80%" }}></div>
-                    <div className="bar-label">2023</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val high">₱12.10</div>
-                    <div className="bar active" style={{ height: "88%" }}></div>
-                    <div className="bar-label">2024</div>
-                  </div>
-
-                  <div className="bar-group">
-                    <div className="bar-val curr">₱12.50</div>
-                    <div className="bar current" style={{ height: "98%" }}></div>
-                    <div className="bar-label">2025</div>
-                  </div>
-                </>
-              )}
-
-              {showMonthlyTrend && (
-                <>
-                  <div className="bar-group">
-                    <div className="bar-val">₱10.50</div>
-                    <div className="bar" style={{ height: "30%" }}></div>
-                    <div className="bar-label">Jan</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱12.50</div>
-                    <div className="bar" style={{ height: "32%" }}></div>
-                    <div className="bar-label">Feb</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱13.00</div>
-                    <div className="bar" style={{ height: "33%" }}></div>
-                    <div className="bar-label">Mar</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱12.50</div>
-                    <div className="bar" style={{ height: "32%" }}></div>
-                    <div className="bar-label">Apr</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱10.50</div>
-                    <div className="bar" style={{ height: "30%" }}></div>
-                    <div className="bar-label">May</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱14.50</div>
-                    <div className="bar" style={{ height: "40%" }}></div>
-                    <div className="bar-label">Jun</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱19.00</div>
-                    <div className="bar" style={{ height: "50%" }}></div>
-                    <div className="bar-label">Jul</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱14.50</div>
-                    <div className="bar" style={{ height: "40%" }}></div>
-                    <div className="bar-label">Aug</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱15.75</div>
-                    <div className="bar" style={{ height: "41%" }}></div>
-                    <div className="bar-label">Sep</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱16.25</div>
-                    <div className="bar" style={{ height: "42%" }}></div>
-                    <div className="bar-label">Oct</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val">₱17.00</div>
-                    <div className="bar active" style={{ height: "45%" }}></div>
-                    <div className="bar-label">Nov</div>
-                  </div>
-                  <div className="bar-group">
-                    <div className="bar-val high">₱21.00</div>
-                    <div className="bar current" style={{ height: "60%" }}></div>
-                    <div className="bar-label">Dec</div>
-                  </div>
-                </>
-              )}
-
+                <button
+                  className="u-page-btn"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  style={{
+                    opacity: currentPage === totalPages ? 0.4 : 1,
+                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {">"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Date Modified</th>
-              <th>Provider</th>
-              <th>Rate Change</th>
-              <th>Reason / Notes</th>
-              <th>Status</th>
-              <th>Updated By</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedRates.map((rate) => {
-              const isIncrease = parseFloat(rate.newRate.replace('₱', '')) > parseFloat(rate.prevRate.replace('₱', ''));
-              return (
-                <tr key={rate.id}>
-                  <td style={{ color: "#ddd", fontWeight: 400 }}>{rate.date}</td>
-                  <td>{rate.provider}</td>
-                  <td>
-                    <span className="rate-pill">{rate.prevRate}</span>
-                    <span
-                      style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
-                    >
-                      →
-                    </span>
-                    <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>{rate.newRate}</span>
-                  </td>
-                  <td>{rate.reason}</td>
-                  <td>
-                    <span className={`stat-badge ${rate.status === 'Active' ? 'stat-active' : 'stat-review'}`}>{rate.status}</span>
-                  </td>
-                  <td>
-                    <div className="admin-meta">
-                      <div
-                        className="user-avatar"
-                        style={{ 
-                          width: "28px", 
-                          height: "28px", 
-                          fontSize: "10px",
-                          background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
-                        }}
-                      >
-                        {rate.role === "super admin" ? "SA" : "AD"}
-                      </div>
-                      {rate.updatedBy}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <div className="a-pagination">
-        <div style={{ fontSize: "14px", color: "#666" }}>
-          Showing{" "}
-          {(currentPage - 1) * itemsPerPage + 1}
-          {"–"}
-          {Math.min(currentPage * itemsPerPage, allRates.length)}
-          {" "}of {allRates.length}
-        </div>
-
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            className="u-page-btn"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            style={{
-              opacity: currentPage === 1 ? 0.4 : 1,
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-            }}
-          >
-            {"<"}
-          </button>
-
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              className={`u-page-btn ${page === currentPage ? "active" : ""}`}
-              onClick={() => setCurrentPage(page)}
-            >
-              {page}
-            </button>
-          ))}
-
-          <button
-            className="u-page-btn"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            style={{
-              opacity: currentPage === totalPages ? 0.4 : 1,
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-            }}
-          >
-            {">"}
-          </button>
-        </div>
-      </div>
-      </div>      
 
       {showModal && (
         <div className="modal-overlay">
@@ -750,7 +834,7 @@ const Rates = () => {
               <input
                 type="text"
                 className="form-input"
-                defaultValue="Meralco (Metro Manila)"
+                value={selected}
                 readOnly
                 style={{
                   background: "#1a1a1a",

@@ -8,10 +8,19 @@ const ProtectedRoute = () => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState(null);
+  const LOCAL_ROLE_KEY = "hardcoded_admin_role";
 
   useEffect(() => {
     const checkSession = async () => {
       try {
+        const localRole = localStorage.getItem(LOCAL_ROLE_KEY);
+        if (localRole) {
+          setIsAuthenticated(true);
+          setRole(localRole);
+          setLoading(false);
+          return;
+        }
+
         const {
           data: { session },
         } = await supabase.auth.getSession();

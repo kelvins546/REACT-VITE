@@ -45,6 +45,7 @@
 
 .dropdown-menu.rates {
     height: 320px;
+    width: 340px;
 }
 
 @keyframes dropdownFade {
