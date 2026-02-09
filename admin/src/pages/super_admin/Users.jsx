@@ -11,6 +11,19 @@ import "../../components/dropdowns/searchableDropdown.css";
 const buildFullName = (first, last) =>
   [first, last].filter(Boolean).join(" ").trim();
 
+const availableColumns = [
+  { label: "Name", key: "name" },
+  { label: "Email", key: "email" },
+  { label: "Phone", key: "phone_number" },
+  { label: "Street Address", key: "street_address" },
+  { label: "City", key: "city" },
+  { label: "Region", key: "region" },
+  { label: "Zip Code", key: "zip_code" },
+  { label: "Status", key: "status" },
+  { label: "Registered Hubs", key: "hubs" },
+  { label: "Joined Date", key: "joined_at" },
+];
+
 const Users = () => {
   const navigate = useNavigate();
   const [usersList, setUsersList] = useState([]);
@@ -21,6 +34,9 @@ const Users = () => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportFromDate, setExportFromDate] = useState("");
   const [exportToDate, setExportToDate] = useState("");
+  const [selectedCity, setSelectedCity] = useState("All Cities");
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState(availableColumns.map(c => c.key));
 
   const [notification, setNotification] = useState({
     show: false,
@@ -120,20 +136,19 @@ const Users = () => {
           });
         }
 
-        const headers = ["Name", "Email", "Phone", "Street Address", "City", "Region", "Zip Code", "Status", "Registered Hubs", "Joined Date"];
+        const headers = availableColumns
+          .filter(col => selectedColumns.includes(col.key))
+          .map(col => col.label);
 
-        const rows = usersToExport.map((user) => [
-          user.name,
-          user.email,
-          user.phone_number,
-          user.street_address,
-          user.city,
-          user.region,
-          user.zip_code,
-          user.status,
-          user.hubs.replace(" Registered", ""),
-          new Date(user.joined_at).toLocaleDateString(),
-        ]);
+        const rows = usersToExport.map((user) => 
+          availableColumns
+            .filter(col => selectedColumns.includes(col.key))
+            .map(col => {
+               if (col.key === "hubs") return (user.hubs || "").replace(" Registered", "");
+               if (col.key === "joined_at") return new Date(user.joined_at).toLocaleDateString();
+               return user[col.key];
+            })
+        );
 
         const csvContent = [
           headers.join(","),
@@ -374,11 +389,15 @@ const Users = () => {
     return colors[(name || "").length % colors.length];
   };
 
-  const filteredUsers = usersList.filter(
-    (u) =>
+  const filteredUsers = usersList.filter((u) => {
+    const matchesSearch =
       (u.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (u.email || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      (u.email || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCity = selectedCity === "All Cities" || u.city === selectedCity;
+    return matchesSearch && matchesCity;
+  });
+
+  const uniqueCities = ["All Cities", ...new Set(usersList.map((u) => u.city).filter(Boolean))];
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = filteredUsers.slice(
@@ -418,23 +437,66 @@ const Users = () => {
       </div>
 
       <div className="toolbar">
-        <div className="search-box">
-          <span
-            className="material-icons"
-            style={{ color: "#666", fontSize: "20px" }}
-          >
-            search
-          </span>
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
+        <div style={{ display: "flex", gap: "12px" }}>
+          <div className="search-box">
+            <span
+              className="material-icons"
+              style={{ color: "#666", fontSize: "20px" }}
+            >
+              search
+            </span>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+          <div style={{ position: "relative", minWidth: "180px" }}>
+            <button
+              className="a-form-input"
+              style={{
+                textAlign: "left",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                height: "47px",
+                background: "#1a1a1a",
+                border: "1px solid #333",
+                borderRadius: "8px",
+                padding: "0 12px",
+                backgroundColor: "#111",
+              }}
+              onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
+            >
+              <span style={{ color: "#fff", fontSize: "14px" }}>{selectedCity}</span>
+              <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isCityDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+                keyboard_arrow_down
+              </span>
+            </button>
+            {isCityDropdownOpen && (
+              <div className="dropdown-menu" style={{ width: "100%", zIndex: 100, top: "110%" }}>
+                <ul className="options-list">
+                  {uniqueCities.map((city) => (
+                    <li
+                      key={city}
+                      className={`provider-option ${selectedCity === city ? "selected" : ""}`}
+                      onClick={() => { setSelectedCity(city); setIsCityDropdownOpen(false); }}
+                    >
+                      <div className="provider-info"><div className="provider-name">{city}</div></div>
+                      {selectedCity === city && <span className="checkmark material-symbols-outlined">check</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
           <Link
@@ -969,7 +1031,7 @@ const Users = () => {
               borderRadius: "12px",
               border: "1px solid #333333",
               padding: "20px",
-              maxWidth: "380px",
+              maxWidth: "420px",
               width: "100%",
               textAlign: "center",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
@@ -1024,6 +1086,29 @@ const Users = () => {
                     placeholder="MM/DD/YY"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "15px", textAlign: "left" }}>
+              <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "8px" }}>Select Columns</label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", maxHeight: "155px", overflowY: "auto", background: "#1a1a1a", padding: "10px", borderRadius: "8px", border: "1px solid #333" }}>
+                {availableColumns.map((col) => (
+                  <label key={col.key} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#ccc", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedColumns.includes(col.key)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedColumns([...selectedColumns, col.key]);
+                        } else {
+                          setSelectedColumns(selectedColumns.filter(key => key !== col.key));
+                        }
+                      }}
+                      style={{ accentColor: "#00A651", width: "14px", height: "14px" }}
+                    />
+                    {col.label}
+                  </label>
+                ))}
               </div>
             </div>
 

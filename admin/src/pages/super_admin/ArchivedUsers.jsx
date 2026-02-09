@@ -19,6 +19,8 @@ const ArchivedUsers = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isRestoreReasonDropdownOpen, setIsRestoreReasonDropdownOpen] = useState(false);
   const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] = useState(false);
+  const [selectedCity, setSelectedCity] = useState("All Cities");
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
 
   const [showResetModal, setShowResetModal] = useState(false);
 
@@ -116,12 +118,13 @@ const ArchivedUsers = () => {
   const [archivedUsers, setArchivedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
-  const filteredUsers = archivedUsers.filter((user) =>
-    `${user.name} ${user.email} ${user.unit}`
+  const filteredUsers = archivedUsers.filter((user) => {
+    const matchesSearch = `${user.name} ${user.email} ${user.unit}`
       .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+      .includes(search.toLowerCase());
+    const matchesCity = selectedCity === "All Cities" || user.city === selectedCity;
+    return matchesSearch && matchesCity;
+  });
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
@@ -133,6 +136,8 @@ const ArchivedUsers = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
+
+  const uniqueCities = ["All Cities", ...new Set(archivedUsers.map((u) => u.city).filter(Boolean))];
 
   const fetchArchivedUsers = async () => {
     try {
@@ -363,21 +368,63 @@ const ArchivedUsers = () => {
 
       { }
       <div className="toolbar">
-        <div className="search-box">
-          <span
-            className="material-icons"
-            style={{ color: "#666", fontSize: "20px" }}
-          >
-            search
-          </span>
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search archived users..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
+        <div style={{ display: "flex", gap: "12px" }}>
+          <div className="search-box">
+            <span
+              className="material-icons"
+              style={{ color: "#666", fontSize: "20px" }}
+            >
+              search
+            </span>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search archived users..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div style={{ position: "relative", minWidth: "180px" }}>
+            <button
+              className="a-form-input"
+              style={{
+                textAlign: "left",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                height: "47px",
+                background: "#1a1a1a",
+                border: "1px solid #333",
+                borderRadius: "8px",
+                padding: "0 12px",
+                backgroundColor: "#111",
+              }}
+              onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
+            >
+              <span style={{ color: "#fff", fontSize: "14px" }}>{selectedCity}</span>
+              <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isCityDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+                keyboard_arrow_down
+              </span>
+            </button>
+            {isCityDropdownOpen && (
+              <div className="dropdown-menu" style={{ width: "100%", zIndex: 100, top: "110%" }}>
+                <ul className="options-list">
+                  {uniqueCities.map((city) => (
+                    <li
+                      key={city}
+                      className={`provider-option ${selectedCity === city ? "selected" : ""}`}
+                      onClick={() => { setSelectedCity(city); setIsCityDropdownOpen(false); }}
+                    >
+                      <div className="provider-info"><div className="provider-name">{city}</div></div>
+                      {selectedCity === city && <span className="checkmark material-symbols-outlined">check</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
           { }

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+﻿﻿import React, { useEffect, useState } from "react";
 import "../super_admin/Rates.css";
 import "../../components/dropdowns/searchableDropdown.css"
 import { PuffLoader } from "react-spinners";
@@ -6,6 +6,16 @@ import { PopupNotification } from "../../components/notifications/PopUpNotificat
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
 import { supabase } from "../../supabaseClient";
+
+const availableColumns = [
+  { label: "Date Modified", key: "date" },
+  { label: "Provider", key: "provider" },
+  { label: "Previous Rate", key: "prevRate" },
+  { label: "New Rate", key: "newRate" },
+  { label: "Reason / Notes", key: "reason" },
+  { label: "Status", key: "status" },
+  { label: "Updated By", key: "updatedBy" },
+];
 
 const Rates = () => {
   const [showModal, setShowModal] = useState(false);
@@ -25,6 +35,7 @@ const Rates = () => {
   const [selectedYear, setSelectedYear] = useState('2025');
   const [isYearOpen, setIsYearOpen] = useState(false);
   const itemsPerPage = 5;
+  const [selectedColumns, setSelectedColumns] = useState(availableColumns.map(c => c.key));
 
   const [notification, setNotification] = useState({
     show: false,
@@ -381,7 +392,9 @@ const Rates = () => {
 
     setTimeout(() => {
       try {
-        const headers = ["Date Modified", "Provider", "Previous Rate", "New Rate", "Reason / Notes", "Status", "Updated By"];
+        const headers = availableColumns
+          .filter(col => selectedColumns.includes(col.key))
+          .map(col => col.label);
 
         let ratesToExport = filteredLogs;
 
@@ -397,17 +410,12 @@ const Rates = () => {
         }
 
         const rows = ratesToExport.map((row) =>
-          [
-            row.date,
-            row.provider,
-            row.prevRate,
-            row.newRate,
-            row.reason,
-            row.status,
-            row.updatedBy,
-          ].map((cell) =>
-            (cell || "").toString().replace(/₱/g, "P")
-          )
+          availableColumns
+            .filter(col => selectedColumns.includes(col.key))
+            .map(col => {
+               const val = row[col.key];
+               return (val || "").toString().replace(/₱/g, "P");
+            })
         );
 
         const csvContent = [
@@ -1000,7 +1008,7 @@ const Rates = () => {
               borderRadius: "12px",
               border: "1px solid #333333",
               padding: "20px",
-              maxWidth: "380px",
+              maxWidth: "420px",
               width: "100%",
               textAlign: "center",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
@@ -1055,6 +1063,29 @@ const Rates = () => {
                     placeholder="MM/DD/YY"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "15px", textAlign: "left" }}>
+              <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "8px" }}>Select Columns</label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", maxHeight: "150px", overflowY: "auto", background: "#1a1a1a", padding: "10px", borderRadius: "8px", border: "1px solid #333" }}>
+                {availableColumns.map((col) => (
+                  <label key={col.key} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#ccc", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedColumns.includes(col.key)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedColumns([...selectedColumns, col.key]);
+                        } else {
+                          setSelectedColumns(selectedColumns.filter(key => key !== col.key));
+                        }
+                      }}
+                      style={{ accentColor: "#00A651", width: "14px", height: "14px" }}
+                    />
+                    {col.label}
+                  </label>
+                ))}
               </div>
             </div>
 

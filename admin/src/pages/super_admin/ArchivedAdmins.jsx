@@ -287,7 +287,6 @@ const ArchivedAdmins = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-
                 </div>
                 <div style={{ display: "flex", gap: "12px" }}>
                     { }
