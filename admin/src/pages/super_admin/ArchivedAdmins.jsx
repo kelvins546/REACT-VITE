@@ -365,10 +365,25 @@ const ArchivedAdmins = () => {
                         </thead>
                         <tbody>
                             { }
-                            {paginatedUsers.map((user) => (
+                            {paginatedUsers.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan="4"
+                                        style={{
+                                            textAlign: "center",
+                                            padding: "24px",
+                                            color: "#666",
+                                            fontSize: "14px",
+                                        }}
+                                    >
+                                        No archived admins found.
+                                    </td>
+                                </tr>
+                            ) : (
+                                paginatedUsers.map((user) => (
 
-                                <tr key={user.id}>
-                                    {/*<td>
+                                    <tr key={user.id}>
+                                        {/*<td>
                                         <input
                                             style={{
                                                 accentColor: "var(--primary)",
@@ -388,42 +403,42 @@ const ArchivedAdmins = () => {
                                     </td>*/}
 
 
-                                    <td>
-                                        <div className="user-cell">
-                                            <div className="u-avatar">
-                                                {user.name
-                                                    .split(" ")
-                                                    .map((n) => n[0])
-                                                    .join("")}
+                                        <td>
+                                            <div className="user-cell">
+                                                <div className="u-avatar">
+                                                    {user.name
+                                                        .split(" ")
+                                                        .map((n) => n[0])
+                                                        .join("")}
+                                                </div>
+                                                <div style={{ fontWeight: 600 }}>
+                                                    {user.name}
+                                                    <br />
+                                                    <span style={{ fontSize: "13px", color: "#666" }}>
+                                                        {user.email}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div style={{ fontWeight: 600 }}>
-                                                {user.name}
-                                                <br />
-                                                <span style={{ fontSize: "13px", color: "#666" }}>
-                                                    {user.email}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td style={{ color: "#888" }}>{user.archivedDate}</td>
+                                        <td style={{ color: "#888" }}>{user.archivedDate}</td>
 
-                                    <td>
-                                        <span className="stat-badge stat-archived">Archived</span>
-                                    </td>
+                                        <td>
+                                            <span className="stat-badge stat-archived">Archived</span>
+                                        </td>
 
-                                    <td>
-                                        <div className="action-cell">
-                                            <button
-                                                className="icon-btn btn-restore"
-                                                onClick={() => {
-                                                    setSelectedUsers([user.id]);
-                                                    setShowRestoreModal(true);
-                                                }}
-                                            >
-                                                <span className="material-icons">restore_from_trash</span>
-                                            </button>
-                                            {/*<button
+                                        <td>
+                                            <div className="action-cell">
+                                                <button
+                                                    className="icon-btn btn-restore"
+                                                    onClick={() => {
+                                                        setSelectedUsers([user.id]);
+                                                        setShowRestoreModal(true);
+                                                    }}
+                                                >
+                                                    <span className="material-icons">restore_from_trash</span>
+                                                </button>
+                                                {/*<button
                                                 className="icon-btn btn-delete"
                                                 onClick={() => {
                                                     setSelectedUsers([user.id]);
@@ -433,10 +448,11 @@ const ArchivedAdmins = () => {
                                                 <span className="material-icons">delete_forever</span>
                                             </button> */}
 
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
 
                         </tbody>
                     </table>

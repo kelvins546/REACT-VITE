@@ -565,7 +565,7 @@ const ArchivedUsers = () => {
           )}
         </div>
 
-        {!loading && (
+        {!loading && filteredUsers.length > 0 && (
           <div className="a-pagination">
             <div style={{ fontSize: "14px", color: "#666" }}>
               Showing{" "}
