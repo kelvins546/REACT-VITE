@@ -572,12 +572,12 @@ const Dashboard = () => {
                   <tr key={fw.id}>
                     <td style={{ fontWeight: 600, color: "#fff" }}>{fw.version}</td>
                     <td>
-                      <span className={`stat-badge ${fw.is_active ? 'st-solved' : 'st-review'}`}>
+                      <span className={`stat-badge ${fw.is_active ? 'st-solved' : 'stat-archived'}`}>
                         {fw.is_active ? 'Active' : 'Archived'}
                       </span>
                     </td>
                     <td style={{ textAlign: "right", color: "#888", fontSize: "12px" }}>
-                      {new Date(fw.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {new Date(fw.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })}
                     </td>
                   </tr>
                 ))}
@@ -629,7 +629,7 @@ const Dashboard = () => {
                       </div>
                     </td>
                     <td style={{ textAlign: "right", color: "#888", fontSize: "12px" }}>
-                      {new Date(log.effective_date || log.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {new Date(log.effective_date || log.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })}
                     </td>
                   </tr>
                   );

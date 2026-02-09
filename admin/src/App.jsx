@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/route_settings/ProtectedRoute";
 
 import MainLayout from "./components/MainLayout";
-import Dashboard from "./pages/super_admin/Dashboard";
+import Dashboard from "./pages/shared/Dashboard";
 
 import Users from "./pages/super_admin/Users";
 import ArchivedUsers from "./pages/super_admin/ArchivedUsers";
