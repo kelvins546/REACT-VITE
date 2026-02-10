@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../super_admin/Rates.css";
+import "../super_admin/CSS_Files/Rates.css";
 import "../../components/dropdowns/searchableDropdown.css"
 import { PuffLoader } from "react-spinners";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
@@ -90,7 +90,6 @@ const Rates = () => {
     'TARELCO II', 'TAWELCO', 'Visayan Electric (VECO)', 'ZAMCELCO', 'ZAMECO I', 'ZAMECO II',
     'ZAMSURECO', 'ZANECO'
   ].sort((a, b) => a.localeCompare(b));
-
 
   const searchLower = searchTerm.toLowerCase();
 
@@ -191,7 +190,6 @@ const Rates = () => {
         .order("created_at", { ascending: false });
       if (logsError) throw logsError;
 
-      // Fetch user details for logs manually to avoid FK issues
       const userIds = [...new Set((logsData || []).map(l => l.updated_by).filter(Boolean))];
       let usersMap = {};
       if (userIds.length > 0) {
@@ -289,7 +287,6 @@ const Rates = () => {
 
         if (exportToDate) {
           const toDate = new Date(exportToDate);
-          // Set to end of day to include logs on the 'to' date
           toDate.setHours(23, 59, 59, 999);
           ratesToExport = ratesToExport.filter(log => new Date(log.rawDate) <= toDate);
         }

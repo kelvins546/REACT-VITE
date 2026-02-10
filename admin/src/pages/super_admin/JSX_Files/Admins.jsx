@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import { supabase } from "../../supabaseClient";
+import { supabase } from "../../../supabaseClient";
 import { createClient } from "@supabase/supabase-js";
 import emailjs from "@emailjs/browser";
-import "./Admins.css";
-import "../../components/dropdowns/searchableDropdown.css";
+import "../CSS_Files/Admins.css";
+import "../../../components/dropdowns/searchableDropdown.css";
 import { PuffLoader } from "react-spinners";
-import { PopupNotification } from "../../components/notifications/PopUpNotification";
-import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
+import { PopupNotification } from "../../../components/notifications/PopUpNotification";
+import { LoadingPopup } from "../../../components/loaders/LoadingPopUp";
 
 const SUPABASE_URL = "https://grgkznbbfedbipxuwkdl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_C9Vr_lDZsic_RsvJ2aM9Bg_l9ag2A0L";

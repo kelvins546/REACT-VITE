@@ -50,7 +50,7 @@ const CalendarDropdown = ({ value, onChange, placeholder = "Select Date" }) => {
         const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
         const date = String(day).padStart(2, "0");
 
-        const localDate = `${year}-${month}-${date}`; 
+        const localDate = `${year}-${month}-${date}`;
         onChange(localDate);
         setIsOpen(false);
     };
@@ -67,7 +67,6 @@ const CalendarDropdown = ({ value, onChange, placeholder = "Select Date" }) => {
                 setIsOpen(false);
             }
         };
-
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
@@ -88,7 +87,6 @@ const CalendarDropdown = ({ value, onChange, placeholder = "Select Date" }) => {
         month: "long",
         year: "numeric",
     });
-
 
     const isToday = (day) => {
         const today = new Date();
@@ -194,7 +192,6 @@ const CalendarDropdown = ({ value, onChange, placeholder = "Select Date" }) => {
                             >
                                 Today
                             </button>
-
                         </div>
                     </div>
                 </div>

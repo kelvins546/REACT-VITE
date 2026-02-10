@@ -1,4 +1,3 @@
-// c:\Users\leele\OneDrive\Desktop\SOFTWARE ENGINEERING\ADMIN\REACT-VITE\admin\src\pages\auth\AdminRegister.jsx
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
@@ -163,7 +162,6 @@ const AdminRegister = () => {
         setLoader({ show: true, message: "Creating User..." });
 
         try {
-            // 1. Sign up the user
             const { data, error } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
@@ -178,7 +176,6 @@ const AdminRegister = () => {
 
             if (error) throw error;
 
-            // 2. Ensure user entry exists in public.users table
             if (data.user) {
                 const { error: dbError } = await supabase.from("users").upsert(
                     {

@@ -1,11 +1,11 @@
 ﻿﻿import React, { useEffect, useState, useLayoutEffect } from "react";
-import "../super_admin/Rates.css";
-import "../../components/dropdowns/searchableDropdown.css"
+import "../../super_admin/CSS_Files/Rates.css";
+import "../../../components/dropdowns/searchableDropdown.css"
 import { PuffLoader } from "react-spinners";
-import { PopupNotification } from "../../components/notifications/PopUpNotification";
-import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
-import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
-import { supabase } from "../../supabaseClient";
+import { PopupNotification } from "../../../components/notifications/PopUpNotification";
+import { LoadingPopup } from "../../../components/loaders/LoadingPopUp";
+import CalendarDropdown from "../../../components/dropdowns/CalendarDropdown";
+import { supabase } from "../../../supabaseClient";
 
 const availableColumns = [
   { label: "Date Modified", key: "date" },

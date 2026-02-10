@@ -27,7 +27,6 @@ const MainLayout = () => {
         minimizeSidebar={sidebarMinimized}
         setminizeSidebar={setSidebarMinimized}
       />
-
       <div className="main-pane">
         <SidebarToggle
           onToggle={() =>
@@ -36,7 +35,6 @@ const MainLayout = () => {
           sidebarWidth={sidebarWidth}
           isMinimized={sidebarMinimized === 2}
         />
-
         <Outlet />
       </div>
     </>

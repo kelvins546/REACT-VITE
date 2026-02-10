@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "../supabaseClient";
-import { LoadingPopup } from "./loaders/LoadingPopUp";
+import { supabase } from "../../supabaseClient";
+import { LoadingPopup } from "../loaders/LoadingPopUp";
 import { PuffLoader } from "react-spinners";
 import { useOutletContext } from "react-router-dom";
 
@@ -51,7 +51,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
   const getInitials = (name) =>
     name
       ? name
-        .replace(",", "") 
+        .replace(",", "")
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -86,14 +86,13 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
 
   return (
     <div className={`sidebar ${minimizeSidebar === 2 ? "active" : ""}`}>
-      { }
       <LoadingPopup
         show={loggingOut}
         message="Logging out..."
         Loader={PuffLoader}
         color="#ff4444"
       />
-
+      {/*expanded*/}
       {minimizeSidebar === 1 && (
         <>
           <div className="brand">
@@ -268,28 +267,6 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                 </AnimatePresence>
               </div>
             </NavLink>
-
-            {/*<NavLink
-              to={role === 'super admin' ? '/complaints' : '/admin/complaints'}
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              <span className="material-icons">report_problem</span>
-              <AnimatePresence initial={!skipInitialAnimation}>
-                {isVisible && (
-                  <motion.span
-                    key="label-complaints"
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -50 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    Complaints
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </NavLink> */}
           </nav>
 
           <div
@@ -351,7 +328,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
           </div>
         </>
       )}
-
+      {/*minimized*/}
       {minimizeSidebar === 2 && (
         <>
           <div className="brand">
@@ -387,7 +364,6 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                   <span className="material-icons">people</span>
                 </NavLink>
 
-                { }
                 <NavLink
                   to="/users/admins"
                   className={({ isActive }) =>
@@ -400,7 +376,6 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               </>
             )}
 
-
             <NavLink
               to={role === 'super admin' ? '/rates' : '/admin/rates'}
               className={({ isActive }) =>
@@ -409,15 +384,6 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             >
               <span className="material-icons">paid</span>
             </NavLink>
-
-           {/*} <NavLink
-              to={role === 'super admin' ? '/complaints' : '/admin/complaints'}
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              <span className="material-icons">report_problem</span>
-            </NavLink> */}
           </nav>
 
           <div
@@ -500,7 +466,6 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             >
               <button className="logoutCancel"
                 onClick={() => setShowLogoutModal(false)}
-
               >
                 Cancel
               </button>

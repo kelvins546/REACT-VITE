@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import { supabase } from "../../supabaseClient";
-import "./Users.css";
+import { supabase } from "../../../supabaseClient";
+import "../CSS_Files/Users.css";
 import { PuffLoader } from "react-spinners";
-import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
-import { PopupNotification } from "../../components/notifications/PopUpNotification";
-import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
-import "../../components/dropdowns/searchableDropdown.css";
+import { LoadingPopup } from "../../../components/loaders/LoadingPopUp";
+import { PopupNotification } from "../../../components/notifications/PopUpNotification";
+import CalendarDropdown from "../../../components/dropdowns/CalendarDropdown";
+import "../../../components/dropdowns/searchableDropdown.css";
 
 const buildFullName = (first, last) =>
   [first, last].filter(Boolean).join(" ").trim();

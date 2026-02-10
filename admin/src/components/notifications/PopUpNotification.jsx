@@ -32,7 +32,6 @@ const VARIANTS = {
     }
 };
 
-
 export function PopupNotification({
     show,
     onClose,

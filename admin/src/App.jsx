@@ -2,16 +2,15 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/route_settings/ProtectedRoute";
 
-import MainLayout from "./components/MainLayout";
+import MainLayout from "./components/screen/MainLayout";
 import Dashboard from "./pages/shared/Dashboard";
 
-import Users from "./pages/super_admin/Users";
-import ArchivedUsers from "./pages/super_admin/ArchivedUsers";
-import ArchivedAdmins from "./pages/super_admin/ArchivedAdmins";
+import Users from "./pages/super_admin/JSX_Files/Users";
+import Admins from "./pages/super_admin/JSX_Files/Admins";
+import ArchivedUsers from "./pages/super_admin/JSX_Files/ArchivedUsers";
+import ArchivedAdmins from "./pages/super_admin/JSX_Files/ArchivedAdmins";
 
-import Rates from "./pages/super_admin/Rates";
-import Admins from "./pages/super_admin/Admins";
-
+import Rates from "./pages/super_admin/JSX_Files/Rates";
 import Admin_Rates from "./pages/admin&staff/Rates";
 
 import AdminRegister from "./pages/auth/AdminRegister";

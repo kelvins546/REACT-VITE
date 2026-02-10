@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import "./ArchivedUsers.css";
+import "../CSS_Files/Archives.css";
 import { PuffLoader } from "react-spinners";
-import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
-import { PopupNotification } from "../../components/notifications/PopUpNotification";
-import { supabase } from "../../supabaseClient";
-import "../../components/dropdowns/searchableDropdown.css";
+import { LoadingPopup } from "../../../components/loaders/LoadingPopUp";
+import { PopupNotification } from "../../../components/notifications/PopUpNotification";
+import { supabase } from "../../../supabaseClient";
+import "../../../components/dropdowns/searchableDropdown.css";
 
 const ArchivedAdmins = () => {
     const navigate = useNavigate();

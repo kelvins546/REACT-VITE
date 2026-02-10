@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./Dashboard.css";
-import '../../styles/stat_pills.css';
+import '../../components/stat-pills/stat_pills.css';
 import '../../components/dropdowns/searchableDropdown.css';
 import { supabase } from "../../supabaseClient";
 
@@ -382,176 +382,175 @@ const Dashboard = () => {
               <span style={{ fontSize: "20px" }} className="material-symbols-outlined text-primary">
                 highlight_mouse_cursor
               </span>
-            Firmware Release
-          </div>
-          <div className="sc-val">{activeFirmwareVersion}</div>
-          <div className="sc-sub text-primary">
-            Latest Stable Version
-          </div>
-        </div>
-
-      </div>
-
-      <div className="trend-card">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div style={{ fontWeight: 700, color: "#fff", fontSize: "16px" }}>
-            Rate Trend
-          </div>
-          <div className="trend-toggle">
-            <div className={`tt-opt ${showMonthlyTrend === true ? 'active' : ''}`} onClick={() => setshowMonthlyTrend(true) & setshowYearlyTrend(false) & setshowTrendStatsMonthly(true) & setshowTrendStatsYearly(false)}>Monthly</div>
-            <div className={`tt-opt ${showYearlyTrend === true ? 'active' : ''}`} onClick={() => setshowYearlyTrend(true) & setshowMonthlyTrend(false) & setshowTrendStatsYearly(true) & setshowTrendStatsMonthly(false)}>Yearly</div>
+              Firmware Release
+            </div>
+            <div className="sc-val">{activeFirmwareVersion}</div>
+            <div className="sc-sub text-primary">
+              Latest Stable Version
+            </div>
           </div>
         </div>
 
-        <div style={{ marginTop: "0px", marginBottom: "2px" }}>
-          <div className="provider-dropdown">
-            <button
-              className={`dropdown-button ${isOpen ? "open" : ""}`}
-              onClick={() => setIsOpen(!isOpen)}
-              style={{ width: "100%", maxWidth: "300px" }}
-            >
-              {selected}
-              <span className="material-symbols-outlined"
-                style={{
-                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "0.3s"
-                }}
+        <div className="trend-card">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ fontWeight: 700, color: "#fff", fontSize: "16px" }}>
+              Rate Trend
+            </div>
+            <div className="trend-toggle">
+              <div className={`tt-opt ${showMonthlyTrend === true ? 'active' : ''}`} onClick={() => setshowMonthlyTrend(true) & setshowYearlyTrend(false) & setshowTrendStatsMonthly(true) & setshowTrendStatsYearly(false)}>Monthly</div>
+              <div className={`tt-opt ${showYearlyTrend === true ? 'active' : ''}`} onClick={() => setshowYearlyTrend(true) & setshowMonthlyTrend(false) & setshowTrendStatsYearly(true) & setshowTrendStatsMonthly(false)}>Yearly</div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: "0px", marginBottom: "2px" }}>
+            <div className="provider-dropdown">
+              <button
+                className={`dropdown-button ${isOpen ? "open" : ""}`}
+                onClick={() => setIsOpen(!isOpen)}
+                style={{ width: "100%", maxWidth: "300px" }}
               >
-                keyboard_arrow_down
-              </span>
-            </button>
+                {selected}
+                <span className="material-symbols-outlined"
+                  style={{
+                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "0.3s"
+                  }}
+                >
+                  keyboard_arrow_down
+                </span>
+              </button>
 
-            {isOpen && (
-              <div className="dropdown-menu rates" style={{ width: "100%", maxWidth: "300px" }}>
-                <div className="searchBar">
-                  <input
-                    type="text"
-                    placeholder="Search provider..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input"
-                    autoFocus
-                  />
-                </div>
+              {isOpen && (
+                <div className="dropdown-menu rates" style={{ width: "100%", maxWidth: "300px" }}>
+                  <div className="searchBar">
+                    <input
+                      type="text"
+                      placeholder="Search provider..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input"
+                      autoFocus
+                    />
+                  </div>
 
-                <ul className="options-list">
-                  {majorProviders.length > 0 && (
-                    <>
-                      <li className="group-label">Major Providers</li>
-                      {majorProviders.map((name) => {
-                        const isSelected = selected === name;
-                        const logoKey = providerLogos[name];
-                        const logoSrc = logoKey ? `/provider_images/${logoKey.replace('./', '')}` : null;
-                        return (
-                          <li
-                            key={name}
-                            onClick={() => handleSelect(name)}
-                            className={`provider-option ${isSelected ? "selected" : ""}`}
-                          >
-                            <div className="provider-left">
-                              <div className="provider-logo">
-                                {logoSrc ? (
-                                  <img src={logoSrc} alt={name} />
-                                ) : (
-                                  <span>{name.charAt(0)}</span>
-                                )}
-                              </div>
-                              <div className="provider-info">
-                                <div className="provider-name">{name}</div>
-                                <div className="provider-sub">
-                                  Rate: ₱ {getProviderCurrentRate(name).toFixed(2)} / kWh
+                  <ul className="options-list">
+                    {majorProviders.length > 0 && (
+                      <>
+                        <li className="group-label">Major Providers</li>
+                        {majorProviders.map((name) => {
+                          const isSelected = selected === name;
+                          const logoKey = providerLogos[name];
+                          const logoSrc = logoKey ? `/provider_images/${logoKey.replace('./', '')}` : null;
+                          return (
+                            <li
+                              key={name}
+                              onClick={() => handleSelect(name)}
+                              className={`provider-option ${isSelected ? "selected" : ""}`}
+                            >
+                              <div className="provider-left">
+                                <div className="provider-logo">
+                                  {logoSrc ? (
+                                    <img src={logoSrc} alt={name} />
+                                  ) : (
+                                    <span>{name.charAt(0)}</span>
+                                  )}
+                                </div>
+                                <div className="provider-info">
+                                  <div className="provider-name">{name}</div>
+                                  <div className="provider-sub">
+                                    Rate: ₱ {getProviderCurrentRate(name).toFixed(2)} / kWh
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            {isSelected && <span className="checkmark material-symbols-outlined">check</span>}
-                          </li>
-                        );
-                      })}
-                    </>
-                  )}
+                              {isSelected && <span className="checkmark material-symbols-outlined">check</span>}
+                            </li>
+                          );
+                        })}
+                      </>
+                    )}
 
-                  {otherProviders.length > 0 && (
-                    <>
-                      <li className="group-label">Cooperatives</li>
-                      {otherProviders.map((name) => {
-                        const isSelected = selected === name;
-                        const logoKey = providerLogos[name];
-                        const logoSrc = logoKey ? `/provider_images/${logoKey.replace('./', '')}` : null;
-                        return (
-                          <li
-                            key={name}
-                            onClick={() => handleSelect(name)}
-                            className={`provider-option ${isSelected ? "selected" : ""}`}
-                          >
-                            <div className="provider-left">
-                              <div className="provider-logo">
-                                {logoSrc ? (
-                                  <img src={logoSrc} alt={name} />
-                                ) : (
-                                  <span>{name.charAt(0)}</span>
-                                )}
-                              </div>
-                              <div className="provider-info">
-                                <div className="provider-name">{name}</div>
-                                <div className="provider-sub muted">
-                                  Rate: ₱ {getProviderCurrentRate(name).toFixed(2)} / kWh
+                    {otherProviders.length > 0 && (
+                      <>
+                        <li className="group-label">Cooperatives</li>
+                        {otherProviders.map((name) => {
+                          const isSelected = selected === name;
+                          const logoKey = providerLogos[name];
+                          const logoSrc = logoKey ? `/provider_images/${logoKey.replace('./', '')}` : null;
+                          return (
+                            <li
+                              key={name}
+                              onClick={() => handleSelect(name)}
+                              className={`provider-option ${isSelected ? "selected" : ""}`}
+                            >
+                              <div className="provider-left">
+                                <div className="provider-logo">
+                                  {logoSrc ? (
+                                    <img src={logoSrc} alt={name} />
+                                  ) : (
+                                    <span>{name.charAt(0)}</span>
+                                  )}
+                                </div>
+                                <div className="provider-info">
+                                  <div className="provider-name">{name}</div>
+                                  <div className="provider-sub muted">
+                                    Rate: ₱ {getProviderCurrentRate(name).toFixed(2)} / kWh
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            {isSelected && <span className="checkmark material-symbols-outlined">check</span>}
-                          </li>
-                        );
-                      })}
-                    </>
-                  )}
+                              {isSelected && <span className="checkmark material-symbols-outlined">check</span>}
+                            </li>
+                          );
+                        })}
+                      </>
+                    )}
 
-                  {majorProviders.length === 0 && otherProviders.length === 0 && (
-                    <li className="no-results">No results found</li>
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="trend-stats-text">
-          <div>
-            HIGH <span className="ts-val">₱{chartMax.toFixed(2)}</span>
-          </div>
-          <div>
-            LOW <span className="ts-val-low">₱{chartMin.toFixed(2)}</span>
-          </div>
-        </div>
-
-        <div
-          className="chart-box animate-chart"
-          key={showYearlyTrend ? "yearly" : "monthly"}
-        >
-          {chartData.map((item, index) => {
-            const maxVal = Math.max(...chartData.map(d => d.value), 1);
-            const height = maxVal > 0 ? (item.value / maxVal) * 85 : 0;
-            return (
-              <div className="bar-group" key={index}>
-                <div className={`bar-val ${item.value === chartMax ? 'high' : ''} ${item.isCurrent ? 'curr' : ''}`}>
-                  ₱{item.value.toFixed(2)}
+                    {majorProviders.length === 0 && otherProviders.length === 0 && (
+                      <li className="no-results">No results found</li>
+                    )}
+                  </ul>
                 </div>
-                <div
-                  className={`bar ${item.isCurrent ? 'current' : ''}`}
-                  style={{ height: `${Math.max(height, 5)}%` }}
-                ></div>
-                <div className="bar-label">{item.label}</div>
-              </div>
-            );
-          })}
+              )}
+            </div>
+          </div>
+
+          <div className="trend-stats-text">
+            <div>
+              HIGH <span className="ts-val">₱{chartMax.toFixed(2)}</span>
+            </div>
+            <div>
+              LOW <span className="ts-val-low">₱{chartMin.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div
+            className="chart-box animate-chart"
+            key={showYearlyTrend ? "yearly" : "monthly"}
+          >
+            {chartData.map((item, index) => {
+              const maxVal = Math.max(...chartData.map(d => d.value), 1);
+              const height = maxVal > 0 ? (item.value / maxVal) * 85 : 0;
+              return (
+                <div className="bar-group" key={index}>
+                  <div className={`bar-val ${item.value === chartMax ? 'high' : ''} ${item.isCurrent ? 'curr' : ''}`}>
+                    ₱{item.value.toFixed(2)}
+                  </div>
+                  <div
+                    className={`bar ${item.isCurrent ? 'current' : ''}`}
+                    style={{ height: `${Math.max(height, 5)}%` }}
+                  ></div>
+                  <div className="bar-label">{item.label}</div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
 
       <div className="dashboard-bottom-grid">
         <div className="table-container">
@@ -615,23 +614,23 @@ const Dashboard = () => {
 
                   return (
                     <tr key={log.id}>
-                    <td>
-                      <div style={{ fontWeight: 600, color: "#fff" }}>{log.provider_name}</div>
-                      <div style={{ fontSize: "12px", color: "#666" }}>{log.rate_type}</div>
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <span className="rate-pill">₱{prevRate.toFixed(2)}</span>
-                        <span style={{ color: "#666", fontSize: "12px" }}>→</span>
-                        <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>
-                          ₱{newRate.toFixed(2)}
-                        </span>
-                      </div>
-                    </td>
-                    <td style={{ textAlign: "right", color: "#888", fontSize: "12px" }}>
-                      {new Date(log.effective_date || log.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })}
-                    </td>
-                  </tr>
+                      <td>
+                        <div style={{ fontWeight: 600, color: "#fff" }}>{log.provider_name}</div>
+                        <div style={{ fontSize: "12px", color: "#666" }}>{log.rate_type}</div>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span className="rate-pill">₱{prevRate.toFixed(2)}</span>
+                          <span style={{ color: "#666", fontSize: "12px" }}>→</span>
+                          <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>
+                            ₱{newRate.toFixed(2)}
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ textAlign: "right", color: "#888", fontSize: "12px" }}>
+                        {new Date(log.effective_date || log.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })}
+                      </td>
+                    </tr>
                   );
                 })}
                 {rateLogs.length === 0 && (
