@@ -18,11 +18,14 @@ const Admins = () => {
   const [currentUserRole, setCurrentUserRole] = useState(null);
   const outletContext = useOutletContext();
   const { setLoading, setLoadingMessage } = outletContext || {
-    setLoading: () => { },
-    setLoadingMessage: () => { }
+    setLoading: () => {},
+    setLoadingMessage: () => {},
   };
   const [searchTerm, setSearchTerm] = useState("");
-  const [loader, setLoader] = useState({ show: false, message: "Processing..." });
+  const [loader, setLoader] = useState({
+    show: false,
+    message: "Processing...",
+  });
   const [archiveReason, setArchiveReason] = useState("Inactive");
   const [notification, setNotification] = useState({
     show: false,
@@ -35,7 +38,9 @@ const Admins = () => {
   useEffect(() => {
     const checkSuperAdminAccess = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) {
           navigate("/login");
           return;
@@ -89,12 +94,12 @@ const Admins = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-
   const [showArchiveModal, setShowArchiveModal] = useState(false);
 
   const [archiveAdmin, setArchiveAdmin] = useState(null);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
-  const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] = useState(false);
+  const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] =
+    useState(false);
   const [showInviteConfirmation, setShowInviteConfirmation] = useState(false);
   const [showCreateConfirmation, setShowCreateConfirmation] = useState(false);
 
@@ -103,8 +108,7 @@ const Admins = () => {
 
   const nameRegex = /^[A-Za-z\s]+$/;
   const emailRegex = /^[^ ,;:<>()\\/]+@(gmail\.com|yahoo\.com)$/;
-  const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
   const OTP_TTL_MS = 5 * 60 * 1000;
   const OTP_RESEND_COOLDOWN_MS = 3 * 60 * 1000;
   const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || "";
@@ -155,12 +159,9 @@ const Admins = () => {
     !errors.first_name &&
     !errors.email &&
     !errors.password &&
-    !errors.confirmPassword
+    !errors.confirmPassword,
   );
-  const isInviteFormValid = Boolean(
-    newAdmin.email?.trim() &&
-    !errors.email
-  );
+  const isInviteFormValid = Boolean(newAdmin.email?.trim() && !errors.email);
 
   const handleOtpChange = (e, index) => {
     const val = e.target.value;
@@ -231,7 +232,6 @@ const Admins = () => {
     return () => clearInterval(timer);
   }, [showOtpModal, otpResendAvailableAt]);
 
-
   const buildFullName = (first, last) =>
     [first, last].filter(Boolean).join(" ").trim();
 
@@ -253,23 +253,23 @@ const Admins = () => {
   const getInitials = (name) =>
     name
       ? name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase()
       : "AD";
-
 
   const fetchAdmins = async () => {
     setLoading(true);
-    setLoadingMessage(navigator.onLine ? "Loading..." : "Check your internet connection...");
+    setLoadingMessage(
+      navigator.onLine ? "Loading..." : "Check your internet connection...",
+    );
     let timeoutId = setTimeout(() => {
       setLoadingMessage("Check your internet connection...");
     }, 5000);
 
     try {
-
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -302,7 +302,6 @@ const Admins = () => {
       setLoading(false);
     }
   };
-
 
   const checkEmailExists = async (email) => {
     try {
@@ -341,11 +340,9 @@ const Admins = () => {
       const first_name = newAdmin.first_name.trim();
       const last_name = newAdmin.last_name?.trim() || "";
 
-      const tempSupabase = createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY,
-        { auth: { persistSession: false } }
-      );
+      const tempSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false },
+      });
 
       const { data: authData, error: authError } =
         await tempSupabase.auth.signUp({
@@ -363,29 +360,27 @@ const Admins = () => {
       if (authError) throw authError;
 
       if (authData?.user) {
-        const { error: dbError } = await supabase
-          .from("users")
-          .upsert(
-            {
-              id: authData.user.id,
-              email: newAdmin.email,
-              role: newAdmin.role,
-              status: "active",
+        const { error: dbError } = await supabase.from("users").upsert(
+          {
+            id: authData.user.id,
+            email: newAdmin.email,
+            role: newAdmin.role,
+            status: "active",
 
-              first_name,
-              last_name,
+            first_name,
+            last_name,
 
-              region: "",
-              city: "",
-              zip_code: "",
-              street_address: "",
+            region: "",
+            city: "",
+            zip_code: "",
+            street_address: "",
 
-              phone_number: null,
-              avatar_url: null,
-              archived_at: null,
-            },
-            { onConflict: "id" }
-          );
+            phone_number: null,
+            avatar_url: null,
+            archived_at: null,
+          },
+          { onConflict: "id" },
+        );
 
         if (dbError) throw dbError;
       }
@@ -454,7 +449,7 @@ const Admins = () => {
         d5: digits[4],
         d6: digits[5],
       },
-      EMAILJS_PUBLIC_KEY
+      EMAILJS_PUBLIC_KEY,
     );
   };
 
@@ -465,7 +460,7 @@ const Admins = () => {
       !EMAILJS_PUBLIC_KEY
     ) {
       throw new Error(
-        "Invite email service is not configured. Set VITE_EMAILJS_INVITE_TEMPLATE_ID."
+        "Invite email service is not configured. Set VITE_EMAILJS_INVITE_TEMPLATE_ID.",
       );
     }
 
@@ -492,7 +487,7 @@ const Admins = () => {
         invite_link: inviteLink,
         role: newAdmin.role,
       },
-      EMAILJS_PUBLIC_KEY
+      EMAILJS_PUBLIC_KEY,
     );
   };
 
@@ -762,7 +757,7 @@ const Admins = () => {
   const filteredAdmins = adminsList.filter(
     (u) =>
       (u.name || "").toLowerCase().includes(safeSearchTerm) ||
-      (u.email || "").toLowerCase().includes(safeSearchTerm)
+      (u.email || "").toLowerCase().includes(safeSearchTerm),
   );
 
   useEffect(() => {
@@ -780,9 +775,8 @@ const Admins = () => {
 
   const paginatedAdmins = filteredAdmins.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
-
 
   const openArchiveModal = (admin) => {
     setArchiveAdmin(admin);
@@ -798,9 +792,7 @@ const Admins = () => {
         variant={notification.variant}
         icon={notification.icon}
         duration={3000}
-        onClose={() =>
-          setNotification((prev) => ({ ...prev, show: false }))
-        }
+        onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
       />
       <LoadingPopup
         show={loader.show}
@@ -855,142 +847,141 @@ const Admins = () => {
             Add New Admin
           </button>
         </div>
-
       </div>
 
       <div className="table-container">
         <div className="table-container-scrollable">
-            <table>
-              <thead>
+          <table>
+            <thead>
+              <tr>
+                <th>Profile</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedAdmins.length === 0 ? (
                 <tr>
-                  <th>Profile</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <td
+                    colSpan="4"
+                    style={{
+                      textAlign: "center",
+                      padding: "24px",
+                      color: "#666",
+                      fontSize: "14px",
+                    }}
+                  >
+                    No admins found.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {paginatedAdmins.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="4"
-                      style={{
-                        textAlign: "center",
-                        padding: "24px",
-                        color: "#666",
-                        fontSize: "14px",
-                      }}
-                    >
-                      No admins found.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedAdmins.map((admin) => (
-                    <tr
-                      key={admin.id}
-                      style={{ opacity: admin.status === "archived" ? 0.5 : 1 }}
-                    >
-                      <td>
-                        <div className="user-cell">
-                          <div
-                            className="u-avatar"
-                            style={{ background: admin.color }}
-                          >
-                            {admin.initials}
-                          </div>
-                          <div style={{ fontWeight: 600, color: "#fff" }}>
-                            {admin.name}
-                            {admin.role === "super admin" && (
-                              <span
-                                className="material-icons"
-                                style={{
-                                  fontSize: "12px",
-                                  color: "#ffd700",
-                                  marginLeft: "6px",
-                                }}
-                                title="Super Admin"
-                              >
-                                verified
-                              </span>
-                            )}
-                            <br />
-                            <span
-                              style={{
-                                fontSize: "13px",
-                                color: "#666",
-                                fontWeight: 400,
-                              }}
-                            >
-                              {admin.email}
-                            </span>
-                          </div>
+              ) : (
+                paginatedAdmins.map((admin) => (
+                  <tr
+                    key={admin.id}
+                    style={{ opacity: admin.status === "archived" ? 0.5 : 1 }}
+                  >
+                    <td>
+                      <div className="user-cell">
+                        <div
+                          className="u-avatar"
+                          style={{ background: admin.color }}
+                        >
+                          {admin.initials}
                         </div>
-                      </td>
+                        <div style={{ fontWeight: 600, color: "#fff" }}>
+                          {admin.name}
+                          {admin.role === "super admin" && (
+                            <span
+                              className="material-icons"
+                              style={{
+                                fontSize: "12px",
+                                color: "#ffd700",
+                                marginLeft: "6px",
+                              }}
+                              title="Super Admin"
+                            >
+                              verified
+                            </span>
+                          )}
+                          <br />
+                          <span
+                            style={{
+                              fontSize: "13px",
+                              color: "#666",
+                              fontWeight: 400,
+                            }}
+                          >
+                            {admin.email}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
 
-                      <td>
-                        <span
-                          className={`stat-badge ${admin.role === "super admin"
+                    <td>
+                      <span
+                        className={`stat-badge ${
+                          admin.role === "super admin"
                             ? "stat-super-admin"
                             : "stat-admin"
-                            }`}
-                        >
-                          {admin.role === "super admin" ? "Super Admin" : "Admin"}
-                        </span>
-                      </td>
+                        }`}
+                      >
+                        {admin.role === "super admin" ? "Super Admin" : "Admin"}
+                      </span>
+                    </td>
 
-                      <td>
-                        <span
-                          className={`stat-badge ${admin.status === "archived"
+                    <td>
+                      <span
+                        className={`stat-badge ${
+                          admin.status === "archived"
                             ? "stat-archived"
                             : "stat-active"
-                            }`}
-                        >
-                          {admin.status === "archived" ? "Archived" : "Active"}
-                        </span>
-                      </td>
+                        }`}
+                      >
+                        {admin.status === "archived" ? "Archived" : "Active"}
+                      </span>
+                    </td>
 
-                      <td>
-                        <div className="action-cell">
-                          {(admin.role !== "super admin" ||
-                            currentUserRole === "super admin") && (
-                              <button
-                                className="icon-btn edit-user-btn"
-                                title="Edit Admin"
-                                onClick={() => openEditModal(admin)}
+                    <td>
+                      <div className="action-cell">
+                        {(admin.role !== "super admin" ||
+                          currentUserRole === "super admin") && (
+                          <button
+                            className="icon-btn edit-user-btn"
+                            title="Edit Admin"
+                            onClick={() => openEditModal(admin)}
+                          >
+                            <span
+                              className="material-icons"
+                              style={{ fontSize: "18px" }}
+                            >
+                              edit
+                            </span>
+                          </button>
+                        )}
+
+                        {admin.role !== "super admin" &&
+                          admin.status !== "archived" && (
+                            <button
+                              className="icon-btn archive-user-btn"
+                              title="Archive Admin"
+                              onClick={() => openArchiveModal(admin)}
+                            >
+                              <span
+                                className="material-icons"
+                                style={{ fontSize: "18px" }}
                               >
-                                <span
-                                  className="material-icons"
-                                  style={{ fontSize: "18px" }}
-                                >
-                                  edit
-                                </span>
-                              </button>
-                            )}
-
-                          {admin.role !== "super admin" &&
-                            admin.status !== "archived" && (
-                              <button
-                                className="icon-btn archive-user-btn"
-                                title="Archive Admin"
-                                onClick={() => openArchiveModal(admin)}
-                              >
-                                <span
-                                  className="material-icons"
-                                  style={{ fontSize: "18px" }}
-                                >
-                                  archive
-                                </span>
-                              </button>
-                            )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-
-            </table>
-            
+                                archive
+                              </span>
+                            </button>
+                          )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
         {filteredAdmins.length > 0 && (
           <div className="a-pagination">
@@ -1001,8 +992,11 @@ const Admins = () => {
                 <>
                   Showing {(currentPage - 1) * itemsPerPage + 1}
                   {"–"}
-                  {Math.min(currentPage * itemsPerPage, filteredAdmins.length)} of{" "}
-                  {filteredAdmins.length}
+                  {Math.min(
+                    currentPage * itemsPerPage,
+                    filteredAdmins.length,
+                  )}{" "}
+                  of {filteredAdmins.length}
                 </>
               )}
             </div>
@@ -1020,23 +1014,28 @@ const Admins = () => {
                 {"<"}
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  className={`u-page-btn ${page === currentPage ? "active" : ""}`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
 
               <button
                 className="u-page-btn"
                 disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
                 style={{
                   opacity: currentPage === totalPages ? 0.4 : 1,
-                  cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
                 }}
               >
                 {">"}
@@ -1046,15 +1045,15 @@ const Admins = () => {
         )}
       </div>
 
-
-      { }
+      {}
       {showCreateModal && (
         <div className="a-modal-overlay">
           <div className="a-modal-container">
             <div className="a-modal-header">
-              <div className="u-modal-title"><span class="material-symbols-outlined">
-                person_add
-              </span><span>Create New Admin</span></div>
+              <div className="u-modal-title">
+                <span class="material-symbols-outlined">person_add</span>
+                <span>Create New Admin</span>
+              </div>
               <button
                 className="a-close-btn"
                 onClick={() => setShowCreateModal(false)}
@@ -1064,20 +1063,23 @@ const Admins = () => {
             </div>
 
             <div className="a-modal-body">
-              <div style={{
-                background: "#1a1a1a",
-                padding: "4px",
-                borderRadius: "10px",
-                display: "flex",
-                marginBottom: "24px",
-                border: "1px solid #333"
-              }}>
+              <div
+                style={{
+                  background: "#1a1a1a",
+                  padding: "4px",
+                  borderRadius: "10px",
+                  display: "flex",
+                  marginBottom: "24px",
+                  border: "1px solid #333",
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setCreateMode("create")}
                   style={{
                     flex: 1,
-                    background: createMode === "create" ? "#333" : "transparent",
+                    background:
+                      createMode === "create" ? "#333" : "transparent",
                     color: createMode === "create" ? "#fff" : "#888",
                     border: "none",
                     padding: "10px",
@@ -1089,10 +1091,12 @@ const Admins = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "8px",
-                    transition: "all 0.2s ease"
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  <span className="material-icons" style={{ fontSize: "18px" }}>person_add</span>
+                  <span className="material-icons" style={{ fontSize: "18px" }}>
+                    person_add
+                  </span>
                   Create Account
                 </button>
                 <button
@@ -1100,7 +1104,8 @@ const Admins = () => {
                   onClick={() => setCreateMode("invite")}
                   style={{
                     flex: 1,
-                    background: createMode === "invite" ? "#333" : "transparent",
+                    background:
+                      createMode === "invite" ? "#333" : "transparent",
                     color: createMode === "invite" ? "#fff" : "#888",
                     border: "none",
                     padding: "10px",
@@ -1112,20 +1117,47 @@ const Admins = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "8px",
-                    transition: "all 0.2s ease"
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  <span className="material-icons" style={{ fontSize: "18px" }}>mail</span>
+                  <span className="material-icons" style={{ fontSize: "18px" }}>
+                    mail
+                  </span>
                   Invite via Gmail
                 </button>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}
+              >
                 {createMode === "create" && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "16px",
+                    }}
+                  >
                     <div className="a-form-group">
                       <label className="a-form-label">First Name</label>
                       <div className="a-input-wrapper">
-                        <span className="material-icons input-icon" style={{ color: "#666", fontSize: "18px", marginLeft: "12px", position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 1 }}>badge</span>
+                        <span
+                          className="material-icons input-icon"
+                          style={{
+                            color: "#666",
+                            fontSize: "18px",
+                            marginLeft: "12px",
+                            position: "absolute",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            zIndex: 1,
+                          }}
+                        >
+                          badge
+                        </span>
                         <input
                           type="text"
                           className="a-form-input"
@@ -1139,14 +1171,31 @@ const Admins = () => {
                         />
                       </div>
                       {errors.first_name && (
-                        <span className="a-form-error">{errors.first_name}</span>
+                        <span className="a-form-error">
+                          {errors.first_name}
+                        </span>
                       )}
                     </div>
 
                     <div className="a-form-group">
-                      <label className="a-form-label">Last Name (Optional)</label>
+                      <label className="a-form-label">
+                        Last Name (Optional)
+                      </label>
                       <div className="a-input-wrapper">
-                        <span className="material-icons input-icon" style={{ color: "#666", fontSize: "18px", marginLeft: "12px", position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 1 }}>badge</span>
+                        <span
+                          className="material-icons input-icon"
+                          style={{
+                            color: "#666",
+                            fontSize: "18px",
+                            marginLeft: "12px",
+                            position: "absolute",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            zIndex: 1,
+                          }}
+                        >
+                          badge
+                        </span>
                         <input
                           type="text"
                           className="a-form-input"
@@ -1169,7 +1218,20 @@ const Admins = () => {
                 <div className="a-form-group">
                   <label className="a-form-label">Email Address</label>
                   <div className="a-input-wrapper">
-                    <span className="material-icons input-icon" style={{ color: "#666", fontSize: "18px", marginLeft: "12px", position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 1 }}>email</span>
+                    <span
+                      className="material-icons input-icon"
+                      style={{
+                        color: "#666",
+                        fontSize: "18px",
+                        marginLeft: "12px",
+                        position: "absolute",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 1,
+                      }}
+                    >
+                      email
+                    </span>
                     <input
                       type="email"
                       className="a-form-input"
@@ -1187,18 +1249,40 @@ const Admins = () => {
                 </div>
 
                 {createMode === "create" && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "16px",
+                    }}
+                  >
                     <div className="a-form-group">
                       <label className="a-form-label">Password</label>
                       <div className="a-input-wrapper">
-                        <span className="material-icons input-icon" style={{ color: "#666", fontSize: "18px", marginLeft: "12px", position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 1 }}>lock</span>
+                        <span
+                          className="material-icons input-icon"
+                          style={{
+                            color: "#666",
+                            fontSize: "18px",
+                            marginLeft: "12px",
+                            position: "absolute",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            zIndex: 1,
+                          }}
+                        >
+                          lock
+                        </span>
                         <input
                           type={showPassword ? "text" : "password"}
                           className="a-form-input"
                           style={{ paddingLeft: "40px" }}
                           value={newAdmin.password}
                           onChange={(e) =>
-                            setNewAdmin({ ...newAdmin, password: e.target.value })
+                            setNewAdmin({
+                              ...newAdmin,
+                              password: e.target.value,
+                            })
                           }
                           placeholder="••••••••"
                         />
@@ -1217,7 +1301,20 @@ const Admins = () => {
                     <div className="a-form-group">
                       <label className="a-form-label">Confirm Password</label>
                       <div className="a-input-wrapper">
-                        <span className="material-icons input-icon" style={{ color: "#666", fontSize: "18px", marginLeft: "12px", position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 1 }}>lock_reset</span>
+                        <span
+                          className="material-icons input-icon"
+                          style={{
+                            color: "#666",
+                            fontSize: "18px",
+                            marginLeft: "12px",
+                            position: "absolute",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            zIndex: 1,
+                          }}
+                        >
+                          lock_reset
+                        </span>
                         <input
                           type={showConfirmPassword ? "text" : "password"}
                           className="a-form-input"
@@ -1237,7 +1334,9 @@ const Admins = () => {
                             setShowConfirmPassword(!showConfirmPassword)
                           }
                         >
-                          {showConfirmPassword ? "visibility" : "visibility_off"}
+                          {showConfirmPassword
+                            ? "visibility"
+                            : "visibility_off"}
                         </span>
                       </div>
                       {errors.confirmPassword && (
@@ -1251,8 +1350,25 @@ const Admins = () => {
 
                 <div className="a-form-group">
                   <label className="a-form-label">Assign Role</label>
-                  <div className="a-input-wrapper" style={{ position: "relative", borderColor: "#333" }}>
-                    <span className="material-icons input-icon" style={{ color: "#666", fontSize: "18px", marginLeft: "12px", position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 2, pointerEvents: "none" }}>admin_panel_settings</span>
+                  <div
+                    className="a-input-wrapper"
+                    style={{ position: "relative", borderColor: "#333" }}
+                  >
+                    <span
+                      className="material-icons input-icon"
+                      style={{
+                        color: "#666",
+                        fontSize: "18px",
+                        marginLeft: "12px",
+                        position: "absolute",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 2,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      admin_panel_settings
+                    </span>
                     <button
                       type="button"
                       className="a-form-input"
@@ -1264,34 +1380,67 @@ const Admins = () => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        width: "100%"
+                        width: "100%",
                       }}
                       onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
                     >
                       <span style={{ color: "#fff", fontSize: "14px" }}>
-                        {newAdmin.role === "super admin" ? "Super Admin" : "System Admin"}
+                        {newAdmin.role === "super admin"
+                          ? "Super Admin"
+                          : "System Admin"}
                       </span>
-                      <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isRoleDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+                      <span
+                        className="material-icons"
+                        style={{
+                          fontSize: "18px",
+                          color: "#666",
+                          transform: isRoleDropdownOpen
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                          transition: "0.3s",
+                        }}
+                      >
                         keyboard_arrow_down
                       </span>
                     </button>
 
                     {isRoleDropdownOpen && (
-                      <div className="dropdown-menu" style={{ width: "100%", zIndex: 100 }}>
+                      <div
+                        className="dropdown-menu"
+                        style={{ width: "100%", zIndex: 100 }}
+                      >
                         <ul className="options-list">
                           <li
                             className={`provider-option ${newAdmin.role === "admin" ? "selected" : ""}`}
-                            onClick={() => { setNewAdmin({ ...newAdmin, role: "admin" }); setIsRoleDropdownOpen(false); }}
+                            onClick={() => {
+                              setNewAdmin({ ...newAdmin, role: "admin" });
+                              setIsRoleDropdownOpen(false);
+                            }}
                           >
-                            <div className="provider-info"><div className="provider-name">System Admin</div></div>
-                            {newAdmin.role === "admin" && <span className="checkmark material-symbols-outlined">check</span>}
+                            <div className="provider-info">
+                              <div className="provider-name">System Admin</div>
+                            </div>
+                            {newAdmin.role === "admin" && (
+                              <span className="checkmark material-symbols-outlined">
+                                check
+                              </span>
+                            )}
                           </li>
                           <li
                             className={`provider-option ${newAdmin.role === "super admin" ? "selected" : ""}`}
-                            onClick={() => { setNewAdmin({ ...newAdmin, role: "super admin" }); setIsRoleDropdownOpen(false); }}
+                            onClick={() => {
+                              setNewAdmin({ ...newAdmin, role: "super admin" });
+                              setIsRoleDropdownOpen(false);
+                            }}
                           >
-                            <div className="provider-info"><div className="provider-name">Super Admin</div></div>
-                            {newAdmin.role === "super admin" && <span className="checkmark material-symbols-outlined">check</span>}
+                            <div className="provider-info">
+                              <div className="provider-name">Super Admin</div>
+                            </div>
+                            {newAdmin.role === "super admin" && (
+                              <span className="checkmark material-symbols-outlined">
+                                check
+                              </span>
+                            )}
                           </li>
                         </ul>
                       </div>
@@ -1362,14 +1511,31 @@ const Admins = () => {
             </div>
 
             <div className="a-modal-body">
-              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
                 <div style={{ color: "#bbb", fontSize: "13px" }}>
-                  Enter the 6-digit code sent to <strong>{newAdmin.email}</strong>.
+                  Enter the 6-digit code sent to{" "}
+                  <strong>{newAdmin.email}</strong>.
                 </div>
 
                 <div className="a-form-group">
                   <label className="a-form-label">OTP Code</label>
-                  <div className="a-input-wrapper" style={{ background: 'transparent', border: 'none', padding: 0, display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                  <div
+                    className="a-input-wrapper"
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      padding: 0,
+                      display: "flex",
+                      gap: "10px",
+                      justifyContent: "center",
+                    }}
+                  >
                     {Array.from({ length: 6 }).map((_, index) => (
                       <input
                         key={index}
@@ -1378,18 +1544,20 @@ const Admins = () => {
                         maxLength="1"
                         className="a-form-input"
                         style={{
-                          width: '45px',
-                          height: '50px',
-                          textAlign: 'center',
-                          fontSize: '20px',
-                          fontWeight: 'bold',
-                          background: '#1a1a1a',
-                          border: '1px solid #333',
-                          borderRadius: '8px',
+                          width: "45px",
+                          height: "50px",
+                          textAlign: "center",
+                          fontSize: "20px",
+                          fontWeight: "bold",
+                          background: "#1a1a1a",
+                          border: "1px solid #333",
+                          borderRadius: "8px",
                           padding: 0,
-                          color: '#fff'
+                          color: "#fff",
                         }}
-                        value={otpInput[index] === " " ? "" : (otpInput[index] || "")}
+                        value={
+                          otpInput[index] === " " ? "" : otpInput[index] || ""
+                        }
                         onChange={(e) => handleOtpChange(e, index)}
                         onKeyDown={(e) => handleOtpKeyDown(e, index)}
                         onPaste={handleOtpPaste}
@@ -1429,12 +1597,20 @@ const Admins = () => {
                 alignItems: "center",
                 fontSize: "13px",
                 color: "#aaa",
-                gap: "6px"
+                gap: "6px",
               }}
             >
               {otpResendRemaining > 0 ? (
                 <span>
-                  Resend available in <span style={{ color: "#fff", fontVariantNumeric: "tabular-nums" }}>{formatMs(otpResendRemaining)}</span>
+                  Resend available in{" "}
+                  <span
+                    style={{
+                      color: "#fff",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {formatMs(otpResendRemaining)}
+                  </span>
                 </span>
               ) : (
                 <>
@@ -1451,7 +1627,7 @@ const Admins = () => {
                       fontWeight: "600",
                       padding: 0,
                       textDecoration: "underline",
-                      opacity: isSendingOtp ? 0.7 : 1
+                      opacity: isSendingOtp ? 0.7 : 1,
                     }}
                   >
                     {isSendingOtp ? "Sending..." : "Resend OTP"}
@@ -1463,14 +1639,15 @@ const Admins = () => {
         </div>
       )}
 
-      { }
+      {}
       {showEditModal && selectedAdmin && (
         <div className="a-modal-overlay">
           <div className="a-modal-container">
             <div className="a-modal-header">
-              <div className="u-modal-title"><span class="material-symbols-outlined">
-                edit
-              </span><span>Edit Admin</span></div>
+              <div className="u-modal-title">
+                <span class="material-symbols-outlined">edit</span>
+                <span>Edit Admin</span>
+              </div>
               <button
                 className="a-close-btn"
                 onClick={() => setShowEditModal(false)}
@@ -1479,8 +1656,20 @@ const Admins = () => {
               </button>
             </div>
             <div className="a-modal-body">
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "16px",
+                  }}
+                >
                   <div className="a-form-group">
                     <label className="a-form-label">First Name</label>
                     <div className="a-input-wrapper">
@@ -1490,7 +1679,10 @@ const Admins = () => {
                         value={editFormData.first_name}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[0-9]/g, "");
-                          setEditFormData({ ...editFormData, first_name: value });
+                          setEditFormData({
+                            ...editFormData,
+                            first_name: value,
+                          });
                         }}
                       />
                     </div>
@@ -1504,7 +1696,10 @@ const Admins = () => {
                         value={editFormData.last_name}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[0-9]/g, "");
-                          setEditFormData({ ...editFormData, last_name: value });
+                          setEditFormData({
+                            ...editFormData,
+                            last_name: value,
+                          });
                         }}
                       />
                     </div>
@@ -1530,7 +1725,10 @@ const Admins = () => {
                 >
                   Cancel
                 </button>
-                <button className="btn btn-primary-modal" onClick={handleUpdateAdmin}>
+                <button
+                  className="btn btn-primary-modal"
+                  onClick={handleUpdateAdmin}
+                >
                   Save Changes
                 </button>
               </div>
@@ -1539,12 +1737,15 @@ const Admins = () => {
         </div>
       )}
 
-      { }
+      {}
       {showArchiveModal && archiveAdmin && (
         <div className="u-modal-overlay">
           <div className="u-modal-container archive-mode">
             <div className="u-modal-header" style={{ borderBottom: "none" }}>
-              <div className="u-modal-title" style={{ color: "var(--warning)" }}>
+              <div
+                className="u-modal-title"
+                style={{ color: "var(--warning)" }}
+              >
                 <span className="material-icons">warning</span> Archive Admin
               </div>
               <button
@@ -1569,7 +1770,10 @@ const Admins = () => {
               </p>
               <div className="u-form-group">
                 <label className="u-form-label">Reason for Archiving</label>
-                <div className="a-input-wrapper" style={{ position: "relative", borderColor: "#333" }}>
+                <div
+                  className="a-input-wrapper"
+                  style={{ position: "relative", borderColor: "#333" }}
+                >
                   <button
                     type="button"
                     className="a-form-input"
@@ -1580,29 +1784,61 @@ const Admins = () => {
                       alignItems: "center",
                       justifyContent: "space-between",
                       width: "100%",
-                      paddingRight: 0
+                      paddingRight: 0,
                     }}
-                    onClick={() => setIsArchiveReasonDropdownOpen(!isArchiveReasonDropdownOpen)}
+                    onClick={() =>
+                      setIsArchiveReasonDropdownOpen(
+                        !isArchiveReasonDropdownOpen,
+                      )
+                    }
                   >
                     <span style={{ color: "#fff", fontSize: "14px" }}>
                       {archiveReason || "Inactive"}
                     </span>
-                    <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isArchiveReasonDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+                    <span
+                      className="material-icons"
+                      style={{
+                        fontSize: "18px",
+                        color: "#666",
+                        transform: isArchiveReasonDropdownOpen
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                        transition: "0.3s",
+                      }}
+                    >
                       keyboard_arrow_down
                     </span>
                   </button>
 
                   {isArchiveReasonDropdownOpen && (
-                    <div className="dropdown-menu" style={{ width: "100%", zIndex: 100 }}>
+                    <div
+                      className="dropdown-menu"
+                      style={{ width: "100%", zIndex: 100 }}
+                    >
                       <ul className="options-list">
-                        {["Inactive", "Employee has left the organization", "Security Concerns", "Duplicate Account", "Other"].map((reason) => (
+                        {[
+                          "Inactive",
+                          "Employee has left the organization",
+                          "Security Concerns",
+                          "Duplicate Account",
+                          "Other",
+                        ].map((reason) => (
                           <li
                             key={reason}
                             className={`provider-option ${archiveReason === reason ? "selected" : ""}`}
-                            onClick={() => { setArchiveReason(reason); setIsArchiveReasonDropdownOpen(false); }}
+                            onClick={() => {
+                              setArchiveReason(reason);
+                              setIsArchiveReasonDropdownOpen(false);
+                            }}
                           >
-                            <div className="provider-info"><div className="provider-name">{reason}</div></div>
-                            {archiveReason === reason && <span className="checkmark material-symbols-outlined">check</span>}
+                            <div className="provider-info">
+                              <div className="provider-name">{reason}</div>
+                            </div>
+                            {archiveReason === reason && (
+                              <span className="checkmark material-symbols-outlined">
+                                check
+                              </span>
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -1645,26 +1881,62 @@ const Admins = () => {
           <div className="a-modal-container" style={{ maxWidth: "400px" }}>
             <div className="a-modal-header">
               <div className="u-modal-title">
-                <span className="material-icons" style={{ color: "#0055ff" }}>help</span>
+                <span className="material-icons" style={{ color: "#0055ff" }}>
+                  help
+                </span>
                 <span>Confirm Invitation</span>
               </div>
-              <button className="a-close-btn" onClick={() => setShowInviteConfirmation(false)}>
+              <button
+                className="a-close-btn"
+                onClick={() => setShowInviteConfirmation(false)}
+              >
                 <span className="material-icons">close</span>
               </button>
             </div>
             <div className="a-modal-body">
-              <p style={{ color: "#ccc", fontSize: "14px", marginBottom: "20px", lineHeight: "1.5" }}>
+              <p
+                style={{
+                  color: "#ccc",
+                  fontSize: "14px",
+                  marginBottom: "20px",
+                  lineHeight: "1.5",
+                }}
+              >
                 Are you sure that this email you want to invite is correct?
               </p>
-              <div style={{ background: "#1a1a1a", padding: "12px", borderRadius: "8px", marginBottom: "20px", border: "1px solid #333" }}>
-                <div style={{ fontSize: "13px", color: "#888", marginBottom: "4px" }}>Email Address</div>
-                <div style={{ color: "#fff", fontWeight: "600" }}>{newAdmin.email}</div>
+              <div
+                style={{
+                  background: "#1a1a1a",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  marginBottom: "20px",
+                  border: "1px solid #333",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "13px",
+                    color: "#888",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Email Address
+                </div>
+                <div style={{ color: "#fff", fontWeight: "600" }}>
+                  {newAdmin.email}
+                </div>
               </div>
               <div className="a-modal-actions">
-                <button className="a-btn-cancel" onClick={() => setShowInviteConfirmation(false)}>
+                <button
+                  className="a-btn-cancel"
+                  onClick={() => setShowInviteConfirmation(false)}
+                >
                   Cancel
                 </button>
-                <button className="btn btn-primary-modal" onClick={confirmSendInvite}>
+                <button
+                  className="btn btn-primary-modal"
+                  onClick={confirmSendInvite}
+                >
                   Yes, Send Invite
                 </button>
               </div>
@@ -1678,50 +1950,129 @@ const Admins = () => {
           <div className="a-modal-container" style={{ maxWidth: "400px" }}>
             <div className="a-modal-header">
               <div className="u-modal-title">
-                <span className="material-icons" style={{ color: "#0055ff" }}>help</span>
+                <span className="material-icons" style={{ color: "#0055ff" }}>
+                  help
+                </span>
                 <span>Confirm Details</span>
               </div>
-              <button className="a-close-btn" onClick={() => setShowCreateConfirmation(false)}>
+              <button
+                className="a-close-btn"
+                onClick={() => setShowCreateConfirmation(false)}
+              >
                 <span className="material-icons">close</span>
               </button>
             </div>
             <div className="a-modal-body">
-              <p style={{ color: "#ccc", fontSize: "14px", marginBottom: "20px", lineHeight: "1.5" }}>
+              <p
+                style={{
+                  color: "#ccc",
+                  fontSize: "14px",
+                  marginBottom: "20px",
+                  lineHeight: "1.5",
+                }}
+              >
                 Are you sure that these details are correct?
               </p>
-              <div style={{ background: "#1a1a1a", padding: "15px", borderRadius: "8px", marginBottom: "20px", border: "1px solid #333", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div
+                style={{
+                  background: "#1a1a1a",
+                  padding: "15px",
+                  borderRadius: "8px",
+                  marginBottom: "20px",
+                  border: "1px solid #333",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
                 <div>
-                  <div style={{ fontSize: "12px", color: "#888", marginBottom: "2px" }}>Name</div>
-                  <div style={{ color: "#fff", fontWeight: "600", fontSize: "14px" }}>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#888",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    Name
+                  </div>
+                  <div
+                    style={{
+                      color: "#fff",
+                      fontWeight: "600",
+                      fontSize: "14px",
+                    }}
+                  >
                     {newAdmin.first_name} {newAdmin.last_name}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "12px", color: "#888", marginBottom: "2px" }}>Email</div>
-                  <div style={{ color: "#fff", fontWeight: "600", fontSize: "14px" }}>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#888",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    Email
+                  </div>
+                  <div
+                    style={{
+                      color: "#fff",
+                      fontWeight: "600",
+                      fontSize: "14px",
+                    }}
+                  >
                     {newAdmin.email}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "12px", color: "#888", marginBottom: "2px" }}>Role</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#888",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    Role
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
                     <span
-                      className={`stat-badge ${newAdmin.role === "super admin"
-                        ? "stat-super-admin"
-                        : "stat-admin"
-                        }`}
-                      style={{ padding: "4px 8px", fontSize: "10px", width: "auto", minWidth: "auto" }}
+                      className={`stat-badge ${
+                        newAdmin.role === "super admin"
+                          ? "stat-super-admin"
+                          : "stat-admin"
+                      }`}
+                      style={{
+                        padding: "4px 8px",
+                        fontSize: "10px",
+                        width: "auto",
+                        minWidth: "auto",
+                      }}
                     >
-                      {newAdmin.role === "super admin" ? "Super Admin" : "Admin"}
+                      {newAdmin.role === "super admin"
+                        ? "Super Admin"
+                        : "Admin"}
                     </span>
                   </div>
                 </div>
               </div>
               <div className="a-modal-actions">
-                <button className="a-btn-cancel" onClick={() => setShowCreateConfirmation(false)}>
+                <button
+                  className="a-btn-cancel"
+                  onClick={() => setShowCreateConfirmation(false)}
+                >
                   Cancel
                 </button>
-                <button className="btn btn-primary-modal" onClick={confirmStartCreate}>
+                <button
+                  className="btn btn-primary-modal"
+                  onClick={confirmStartCreate}
+                >
                   Yes, Proceed
                 </button>
               </div>

@@ -48,7 +48,7 @@
 }
 
 .btn-restore {
-  border: #00FF99 1px solid;
+  border: #00ff99 1px solid;
 }
 
 .archive-user-btn:hover {
@@ -293,7 +293,7 @@
 .r-btn-success {
   background: rgba(76, 175, 80, 0.1);
   color: var(--success);
-  border: #00FF99 1px solid;
+  border: #00ff99 1px solid;
   width: 100%;
   display: flex;
   justify-content: center;

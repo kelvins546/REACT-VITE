@@ -51,14 +51,13 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
   const getInitials = (name) =>
     name
       ? name
-        .replace(",", "")
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
+          .replace(",", "")
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase()
       : "AD";
-
 
   const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
 
@@ -96,11 +95,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
       {minimizeSidebar === 1 && (
         <>
           <div className="brand">
-            <img
-              src="/logoNew.png"
-              className="brand-logo"
-              alt="Logo"
-            />
+            <img src="/logoNew.png" className="brand-logo" alt="Logo" />
             <AnimatePresence initial={!skipInitialAnimation}>
               {isVisible && (
                 <motion.span
@@ -141,7 +136,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               </AnimatePresence>
             </NavLink>
 
-            { }
+            {}
             {isSuperAdmin && (
               <div className="nav-group">
                 <div
@@ -149,7 +144,13 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                   onClick={() => setIsUsersOpen(!isUsersOpen)}
                   style={{ cursor: "pointer", justifyContent: "space-between" }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                    }}
+                  >
                     <span className="material-icons">manage_accounts</span>
                     <div style={{ display: "flex", gap: "5px" }}>
                       <AnimatePresence initial={!skipInitialAnimation}>
@@ -183,7 +184,9 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                       className="material-icons"
                       style={{
                         fontSize: "16px",
-                        transform: isUsersOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transform: isUsersOpen
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
                         transition: "0.3s",
                       }}
                     >
@@ -205,11 +208,16 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                         to="/users"
                         end
                         className={({ isActive }) =>
-                          isActive ? "nav-link sub-link active" : "nav-link sub-link"
+                          isActive
+                            ? "nav-link sub-link active"
+                            : "nav-link sub-link"
                         }
                         style={{ paddingLeft: "45px", height: "45px" }}
                       >
-                        <span className="material-icons" style={{ fontSize: "18px" }}>
+                        <span
+                          className="material-icons"
+                          style={{ fontSize: "18px" }}
+                        >
                           people
                         </span>
                         <span>Residents</span>
@@ -218,11 +226,16 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                       <NavLink
                         to="/users/admins"
                         className={({ isActive }) =>
-                          isActive ? "nav-link sub-link active" : "nav-link sub-link"
+                          isActive
+                            ? "nav-link sub-link active"
+                            : "nav-link sub-link"
                         }
                         style={{ paddingLeft: "45px", height: "45px" }}
                       >
-                        <span className="material-icons" style={{ fontSize: "18px" }}>
+                        <span
+                          className="material-icons"
+                          style={{ fontSize: "18px" }}
+                        >
                           admin_panel_settings
                         </span>
                         <span>System Admins</span>
@@ -234,7 +247,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             )}
 
             <NavLink
-              to={role === 'super admin' ? '/rates' : '/admin/rates'}
+              to={role === "super admin" ? "/rates" : "/admin/rates"}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -276,7 +289,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             style={{ transition: "0.5s ease" }}
           >
             <AnimatePresence initial={!skipInitialAnimation}>
-              { }
+              {}
               <motion.div
                 key="user-avatar"
                 className="user-avatar"
@@ -295,7 +308,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                { }
+                {}
                 <div
                   style={{
                     fontSize: "14px",
@@ -309,7 +322,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                 >
                   {adminProfile.name}
                 </div>
-                { }
+                {}
                 <div style={{ fontSize: "12px", color: "#888" }}>
                   {adminProfile.role}
                 </div>
@@ -332,11 +345,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
       {minimizeSidebar === 2 && (
         <>
           <div className="brand">
-            <img
-              src="/logoNew.png"
-              className="brand-logo"
-              alt="Logo"
-            />
+            <img src="/logoNew.png" className="brand-logo" alt="Logo" />
           </div>
 
           <nav style={{ display: "flex", flexDirection: "column" }}>
@@ -350,7 +359,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               <span className="material-icons">dashboard</span>
             </NavLink>
 
-            { }
+            {}
             {isSuperAdmin && (
               <>
                 <NavLink
@@ -377,7 +386,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
             )}
 
             <NavLink
-              to={role === 'super admin' ? '/rates' : '/admin/rates'}
+              to={role === "super admin" ? "/rates" : "/admin/rates"}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -449,7 +458,12 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               }}
             >
               <span
-                style={{ fontSize: "15.5px", fontWeight: "600", color: "#fff", marginTop: "10px" }}
+                style={{
+                  fontSize: "15.5px",
+                  fontWeight: "600",
+                  color: "#fff",
+                  marginTop: "10px",
+                }}
               >
                 Confirm Logout
               </span>
@@ -464,15 +478,13 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                 gap: "10px",
               }}
             >
-              <button className="logoutCancel"
+              <button
+                className="logoutCancel"
                 onClick={() => setShowLogoutModal(false)}
               >
                 Cancel
               </button>
-              <button
-                className="btn btn-danger2"
-                onClick={handleLogout}
-              >
+              <button className="btn btn-danger2" onClick={handleLogout}>
                 Logout
               </button>
             </div>

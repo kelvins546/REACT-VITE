@@ -24,7 +24,9 @@ const ProtectedRoute = () => {
 
       if (isMounted) {
         setLoading(true);
-        setLoadingMessage(navigator.onLine ? "Loading..." : "Check your internet connection...");
+        setLoadingMessage(
+          navigator.onLine ? "Loading..." : "Check your internet connection...",
+        );
       }
 
       timeoutId = setTimeout(() => {

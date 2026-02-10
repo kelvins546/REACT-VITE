@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../super_admin/CSS_Files/Rates.css";
-import "../../components/dropdowns/searchableDropdown.css"
+import "../../components/dropdowns/searchableDropdown.css";
 import { PuffLoader } from "react-spinners";
 import { PopupNotification } from "../../components/notifications/PopUpNotification";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
@@ -18,10 +18,14 @@ const Rates = () => {
   const [loadingRates, setLoadingRates] = useState(true);
   const [rateRows, setRateRows] = useState([]);
   const [rateLogs, setRateLogs] = useState([]);
-  const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "admin", id: null });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [currentUser, setCurrentUser] = useState({
+    name: "Admin",
+    role: "admin",
+    id: null,
+  });
+  const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState('Meralco (Commercial)');
+  const [selected, setSelected] = useState("Meralco (Commercial)");
   const itemsPerPage = 5;
 
   const [notification, setNotification] = useState({
@@ -29,19 +33,19 @@ const Rates = () => {
     title: "",
     message: "",
     variant: "success",
-    icon: "info"
+    icon: "info",
   });
 
   const [loader, setLoader] = useState({
     show: false,
-    message: "Processing..."
+    message: "Processing...",
   });
 
   const MAJOR_PROVIDERS = {
-    "Meralco (Industrial)": 9.80,
-    "Meralco (Commercial)": 10.50,
+    "Meralco (Industrial)": 9.8,
+    "Meralco (Commercial)": 10.5,
     "Visayan Electric (VECO) (Commercial)": 10.15,
-    "Davao Light (DLPC)": 10.24
+    "Davao Light (DLPC)": 10.24,
   };
 
   const DEFAULT_RATE = 9.75;
@@ -63,54 +67,150 @@ const Rates = () => {
     return { name, type };
   };
 
-  const { name: selectedProvider, type: selectedType } = parseSelection(selected);
-  const filteredLogs = rateLogs.filter((log) => log.providerName === selectedProvider && (log.rateType === selectedType || (selectedType === "Residential" && log.rateType === "standard")));
+  const { name: selectedProvider, type: selectedType } =
+    parseSelection(selected);
+  const filteredLogs = rateLogs.filter(
+    (log) =>
+      log.providerName === selectedProvider &&
+      (log.rateType === selectedType ||
+        (selectedType === "Residential" && log.rateType === "standard")),
+  );
 
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
   const paginatedRates = filteredLogs.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const allProviders = [
-    'ABRECO', 'AEC (Albay)', 'AKELCO', 'ALECO', 'ANECO', 'ANTECO', 'ASELCO', 'AURELCO',
-    'BALAMBAN', 'BANELCO', 'BASELCO', 'BATANELCO', 'BATELEC I', 'BATELEC II', 'BENECO',
-    'BILECO', 'BISELCO', 'BOHECO I', 'BOHECO II', 'BUSECO', 'CAGELCO I', 'CAGELCO II',
-    'CAMELCO', 'CANORECO', 'CAPELCO', 'CASURECO I', 'CASURECO II', 'CASURECO III',
-    'CASURECO IV', 'CEBECO I', 'CEBECO II', 'CEBECO III', 'CELCOR', 'CENPELCO', 'CEPALCO',
-    'CLPC (Calamba)', 'COTELCO', 'DASURECO', 'Davao Light (DLPC)', 'DECORP', 'DIELCO',
-    'DORELCO', 'ESAMELCO', 'FLECO', 'GUIMELCO', 'IFELCO', 'ILECO I', 'ILECO II', 'ILECO III',
-    'ILPI (Iligan)', 'INEC', 'ISECO', 'ISELCO I', 'ISELCO II', 'KAELCO', 'LANECO',
-    'LEYECO II', 'LEYECO III', 'LEYECO IV', 'LEYECO V', 'LUELCO', 'MAGELCO', 'MARELCO',
-    'MECO (Mactan)', 'MOPRECO', 'MORESCO I', 'MORESCO II', 'NEECO I', 'NEECO II',
-    'NOCECO', 'NONECO', 'NORECO I', 'NORECO II', 'NORSAMELCO', 'NUVELCO', 'OMECO', 'ORMECO',
-    'PALECO', 'PANELCO I', 'PANELCO III', 'PELCO I', 'PELCO II', 'PELCO III', 'PENELCO',
-    'QUEZELCO I', 'QUEZELCO II', 'QUIRELCO', 'ROMELCO', 'SAMELCO I', 'SAMELCO II',
-    'SOCOTECO I', 'SOCOTECO II', 'SOLECO', 'SUKELCO', 'SURNECO', 'SURSECO', 'TARELCO I',
-    'TARELCO II', 'TAWELCO', 'Visayan Electric (VECO)', 'ZAMCELCO', 'ZAMECO I', 'ZAMECO II',
-    'ZAMSURECO', 'ZANECO'
+    "ABRECO",
+    "AEC (Albay)",
+    "AKELCO",
+    "ALECO",
+    "ANECO",
+    "ANTECO",
+    "ASELCO",
+    "AURELCO",
+    "BALAMBAN",
+    "BANELCO",
+    "BASELCO",
+    "BATANELCO",
+    "BATELEC I",
+    "BATELEC II",
+    "BENECO",
+    "BILECO",
+    "BISELCO",
+    "BOHECO I",
+    "BOHECO II",
+    "BUSECO",
+    "CAGELCO I",
+    "CAGELCO II",
+    "CAMELCO",
+    "CANORECO",
+    "CAPELCO",
+    "CASURECO I",
+    "CASURECO II",
+    "CASURECO III",
+    "CASURECO IV",
+    "CEBECO I",
+    "CEBECO II",
+    "CEBECO III",
+    "CELCOR",
+    "CENPELCO",
+    "CEPALCO",
+    "CLPC (Calamba)",
+    "COTELCO",
+    "DASURECO",
+    "Davao Light (DLPC)",
+    "DECORP",
+    "DIELCO",
+    "DORELCO",
+    "ESAMELCO",
+    "FLECO",
+    "GUIMELCO",
+    "IFELCO",
+    "ILECO I",
+    "ILECO II",
+    "ILECO III",
+    "ILPI (Iligan)",
+    "INEC",
+    "ISECO",
+    "ISELCO I",
+    "ISELCO II",
+    "KAELCO",
+    "LANECO",
+    "LEYECO II",
+    "LEYECO III",
+    "LEYECO IV",
+    "LEYECO V",
+    "LUELCO",
+    "MAGELCO",
+    "MARELCO",
+    "MECO (Mactan)",
+    "MOPRECO",
+    "MORESCO I",
+    "MORESCO II",
+    "NEECO I",
+    "NEECO II",
+    "NOCECO",
+    "NONECO",
+    "NORECO I",
+    "NORECO II",
+    "NORSAMELCO",
+    "NUVELCO",
+    "OMECO",
+    "ORMECO",
+    "PALECO",
+    "PANELCO I",
+    "PANELCO III",
+    "PELCO I",
+    "PELCO II",
+    "PELCO III",
+    "PENELCO",
+    "QUEZELCO I",
+    "QUEZELCO II",
+    "QUIRELCO",
+    "ROMELCO",
+    "SAMELCO I",
+    "SAMELCO II",
+    "SOCOTECO I",
+    "SOCOTECO II",
+    "SOLECO",
+    "SUKELCO",
+    "SURNECO",
+    "SURSECO",
+    "TARELCO I",
+    "TARELCO II",
+    "TAWELCO",
+    "Visayan Electric (VECO)",
+    "ZAMCELCO",
+    "ZAMECO I",
+    "ZAMECO II",
+    "ZAMSURECO",
+    "ZANECO",
   ].sort((a, b) => a.localeCompare(b));
 
   const searchLower = searchTerm.toLowerCase();
 
-  const majorProviders = Object.keys(MAJOR_PROVIDERS)
-    .filter(p => p.toLowerCase().includes(searchLower));
+  const majorProviders = Object.keys(MAJOR_PROVIDERS).filter((p) =>
+    p.toLowerCase().includes(searchLower),
+  );
 
   const otherProviders = allProviders
-    .filter(p => !Object.prototype.hasOwnProperty.call(MAJOR_PROVIDERS, p))
-    .filter(p => p.toLowerCase().includes(searchLower));
+    .filter((p) => !Object.prototype.hasOwnProperty.call(MAJOR_PROVIDERS, p))
+    .filter((p) => p.toLowerCase().includes(searchLower));
 
   const providerLogos = {
-    'Meralco (Residential)': "MERALCO.png",
-    'Meralco (Industrial)': "MERALCO.png",
-    'Meralco (Commercial)': "MERALCO.png",
-    'Davao Light (DLPC)': "DAVAO LIGHT.png",
-    'Visayan Electric (VECO)': "VECO.png",
-    'Visayan Electric (VECO) (Commercial)': "VECO.png",
+    "Meralco (Residential)": "MERALCO.png",
+    "Meralco (Industrial)": "MERALCO.png",
+    "Meralco (Commercial)": "MERALCO.png",
+    "Davao Light (DLPC)": "DAVAO LIGHT.png",
+    "Visayan Electric (VECO)": "VECO.png",
+    "Visayan Electric (VECO) (Commercial)": "VECO.png",
   };
 
-  const filteredOptions = allProviders.filter(option =>
-    option.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOptions = allProviders.filter((option) =>
+    option.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const formatCurrency = (value) => {
@@ -138,7 +238,12 @@ const Rates = () => {
 
   const getProviderRate = (name) => {
     const { name: providerName, type } = parseSelection(name);
-    const match = rateRows.find((row) => row.provider_name === providerName && row.rate_type === type && (row.status || "").toLowerCase() === "active");
+    const match = rateRows.find(
+      (row) =>
+        row.provider_name === providerName &&
+        row.rate_type === type &&
+        (row.status || "").toLowerCase() === "active",
+    );
     if (match?.rate_per_kwh != null) return Number(match.rate_per_kwh);
     if (Object.prototype.hasOwnProperty.call(MAJOR_PROVIDERS, name)) {
       return MAJOR_PROVIDERS[name];
@@ -148,12 +253,18 @@ const Rates = () => {
 
   const getCurrentRate = () => {
     const { name, type } = parseSelection(selected);
-    return rateRows.find(
-      (row) =>
-        row.provider_name === name &&
-        row.rate_type === type &&
-        (row.status || "").toLowerCase() === "active"
-    ) || rateRows.find((row) => row.provider_name === name && row.rate_type === type) || null;
+    return (
+      rateRows.find(
+        (row) =>
+          row.provider_name === name &&
+          row.rate_type === type &&
+          (row.status || "").toLowerCase() === "active",
+      ) ||
+      rateRows.find(
+        (row) => row.provider_name === name && row.rate_type === type,
+      ) ||
+      null
+    );
   };
 
   const loadCurrentUser = async () => {
@@ -190,16 +301,18 @@ const Rates = () => {
         .order("created_at", { ascending: false });
       if (logsError) throw logsError;
 
-      const userIds = [...new Set((logsData || []).map(l => l.updated_by).filter(Boolean))];
+      const userIds = [
+        ...new Set((logsData || []).map((l) => l.updated_by).filter(Boolean)),
+      ];
       let usersMap = {};
       if (userIds.length > 0) {
         const { data: usersData } = await supabase
-          .from('users')
-          .select('id, first_name, last_name, role')
-          .in('id', userIds);
-        
+          .from("users")
+          .select("id, first_name, last_name, role")
+          .in("id", userIds);
+
         if (usersData) {
-          usersData.forEach(u => {
+          usersData.forEach((u) => {
             usersMap[u.id] = u;
           });
         }
@@ -212,16 +325,18 @@ const Rates = () => {
           const movement = Number(row.movement || 0);
           const prevRate = newRate - movement;
           const status = (row.status || "previous").toLowerCase();
-          
+
           const user = usersMap[row.updated_by];
-          const updaterName = user 
-            ? `${user.first_name} ${user.last_name}`.trim() 
-            : (row.updated_by === currentUser.id ? currentUser.name : "Admin");
+          const updaterName = user
+            ? `${user.first_name} ${user.last_name}`.trim()
+            : row.updated_by === currentUser.id
+              ? currentUser.name
+              : "Admin";
           const updaterRole = user ? user.role : "admin";
 
           let providerDisplay = row.provider_name;
-          if (row.rate_type && row.rate_type !== 'standard') {
-             providerDisplay += ` (${row.rate_type})`;
+          if (row.rate_type && row.rate_type !== "standard") {
+            providerDisplay += ` (${row.rate_type})`;
           }
 
           return {
@@ -238,7 +353,7 @@ const Rates = () => {
             updatedBy: updaterName,
             role: updaterRole,
           };
-        })
+        }),
       );
     } catch (error) {
       setNotification({
@@ -246,7 +361,7 @@ const Rates = () => {
         title: "Load Failed",
         message: error.message || "Failed to load utility rates.",
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
     } finally {
       setLoadingRates(false);
@@ -271,24 +386,36 @@ const Rates = () => {
   const handleExport = () => {
     setLoader({
       show: true,
-      message: "Exporting Report..."
+      message: "Exporting Report...",
     });
 
     setTimeout(() => {
       try {
-        const headers = ["Date Modified", "Provider", "Previous Rate", "New Rate", "Reason / Notes", "Status", "Updated By"];
+        const headers = [
+          "Date Modified",
+          "Provider",
+          "Previous Rate",
+          "New Rate",
+          "Reason / Notes",
+          "Status",
+          "Updated By",
+        ];
 
         let ratesToExport = filteredLogs;
 
         if (exportFromDate) {
           const fromDate = new Date(exportFromDate);
-          ratesToExport = ratesToExport.filter(log => new Date(log.rawDate) >= fromDate);
+          ratesToExport = ratesToExport.filter(
+            (log) => new Date(log.rawDate) >= fromDate,
+          );
         }
 
         if (exportToDate) {
           const toDate = new Date(exportToDate);
           toDate.setHours(23, 59, 59, 999);
-          ratesToExport = ratesToExport.filter(log => new Date(log.rawDate) <= toDate);
+          ratesToExport = ratesToExport.filter(
+            (log) => new Date(log.rawDate) <= toDate,
+          );
         }
 
         const rows = ratesToExport.map((row) =>
@@ -300,9 +427,7 @@ const Rates = () => {
             row.reason,
             row.status,
             row.updatedBy,
-          ].map((cell) =>
-            (cell || "").toString().replace(/₱/g, "P")
-          )
+          ].map((cell) => (cell || "").toString().replace(/₱/g, "P")),
         );
 
         const csvContent = [
@@ -310,17 +435,22 @@ const Rates = () => {
           ...rows.map((row) =>
             row
               .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
-              .join(",")
+              .join(","),
           ),
         ].join("\n");
 
         const BOM = "\uFEFF";
-        const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+        const blob = new Blob([BOM + csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
 
         link.setAttribute("href", url);
-        link.setAttribute("download", `rates_report_${new Date().toISOString().split("T")[0]}.csv`);
+        link.setAttribute(
+          "download",
+          `rates_report_${new Date().toISOString().split("T")[0]}.csv`,
+        );
         link.style.visibility = "hidden";
 
         document.body.appendChild(link);
@@ -329,7 +459,7 @@ const Rates = () => {
 
         setLoader({
           show: false,
-          message: "Processing..."
+          message: "Processing...",
         });
 
         setNotification({
@@ -337,7 +467,7 @@ const Rates = () => {
           title: "Export Successful",
           message: `Successfully exported ${ratesToExport.length} rate records.`,
           variant: "success",
-          icon: "check_circle"
+          icon: "check_circle",
         });
 
         setShowExportModal(false);
@@ -346,7 +476,7 @@ const Rates = () => {
       } catch (error) {
         setLoader({
           show: false,
-          message: "Processing..."
+          message: "Processing...",
         });
 
         setNotification({
@@ -354,15 +484,15 @@ const Rates = () => {
           title: "Export Failed",
           message: error.message || "Failed to export CSV file.",
           variant: "error",
-          icon: "error"
+          icon: "error",
         });
       }
     }, 1500);
-  }
+  };
 
   const handleSelect = (option) => {
     setSelected(option);
-    setSearchTerm('');
+    setSearchTerm("");
     setIsOpen(false);
   };
 
@@ -373,7 +503,7 @@ const Rates = () => {
         title: "Missing Inputs",
         message: "Please enter an electricity rate.",
         variant: "warning",
-        icon: "warning"
+        icon: "warning",
       });
       return;
     }
@@ -384,7 +514,7 @@ const Rates = () => {
         title: "Missing Inputs",
         message: "Please enter a description.",
         variant: "warning",
-        icon: "warning"
+        icon: "warning",
       });
       return;
     }
@@ -393,27 +523,33 @@ const Rates = () => {
       setNotification({
         show: true,
         title: "Validation Error",
-        message: "Please enter a valid positive number for the electricity rate.",
+        message:
+          "Please enter a valid positive number for the electricity rate.",
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
       return;
     }
 
     setLoader({
       show: true,
-      message: "Updating Rate..."
+      message: "Updating Rate...",
     });
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
       const { name: providerName, type: rateType } = parseSelection(selected);
 
       const newRate = Number(electricityRate);
       const currentRate = getCurrentRate();
-      const prevRate = currentRate?.rate_per_kwh != null ? Number(currentRate.rate_per_kwh) : null;
+      const prevRate =
+        currentRate?.rate_per_kwh != null
+          ? Number(currentRate.rate_per_kwh)
+          : null;
       const movement = prevRate != null ? newRate - prevRate : 0;
       const effectiveDate = new Date().toISOString();
 
@@ -465,7 +601,7 @@ const Rates = () => {
         title: "Electricity Rate Updated",
         message: "The electricity rate has been updated successfully.",
         variant: "success",
-        icon: "check_circle"
+        icon: "check_circle",
       });
 
       setShowModal(false);
@@ -479,18 +615,26 @@ const Rates = () => {
         title: "Update Failed",
         message: error.message,
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
     }
   };
 
   const currentRate = getCurrentRate();
   const currentRateValue =
-    currentRate?.rate_per_kwh != null ? Number(currentRate.rate_per_kwh) : getProviderRate(selected);
+    currentRate?.rate_per_kwh != null
+      ? Number(currentRate.rate_per_kwh)
+      : getProviderRate(selected);
   const currentMovement = Number(currentRate?.movement || 0);
-  const movementClass = currentMovement > 0 ? "rd-val red" : currentMovement < 0 ? "rd-val green" : "rd-val";
+  const movementClass =
+    currentMovement > 0
+      ? "rd-val red"
+      : currentMovement < 0
+        ? "rd-val green"
+        : "rd-val";
   const displayRate = formatCurrency(currentRateValue).replace("₱", "₱ ");
-  const displayDate = currentRate?.effective_date || currentRate?.created_at || "";
+  const displayDate =
+    currentRate?.effective_date || currentRate?.created_at || "";
 
   return (
     <>
@@ -501,9 +645,7 @@ const Rates = () => {
         variant={notification.variant}
         icon={notification.icon}
         duration={3000}
-        onClose={() =>
-          setNotification((prev) => ({ ...prev, show: false }))
-        }
+        onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
       />
       <LoadingPopup
         show={loader.show}
@@ -525,7 +667,6 @@ const Rates = () => {
           <span className="material-icons">download</span>
           Export Report
         </button>
-
       </div>
       <div className="rates-scroll">
         <div className="rates-container">
@@ -561,10 +702,11 @@ const Rates = () => {
                 onClick={() => setIsOpen(!isOpen)}
               >
                 {selected}
-                <span className="material-symbols-outlined"
+                <span
+                  className="material-symbols-outlined"
                   style={{
                     transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "0.3s"
+                    transition: "0.3s",
                   }}
                 >
                   keyboard_arrow_down
@@ -601,7 +743,10 @@ const Rates = () => {
                               <div className="provider-left">
                                 <div className="provider-logo">
                                   {providerLogos[name] ? (
-                                    <img src={`/provider_images/${providerLogos[name]}`} alt={name} />
+                                    <img
+                                      src={`/provider_images/${providerLogos[name]}`}
+                                      alt={name}
+                                    />
                                   ) : (
                                     <span>{name.charAt(0)}</span>
                                   )}
@@ -610,14 +755,17 @@ const Rates = () => {
                                 <div className="provider-info">
                                   <div className="provider-name">{name}</div>
                                   <div className="provider-sub">
-                                    Rate: ₱ {getProviderRate(name).toFixed(2)} / kWh
+                                    Rate: ₱ {getProviderRate(name).toFixed(2)} /
+                                    kWh
                                   </div>
                                 </div>
                               </div>
 
-                              {isSelected && <span className="checkmark material-symbols-outlined">
-                                check
-                              </span>}
+                              {isSelected && (
+                                <span className="checkmark material-symbols-outlined">
+                                  check
+                                </span>
+                              )}
                             </li>
                           );
                         })}
@@ -645,7 +793,8 @@ const Rates = () => {
                                 <div className="provider-info">
                                   <div className="provider-name">{name}</div>
                                   <div className="provider-sub muted">
-                                    Rate: ₱ {getProviderRate(name).toFixed(2)} / kWh
+                                    Rate: ₱ {getProviderRate(name).toFixed(2)} /
+                                    kWh
                                   </div>
                                 </div>
                               </div>
@@ -657,15 +806,14 @@ const Rates = () => {
                       </>
                     )}
 
-                    {majorProviders.length === 0 && otherProviders.length === 0 && (
-                      <li className="no-results">No results found</li>
-                    )}
+                    {majorProviders.length === 0 &&
+                      otherProviders.length === 0 && (
+                        <li className="no-results">No results found</li>
+                      )}
                   </ul>
-
                 </div>
               )}
             </div>
-
 
             <div style={{ margin: "25px 0" }}>
               <div className="rate-main">{displayRate}</div>
@@ -675,11 +823,15 @@ const Rates = () => {
             <div className="rate-details">
               <div>
                 <div className="rd-label">Effective Date</div>
-                <div className="rd-val">{displayDate ? formatDate(displayDate) : "--"}</div>
+                <div className="rd-val">
+                  {displayDate ? formatDate(displayDate) : "--"}
+                </div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div className="rd-label">Movement</div>
-                <div className={movementClass}>{formatMovement(currentMovement)}</div>
+                <div className={movementClass}>
+                  {formatMovement(currentMovement)}
+                </div>
               </div>
             </div>
 
@@ -711,39 +863,71 @@ const Rates = () => {
                 <tbody>
                   {loadingRates ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: "center", padding: "30px" }}>
-                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                      <td
+                        colSpan="6"
+                        style={{ textAlign: "center", padding: "30px" }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            width: "100%",
+                          }}
+                        >
                           <PuffLoader color="#ffd700" size={28} />
                         </div>
                       </td>
                     </tr>
                   ) : paginatedRates.length === 0 ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: "center", padding: "24px", color: "#666" }}>
+                      <td
+                        colSpan="6"
+                        style={{
+                          textAlign: "center",
+                          padding: "24px",
+                          color: "#666",
+                        }}
+                      >
                         No rate logs found for {selected}.
                       </td>
                     </tr>
                   ) : (
                     paginatedRates.map((rate) => {
-                      const isIncrease = parseFloat(rate.newRate.replace(/[^\d.-]/g, '')) > parseFloat(rate.prevRate.replace(/[^\d.-]/g, ''));
+                      const isIncrease =
+                        parseFloat(rate.newRate.replace(/[^\d.-]/g, "")) >
+                        parseFloat(rate.prevRate.replace(/[^\d.-]/g, ""));
                       return (
                         <tr key={rate.id}>
-                          <td style={{ color: "#ddd", fontWeight: 400 }}>{rate.date}</td>
+                          <td style={{ color: "#ddd", fontWeight: 400 }}>
+                            {rate.date}
+                          </td>
                           <td>{rate.provider}</td>
                           <td>
                             <div className="rate-change-cell">
                               <span className="rate-pill">{rate.prevRate}</span>
                               <span
-                                style={{ color: "#666", fontSize: "12px", margin: "0 4px" }}
+                                style={{
+                                  color: "#666",
+                                  fontSize: "12px",
+                                  margin: "0 4px",
+                                }}
                               >
                                 →
                               </span>
-                              <span className={`rate-pill ${isIncrease ? 'rate-up' : 'rate-down'}`}>{rate.newRate}</span>
+                              <span
+                                className={`rate-pill ${isIncrease ? "rate-up" : "rate-down"}`}
+                              >
+                                {rate.newRate}
+                              </span>
                             </div>
                           </td>
                           <td>{rate.reason}</td>
                           <td>
-                            <span className={`stat-badge ${rate.status === 'Active' ? 'stat-active' : 'stat-review'}`}>{rate.status}</span>
+                            <span
+                              className={`stat-badge ${rate.status === "Active" ? "stat-active" : "stat-review"}`}
+                            >
+                              {rate.status}
+                            </span>
                           </td>
                           <td>
                             <div className="admin-meta">
@@ -753,7 +937,10 @@ const Rates = () => {
                                   width: "28px",
                                   height: "28px",
                                   fontSize: "10px",
-                                  background: rate.role === "super admin" ? "#ffd700" : "#0055ff"
+                                  background:
+                                    rate.role === "super admin"
+                                      ? "#ffd700"
+                                      : "#0055ff",
                                 }}
                               >
                                 {rate.role === "super admin" ? "SA" : "AD"}
@@ -769,55 +956,64 @@ const Rates = () => {
               </table>
             </div>
             {filteredLogs.length > 0 && (
-            <div className="a-pagination">
-              <div style={{ fontSize: "14px", color: "#666" }}>
-              {filteredLogs.length === 0 ? (
-                "Showing 0–0 of 0"
-              ) : (
-                <>
-                  Showing {(currentPage - 1) * itemsPerPage + 1}
-                  {"–"}
-                  {Math.min(currentPage * itemsPerPage, filteredLogs.length)} of {filteredLogs.length}
-                </>
-              )}
-            </div>
+              <div className="a-pagination">
+                <div style={{ fontSize: "14px", color: "#666" }}>
+                  {filteredLogs.length === 0 ? (
+                    "Showing 0–0 of 0"
+                  ) : (
+                    <>
+                      Showing {(currentPage - 1) * itemsPerPage + 1}
+                      {"–"}
+                      {Math.min(
+                        currentPage * itemsPerPage,
+                        filteredLogs.length,
+                      )}{" "}
+                      of {filteredLogs.length}
+                    </>
+                  )}
+                </div>
 
-              <div style={{ display: "flex", gap: "8px" }}>
-                <button
-                  className="u-page-btn"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  style={{
-                    opacity: currentPage === 1 ? 0.4 : 1,
-                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                  }}
-                >
-                  {"<"}
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <div style={{ display: "flex", gap: "8px" }}>
                   <button
-                    key={page}
-                    className={`u-page-btn ${page === currentPage ? "active" : ""}`}
-                    onClick={() => setCurrentPage(page)}
+                    className="u-page-btn"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    style={{
+                      opacity: currentPage === 1 ? 0.4 : 1,
+                      cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    }}
                   >
-                    {page}
+                    {"<"}
                   </button>
-                ))}
 
-                <button
-                  className="u-page-btn"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  style={{
-                    opacity: currentPage === totalPages ? 0.4 : 1,
-                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                  }}
-                >
-                  {">"}
-                </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </button>
+                    ),
+                  )}
+
+                  <button
+                    className="u-page-btn"
+                    disabled={currentPage === totalPages}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(p + 1, totalPages))
+                    }
+                    style={{
+                      opacity: currentPage === totalPages ? 0.4 : 1,
+                      cursor:
+                        currentPage === totalPages ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {">"}
+                  </button>
+                </div>
               </div>
-            </div>
             )}
           </div>
         </div>
@@ -876,7 +1072,11 @@ const Rates = () => {
               >
                 Cancel
               </button>
-              <button onClick={handleUpdate} className="btn btn-primary" style={{ width: "100%" }}>
+              <button
+                onClick={handleUpdate}
+                className="btn btn-primary"
+                style={{ width: "100%" }}
+              >
                 Confirm Update
               </button>
             </div>
@@ -884,7 +1084,10 @@ const Rates = () => {
         </div>
       )}
       {showExportModal && (
-        <div className="export-backdrop" onClick={() => setShowExportModal(false)}>
+        <div
+          className="export-backdrop"
+          onClick={() => setShowExportModal(false)}
+        >
           <div
             style={{
               backgroundColor: "#0F0F0F",
@@ -919,7 +1122,12 @@ const Rates = () => {
               }}
             >
               <span
-                style={{ fontSize: "15.5px", fontWeight: "600", color: "#fff", marginTop: "10px" }}
+                style={{
+                  fontSize: "15.5px",
+                  fontWeight: "600",
+                  color: "#fff",
+                  marginTop: "10px",
+                }}
               >
                 Export CSV File
               </span>
@@ -928,10 +1136,26 @@ const Rates = () => {
               </span>
             </div>
 
-            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+              }}
+            >
               <div style={{ display: "flex", gap: "10px" }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "6px" }}>From Date</label>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      color: "#888",
+                      display: "block",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    From Date
+                  </label>
                   <CalendarDropdown
                     value={exportFromDate}
                     onChange={setExportFromDate}
@@ -939,7 +1163,16 @@ const Rates = () => {
                   />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "6px" }}>To Date</label>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      color: "#888",
+                      display: "block",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    To Date
+                  </label>
                   <CalendarDropdown
                     value={exportToDate}
                     onChange={setExportToDate}
@@ -960,7 +1193,7 @@ const Rates = () => {
                   cursor: "pointer",
                   flex: 1,
                   fontWeight: "600",
-                  transition: "0.2s"
+                  transition: "0.2s",
                 }}
                 onClick={() => {
                   setShowExportModal(false);
@@ -989,7 +1222,7 @@ const Rates = () => {
                   flex: 1,
                   fontWeight: "600",
                   border: "none",
-                  transition: "0.2s"
+                  transition: "0.2s",
                 }}
                 onClick={handleExport}
                 onMouseEnter={(e) => {
@@ -1005,7 +1238,6 @@ const Rates = () => {
           </div>
         </div>
       )}
-
     </>
   );
 };

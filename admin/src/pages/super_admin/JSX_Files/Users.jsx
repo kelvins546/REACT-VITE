@@ -31,8 +31,8 @@ const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const outletContext = useOutletContext();
   const { setLoading, setLoadingMessage } = outletContext || {
-    setLoading: () => { },
-    setLoadingMessage: () => { }
+    setLoading: () => {},
+    setLoadingMessage: () => {},
   };
   const itemsPerPage = 10;
   const [showExportModal, setShowExportModal] = useState(false);
@@ -40,7 +40,9 @@ const Users = () => {
   const [exportToDate, setExportToDate] = useState("");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState(availableColumns.map(c => c.key));
+  const [selectedColumns, setSelectedColumns] = useState(
+    availableColumns.map((c) => c.key),
+  );
 
   const [notification, setNotification] = useState({
     show: false,
@@ -58,7 +60,9 @@ const Users = () => {
   useEffect(() => {
     const checkSuperAdminAccess = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) {
           navigate("/login");
           return;
@@ -90,7 +94,8 @@ const Users = () => {
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [archiveReason, setArchiveReason] = useState("Non-payment of Dues");
-  const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] = useState(false);
+  const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] =
+    useState(false);
 
   const checkHubStatus = (lastSeen) => {
     if (!lastSeen) return false;
@@ -114,7 +119,7 @@ const Users = () => {
   const handleExport = () => {
     setLoader({
       show: true,
-      message: "Exporting Report..."
+      message: "Exporting Report...",
     });
 
     setTimeout(() => {
@@ -141,17 +146,19 @@ const Users = () => {
         }
 
         const headers = availableColumns
-          .filter(col => selectedColumns.includes(col.key))
-          .map(col => col.label);
+          .filter((col) => selectedColumns.includes(col.key))
+          .map((col) => col.label);
 
-        const rows = usersToExport.map((user) => 
+        const rows = usersToExport.map((user) =>
           availableColumns
-            .filter(col => selectedColumns.includes(col.key))
-            .map(col => {
-               if (col.key === "hubs") return (user.hubs || "").replace(" Registered", "");
-               if (col.key === "joined_at") return new Date(user.joined_at).toLocaleDateString();
-               return user[col.key];
-            })
+            .filter((col) => selectedColumns.includes(col.key))
+            .map((col) => {
+              if (col.key === "hubs")
+                return (user.hubs || "").replace(" Registered", "");
+              if (col.key === "joined_at")
+                return new Date(user.joined_at).toLocaleDateString();
+              return user[col.key];
+            }),
         );
 
         const csvContent = [
@@ -159,16 +166,21 @@ const Users = () => {
           ...rows.map((row) =>
             row
               .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
-              .join(",")
+              .join(","),
           ),
         ].join("\n");
 
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
 
         link.setAttribute("href", url);
-        link.setAttribute("download", `users_report_${new Date().toISOString().split("T")[0]}.csv`);
+        link.setAttribute(
+          "download",
+          `users_report_${new Date().toISOString().split("T")[0]}.csv`,
+        );
         link.style.visibility = "hidden";
 
         document.body.appendChild(link);
@@ -177,7 +189,7 @@ const Users = () => {
 
         setLoader({
           show: false,
-          message: "Processing..."
+          message: "Processing...",
         });
 
         setNotification({
@@ -185,7 +197,7 @@ const Users = () => {
           title: "Export Successful",
           message: `Successfully exported ${usersToExport.length} user records.`,
           variant: "success",
-          icon: "check_circle"
+          icon: "check_circle",
         });
 
         setShowExportModal(false);
@@ -194,7 +206,7 @@ const Users = () => {
       } catch (error) {
         setLoader({
           show: false,
-          message: "Processing..."
+          message: "Processing...",
         });
 
         setNotification({
@@ -202,16 +214,18 @@ const Users = () => {
           title: "Export Failed",
           message: error.message || "Failed to export CSV file.",
           variant: "error",
-          icon: "error"
+          icon: "error",
         });
       }
     }, 1500);
-  }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
-    setLoadingMessage(navigator.onLine ? "Loading..." : "Check your internet connection...");
-    
+    setLoadingMessage(
+      navigator.onLine ? "Loading..." : "Check your internet connection...",
+    );
+
     let timeoutId = setTimeout(() => {
       setLoadingMessage("Check your internet connection...");
     }, 5000);
@@ -226,7 +240,7 @@ const Users = () => {
       if (error) throw error;
 
       const visibleUsers = usersData.filter(
-        (u) => u.role !== "super admin" && u.role !== "admin"
+        (u) => u.role !== "super admin" && u.role !== "admin",
       );
 
       const userIds = visibleUsers.map((u) => u.id);
@@ -246,7 +260,7 @@ const Users = () => {
           buildFullName(u.first_name, u.last_name) || "Unknown User";
 
         const totalHubsCount = hubsData.filter(
-          (h) => h.user_id === u.id
+          (h) => h.user_id === u.id,
         ).length;
 
         return {
@@ -351,8 +365,8 @@ const Users = () => {
         prev.map((u) =>
           u.id === selectedUser.id
             ? { ...u, status: "Archived", archived_at: now }
-            : u
-        )
+            : u,
+        ),
       );
 
       setNotification({
@@ -384,15 +398,14 @@ const Users = () => {
   const getInitials = (name) =>
     name
       ? name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase()
       : "??";
 
-  const capitalize = (s) =>
-    s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
 
   const getAvatarColor = (name) => {
     const colors = ["#0055ff", "#00ff99", "#ffaa00", "#ff4444", "#9d00ff"];
@@ -403,16 +416,20 @@ const Users = () => {
     const matchesSearch =
       (u.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (u.email || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCity = selectedCity === "All Cities" || u.city === selectedCity;
+    const matchesCity =
+      selectedCity === "All Cities" || u.city === selectedCity;
     return matchesSearch && matchesCity;
   });
 
-  const uniqueCities = ["All Cities", ...new Set(usersList.map((u) => u.city).filter(Boolean))];
+  const uniqueCities = [
+    "All Cities",
+    ...new Set(usersList.map((u) => u.city).filter(Boolean)),
+  ];
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   useEffect(() => {
@@ -421,7 +438,6 @@ const Users = () => {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
-
 
   return (
     <>
@@ -432,9 +448,7 @@ const Users = () => {
         variant={notification.variant}
         icon={notification.icon}
         duration={3000}
-        onClose={() =>
-          setNotification((prev) => ({ ...prev, show: false }))
-        }
+        onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
       />
       <LoadingPopup
         show={loader.show}
@@ -485,22 +499,46 @@ const Users = () => {
               }}
               onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
             >
-              <span style={{ color: "#fff", fontSize: "14px" }}>{selectedCity}</span>
-              <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isCityDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+              <span style={{ color: "#fff", fontSize: "14px" }}>
+                {selectedCity}
+              </span>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "18px",
+                  color: "#666",
+                  transform: isCityDropdownOpen
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "0.3s",
+                }}
+              >
                 keyboard_arrow_down
               </span>
             </button>
             {isCityDropdownOpen && (
-              <div className="dropdown-menu" style={{ width: "100%", zIndex: 100, top: "110%" }}>
+              <div
+                className="dropdown-menu"
+                style={{ width: "100%", zIndex: 100, top: "110%" }}
+              >
                 <ul className="options-list">
                   {uniqueCities.map((city) => (
                     <li
                       key={city}
                       className={`provider-option ${selectedCity === city ? "selected" : ""}`}
-                      onClick={() => { setSelectedCity(city); setIsCityDropdownOpen(false); }}
+                      onClick={() => {
+                        setSelectedCity(city);
+                        setIsCityDropdownOpen(false);
+                      }}
                     >
-                      <div className="provider-info"><div className="provider-name">{city}</div></div>
-                      {selectedCity === city && <span className="checkmark material-symbols-outlined">check</span>}
+                      <div className="provider-info">
+                        <div className="provider-name">{city}</div>
+                      </div>
+                      {selectedCity === city && (
+                        <span className="checkmark material-symbols-outlined">
+                          check
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -519,7 +557,10 @@ const Users = () => {
             </span>
             Archived
           </Link>
-          <button className="btn btn-primary" onClick={() => setShowExportModal(true)}>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowExportModal(true)}
+          >
             <span className="material-icons" style={{ fontSize: "18px" }}>
               file_download
             </span>
@@ -530,10 +571,10 @@ const Users = () => {
 
       <div className="table-container">
         <div className="table-container-scrollable">
-            <table>
-              <thead>
-                <tr>
-                  {/* <th style={{ width: "50px" }}>
+          <table>
+            <thead>
+              <tr>
+                {/* <th style={{ width: "50px" }}>
                   <input
                     type="checkbox"
                     style={{
@@ -544,34 +585,34 @@ const Users = () => {
                   />
                 </th>*/}
 
-                  <th>User Profile</th>
-                  <th>City</th>
-                  <th>Registered Hubs</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                <th>User Profile</th>
+                <th>City</th>
+                <th>Registered Hubs</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#666",
+                    }}
+                  >
+                    No users found.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {paginatedUsers.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="6"
-                      style={{
-                        textAlign: "center",
-                        padding: "20px",
-                        color: "#666",
-                      }}
-                    >
-                      No users found.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedUsers.map((user, index) => (
-                    <tr
-                      key={user.id || index}
-                      style={{ opacity: user.status === "Archived" ? 0.5 : 1 }}
-                    >
-                      {/* <td>
+              ) : (
+                paginatedUsers.map((user, index) => (
+                  <tr
+                    key={user.id || index}
+                    style={{ opacity: user.status === "Archived" ? 0.5 : 1 }}
+                  >
+                    {/* <td>
                       <input
                         type="checkbox"
                         style={{
@@ -582,99 +623,101 @@ const Users = () => {
                       />
                     </td> */}
 
-                      <td>
-                        <div className="user-cell">
-                          {user.avatar_url ? (
-                            <img
-                              src={user.avatar_url}
-                              alt={user.name}
-                              className="u-avatar"
-                              style={{ objectFit: "cover" }}
-                            />
-                          ) : (
-                            <div
-                              className="u-avatar"
-                              style={{
-                                background: user.color,
-                                color: user.textColor,
-                              }}
-                            >
-                              {user.initials}
-                            </div>
-                          )}
-
-                          <div style={{ fontWeight: 600, color: "#fff" }}>
-                            {user.name}
-                            <br />
-                            <span
-                              style={{
-                                fontSize: "13px",
-                                color: "#666",
-                                fontWeight: 400,
-                              }}
-                            >
-                              {user.email}
-                            </span>
+                    <td>
+                      <div className="user-cell">
+                        {user.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            alt={user.name}
+                            className="u-avatar"
+                            style={{ objectFit: "cover" }}
+                          />
+                        ) : (
+                          <div
+                            className="u-avatar"
+                            style={{
+                              background: user.color,
+                              color: user.textColor,
+                            }}
+                          >
+                            {user.initials}
                           </div>
+                        )}
+
+                        <div style={{ fontWeight: 600, color: "#fff" }}>
+                          {user.name}
+                          <br />
+                          <span
+                            style={{
+                              fontSize: "13px",
+                              color: "#666",
+                              fontWeight: 400,
+                            }}
+                          >
+                            {user.email}
+                          </span>
                         </div>
-                      </td>
-                      <td>{user.city}</td>
-                      <td>{user.hubs}</td>
-                      <td>
-                        <span
-                          className={`stat-badge ${user.status === "Active"
+                      </div>
+                    </td>
+                    <td>{user.city}</td>
+                    <td>{user.hubs}</td>
+                    <td>
+                      <span
+                        className={`stat-badge ${
+                          user.status === "Active"
                             ? "stat-active"
                             : "stat-archived"
-                            }`}
+                        }`}
+                      >
+                        {user.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-cell">
+                        <button
+                          className="icon-btn btn-view"
+                          title="View Details"
+                          onClick={() => handleViewDetails(user)}
                         >
-                          {user.status}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="action-cell">
+                          <span
+                            className="material-icons"
+                            style={{ fontSize: "18px" }}
+                          >
+                            visibility
+                          </span>
+                        </button>
+                        {user.status !== "Archived" && (
                           <button
-                            className="icon-btn btn-view"
-                            title="View Details"
-                            onClick={() => handleViewDetails(user)}
+                            className="icon-btn archive-user-btn"
+                            title="Archive User"
+                            onClick={() => handleArchiveClick(user)}
                           >
                             <span
                               className="material-icons"
                               style={{ fontSize: "18px" }}
                             >
-                              visibility
+                              archive
                             </span>
                           </button>
-                          {user.status !== "Archived" && (
-                            <button
-                              className="icon-btn archive-user-btn"
-                              title="Archive User"
-                              onClick={() => handleArchiveClick(user)}
-                            >
-                              <span
-                                className="material-icons"
-                                style={{ fontSize: "18px" }}
-                              >
-                                archive
-                              </span>
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
         {filteredUsers.length > 0 && (
           <div className="a-pagination">
             <div style={{ fontSize: "14px", color: "#666" }}>
-              Showing{" "}
-              {(currentPage - 1) * itemsPerPage + 1}
+              Showing {(currentPage - 1) * itemsPerPage + 1}
               {"–"}
-              {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
-              {" "}of {filteredUsers.length}
+              {Math.min(
+                currentPage * itemsPerPage,
+                filteredUsers.length,
+              )} of {filteredUsers.length}
             </div>
 
             <div style={{ display: "flex", gap: "8px" }}>
@@ -690,15 +733,17 @@ const Users = () => {
                 {"<"}
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  className={`u-page-btn ${page === currentPage ? "active" : ""}`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
 
               <button
                 className="u-page-btn"
@@ -719,7 +764,7 @@ const Users = () => {
         )}
       </div>
 
-      { }
+      {}
       {showModal && viewUser && (
         <div className="u-modal-overlay">
           <div
@@ -734,12 +779,7 @@ const Users = () => {
           >
             <div className="u-modal-header">
               <div className="u-modal-title">
-                <span
-                  className="material-icons"
-
-                >
-                  account_circle
-                </span>
+                <span className="material-icons">account_circle</span>
                 User Details
               </div>
               <button
@@ -752,9 +792,15 @@ const Users = () => {
 
             <div
               className="u-modal-body"
-              style={{ display: "flex", gap: "24px", padding: "24px", flexWrap: "wrap", scrollbarWidth: "none" }}
+              style={{
+                display: "flex",
+                gap: "24px",
+                padding: "24px",
+                flexWrap: "wrap",
+                scrollbarWidth: "none",
+              }}
             >
-              { }
+              {}
               <div
                 className="profile-card"
                 style={{ width: "380px", flexShrink: 0 }}
@@ -777,9 +823,7 @@ const Users = () => {
                   )}
 
                   <div className="user-name">{viewUser.name}</div>
-                  <div className="user-meta">
-                    • {capitalize(viewUser.role)}
-                  </div>
+                  <div className="user-meta">• {capitalize(viewUser.role)}</div>
 
                   <span className="stat-badge stat-active">ACTIVE ACCOUNT</span>
                 </div>
@@ -837,8 +881,10 @@ const Users = () => {
                 </div>
               </div>
 
-              { }
-              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              {}
+              <div
+                style={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
                 <div
                   style={{
                     display: "grid",
@@ -922,14 +968,18 @@ const Users = () => {
           <div className="u-modal-container archive-mode">
             <div className="u-modal-header" style={{ borderBottom: "none" }}>
               <div className="u-modal-title" style={{ color: "var(--danger)" }}>
-                <span style={{ color: "#FFAA00" }} className="material-icons">warning</span>
+                <span style={{ color: "#FFAA00" }} className="material-icons">
+                  warning
+                </span>
                 <span style={{ color: "#FFAA00" }}>Archive User</span>
               </div>
               <button
                 className="u-close-btn"
                 onClick={() => setShowArchiveModal(false)}
               >
-                <span style={{ color: "#FFAA00" }} className="material-icons">close</span>
+                <span style={{ color: "#FFAA00" }} className="material-icons">
+                  close
+                </span>
               </button>
             </div>
 
@@ -947,7 +997,18 @@ const Users = () => {
               </p>
               <div className="u-form-group">
                 <label className="u-form-label">Reason for Archiving</label>
-                <div className="a-input-wrapper" style={{ position: "relative", borderColor: "#333", background: "#1a1a1a", borderRadius: "12px", padding: "14px", display: "flex", alignItems: "center" }}>
+                <div
+                  className="a-input-wrapper"
+                  style={{
+                    position: "relative",
+                    borderColor: "#333",
+                    background: "#1a1a1a",
+                    borderRadius: "12px",
+                    padding: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
                   <button
                     type="button"
                     className="a-form-input"
@@ -962,29 +1023,60 @@ const Users = () => {
                       background: "transparent",
                       border: "none",
                       color: "#fff",
-                      fontSize: "14px"
+                      fontSize: "14px",
                     }}
-                    onClick={() => setIsArchiveReasonDropdownOpen(!isArchiveReasonDropdownOpen)}
+                    onClick={() =>
+                      setIsArchiveReasonDropdownOpen(
+                        !isArchiveReasonDropdownOpen,
+                      )
+                    }
                   >
                     <span style={{ color: "#fff", fontSize: "14px" }}>
                       {archiveReason || "Non-payment of Dues"}
                     </span>
-                    <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isArchiveReasonDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+                    <span
+                      className="material-icons"
+                      style={{
+                        fontSize: "18px",
+                        color: "#666",
+                        transform: isArchiveReasonDropdownOpen
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                        transition: "0.3s",
+                      }}
+                    >
                       keyboard_arrow_down
                     </span>
                   </button>
 
                   {isArchiveReasonDropdownOpen && (
-                    <div className="dropdown-menu" style={{ width: "100%", zIndex: 100 }}>
+                    <div
+                      className="dropdown-menu"
+                      style={{ width: "100%", zIndex: 100 }}
+                    >
                       <ul className="options-list">
-                        {["Non-payment of Dues", "Violation of Terms", "Moved Out / Contract Ended", "Other"].map((reason) => (
+                        {[
+                          "Non-payment of Dues",
+                          "Violation of Terms",
+                          "Moved Out / Contract Ended",
+                          "Other",
+                        ].map((reason) => (
                           <li
                             key={reason}
                             className={`provider-option ${archiveReason === reason ? "selected" : ""}`}
-                            onClick={() => { setArchiveReason(reason); setIsArchiveReasonDropdownOpen(false); }}
+                            onClick={() => {
+                              setArchiveReason(reason);
+                              setIsArchiveReasonDropdownOpen(false);
+                            }}
                           >
-                            <div className="provider-info"><div className="provider-name">{reason}</div></div>
-                            {archiveReason === reason && <span className="checkmark material-symbols-outlined">check</span>}
+                            <div className="provider-info">
+                              <div className="provider-name">{reason}</div>
+                            </div>
+                            {archiveReason === reason && (
+                              <span className="checkmark material-symbols-outlined">
+                                check
+                              </span>
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -999,8 +1091,8 @@ const Users = () => {
                 <textarea
                   className="u-form-textarea"
                   placeholder="Enter details here..."
-                /* value={archiveReason} */
-                /*onChange={(e) => setArchiveReason(e.target.value)}*/
+                  /* value={archiveReason} */
+                  /*onChange={(e) => setArchiveReason(e.target.value)}*/
                 ></textarea>
               </div>
               <div className="u-modal-actions">
@@ -1022,7 +1114,10 @@ const Users = () => {
         </div>
       )}
       {showExportModal && (
-        <div className="export-backdrop" onClick={() => setShowExportModal(false)}>
+        <div
+          className="export-backdrop"
+          onClick={() => setShowExportModal(false)}
+        >
           <div
             style={{
               backgroundColor: "#0F0F0F",
@@ -1057,7 +1152,12 @@ const Users = () => {
               }}
             >
               <span
-                style={{ fontSize: "15.5px", fontWeight: "600", color: "#fff", marginTop: "10px" }}
+                style={{
+                  fontSize: "15.5px",
+                  fontWeight: "600",
+                  color: "#fff",
+                  marginTop: "10px",
+                }}
               >
                 Export CSV File
               </span>
@@ -1066,10 +1166,26 @@ const Users = () => {
               </span>
             </div>
 
-            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+              }}
+            >
               <div style={{ display: "flex", gap: "10px" }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "6px" }}>From Date</label>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      color: "#888",
+                      display: "block",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    From Date
+                  </label>
                   <CalendarDropdown
                     value={exportFromDate}
                     onChange={setExportFromDate}
@@ -1077,7 +1193,16 @@ const Users = () => {
                   />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "6px" }}>To Date</label>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      color: "#888",
+                      display: "block",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    To Date
+                  </label>
                   <CalendarDropdown
                     value={exportToDate}
                     onChange={setExportToDate}
@@ -1088,10 +1213,41 @@ const Users = () => {
             </div>
 
             <div style={{ marginTop: "15px", textAlign: "left" }}>
-              <label style={{ fontSize: "12px", color: "#888", display: "block", marginBottom: "8px" }}>Select Columns</label>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", maxHeight: "155px", overflowY: "auto", background: "#1a1a1a", padding: "10px", borderRadius: "8px", border: "1px solid #333" }}>
+              <label
+                style={{
+                  fontSize: "12px",
+                  color: "#888",
+                  display: "block",
+                  marginBottom: "8px",
+                }}
+              >
+                Select Columns
+              </label>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "8px",
+                  maxHeight: "155px",
+                  overflowY: "auto",
+                  background: "#1a1a1a",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  border: "1px solid #333",
+                }}
+              >
                 {availableColumns.map((col) => (
-                  <label key={col.key} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#ccc", cursor: "pointer" }}>
+                  <label
+                    key={col.key}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "13px",
+                      color: "#ccc",
+                      cursor: "pointer",
+                    }}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedColumns.includes(col.key)}
@@ -1099,10 +1255,16 @@ const Users = () => {
                         if (e.target.checked) {
                           setSelectedColumns([...selectedColumns, col.key]);
                         } else {
-                          setSelectedColumns(selectedColumns.filter(key => key !== col.key));
+                          setSelectedColumns(
+                            selectedColumns.filter((key) => key !== col.key),
+                          );
                         }
                       }}
-                      style={{ accentColor: "#00A651", width: "14px", height: "14px" }}
+                      style={{
+                        accentColor: "#00A651",
+                        width: "14px",
+                        height: "14px",
+                      }}
                     />
                     {col.label}
                   </label>
@@ -1122,14 +1284,17 @@ const Users = () => {
                 Cancel
               </button>
 
-              <button style={{ width: "100%", justifyContent: "center" }} className="btn-primary" onClick={handleExport}>
+              <button
+                style={{ width: "100%", justifyContent: "center" }}
+                className="btn-primary"
+                onClick={handleExport}
+              >
                 Export
               </button>
             </div>
           </div>
         </div>
       )}
-
     </>
   );
 };

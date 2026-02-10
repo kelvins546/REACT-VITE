@@ -21,7 +21,9 @@
   flex-direction: column;
   justify-content: space-between;
   min-height: 200px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .stat-card:hover {

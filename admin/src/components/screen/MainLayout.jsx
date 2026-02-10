@@ -17,9 +17,7 @@ const MainLayout = () => {
   }, [sidebarMinimized]);
 
   const sidebarWidth =
-    sidebarMinimized === 2
-      ? SIDEBAR_COLLAPSED
-      : SIDEBAR_EXPANDED;
+    sidebarMinimized === 2 ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED;
 
   return (
     <>
@@ -29,9 +27,7 @@ const MainLayout = () => {
       />
       <div className="main-pane">
         <SidebarToggle
-          onToggle={() =>
-            setSidebarMinimized(prev => (prev === 1 ? 2 : 1))
-          }
+          onToggle={() => setSidebarMinimized((prev) => (prev === 1 ? 2 : 1))}
           sidebarWidth={sidebarWidth}
           isMinimized={sidebarMinimized === 2}
         />

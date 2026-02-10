@@ -8,10 +8,10 @@
   --danger: #ff4444;
   --warning: #ffaa00;
   --text-main: #ffffff;
-  --text-sub: #D0D2D6;
+  --text-sub: #d0d2d6;
   --sidebar-width: 280px;
   --comp-height: 48px;
-  --buttonColor: #00A651;
+  --buttonColor: #00a651;
 }
 
 * {
@@ -99,7 +99,7 @@ body {
 }
 
 .restore {
-  color:#00ff99;
+  color: #00ff99;
 }
 
 .btn {
@@ -119,18 +119,17 @@ body {
 }
 
 .btn-primary {
-  background: #00A651;
+  background: #00a651;
   color: #fff;
   border: none;
 }
 
 .btn-primary:hover {
   opacity: 0.9;
-  
 }
 
 .btn-primary-modal {
-  background: #00A651;
+  background: #00a651;
   color: #fff;
   border: none;
   width: 100%;
@@ -139,7 +138,6 @@ body {
 
 .btn-primary-modal:hover {
   opacity: 0.9;
-  
 }
 
 .btn-secondary {
@@ -190,7 +188,7 @@ body {
 }
 
 .btn-danger2:hover {
- background: #ef4444df;
+  background: #ef4444df;
 }
 
 .btn-cancel {

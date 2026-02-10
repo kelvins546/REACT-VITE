@@ -7,13 +7,12 @@ import { PopupNotification } from "../../../components/notifications/PopUpNotifi
 import { supabase } from "../../../supabaseClient";
 import "../../../components/dropdowns/searchableDropdown.css";
 
-
 const ArchivedUsers = () => {
   const navigate = useNavigate();
   const outletContext = useOutletContext();
   const { setLoading, setLoadingMessage } = outletContext || {
-    setLoading: () => { },
-    setLoadingMessage: () => { }
+    setLoading: () => {},
+    setLoadingMessage: () => {},
   };
   const [restoreModal, setShowRestoreModal] = useState(false);
   const [restoreReason, setRestoreReason] = useState("Payment Received");
@@ -22,8 +21,10 @@ const ArchivedUsers = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [isRestoreReasonDropdownOpen, setIsRestoreReasonDropdownOpen] = useState(false);
-  const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] = useState(false);
+  const [isRestoreReasonDropdownOpen, setIsRestoreReasonDropdownOpen] =
+    useState(false);
+  const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] =
+    useState(false);
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
 
@@ -35,7 +36,9 @@ const ArchivedUsers = () => {
   useEffect(() => {
     const checkSuperAdminAccess = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) {
           navigate("/login");
           return;
@@ -59,19 +62,17 @@ const ArchivedUsers = () => {
     checkSuperAdminAccess();
   }, [navigate]);
 
-
   const handleSendReset = () => {
     setLoader({ show: true, message: "Sending..." });
 
     setTimeout(() => {
-
       setLoader({ show: false, message: "Processing..." });
       setNotification({
         show: true,
         title: "Email Sent",
         message: "A reset password link has been sent to the user.",
         variant: "success",
-        icon: "check_circle"
+        icon: "check_circle",
       });
 
       setShowResetModal(false);
@@ -115,10 +116,8 @@ const ArchivedUsers = () => {
     }
   };
 
-
   const buildFullName = (first, last) =>
     [first, last].filter(Boolean).join(" ").trim();
-
 
   const [archivedUsers, setArchivedUsers] = useState([]);
 
@@ -126,7 +125,8 @@ const ArchivedUsers = () => {
     const matchesSearch = `${user.name} ${user.email} ${user.unit}`
       .toLowerCase()
       .includes(search.toLowerCase());
-    const matchesCity = selectedCity === "All Cities" || user.city === selectedCity;
+    const matchesCity =
+      selectedCity === "All Cities" || user.city === selectedCity;
     return matchesSearch && matchesCity;
   });
 
@@ -134,23 +134,27 @@ const ArchivedUsers = () => {
 
   const paginatedUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
 
-  const uniqueCities = ["All Cities", ...new Set(archivedUsers.map((u) => u.city).filter(Boolean))];
+  const uniqueCities = [
+    "All Cities",
+    ...new Set(archivedUsers.map((u) => u.city).filter(Boolean)),
+  ];
 
   const fetchArchivedUsers = async () => {
     setLoading(true);
-    setLoadingMessage(navigator.onLine ? "Loading..." : "Check your internet connection...");
+    setLoadingMessage(
+      navigator.onLine ? "Loading..." : "Check your internet connection...",
+    );
     let timeoutId = setTimeout(() => {
       setLoadingMessage("Check your internet connection...");
     }, 5000);
     try {
-
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -197,18 +201,17 @@ const ArchivedUsers = () => {
     }
   };
 
-
   const [notification, setNotification] = useState({
     show: false,
     title: "",
     message: "",
     variant: "success",
-    icon: "info"
+    icon: "info",
   });
 
   const [loader, setLoader] = useState({
     show: false,
-    message: "Processing..."
+    message: "Processing...",
   });
 
   useLayoutEffect(() => {
@@ -239,7 +242,7 @@ const ArchivedUsers = () => {
       if (error) throw error;
 
       setArchivedUsers((prev) =>
-        prev.filter((user) => !selectedUsers.includes(user.id))
+        prev.filter((user) => !selectedUsers.includes(user.id)),
       );
 
       setNotification({
@@ -270,13 +273,12 @@ const ArchivedUsers = () => {
     }
   };
 
-
   const handleDelete = async () => {
     if (selectedUsers.length === 0) return;
 
     setLoader({
       show: true,
-      message: "Deleting User..."
+      message: "Deleting User...",
     });
 
     try {
@@ -287,8 +289,8 @@ const ArchivedUsers = () => {
 
       if (error) throw error;
 
-      setArchivedUsers(prevUsers =>
-        prevUsers.filter(user => !selectedUsers.includes(user.id))
+      setArchivedUsers((prevUsers) =>
+        prevUsers.filter((user) => !selectedUsers.includes(user.id)),
       );
 
       setNotification({
@@ -296,7 +298,7 @@ const ArchivedUsers = () => {
         title: "User deleted",
         message: `${selectedUsers.length} user${selectedUsers.length > 1 ? "s" : ""} permanently deleted.`,
         variant: "success",
-        icon: "check_circle"
+        icon: "check_circle",
       });
 
       setShowDeleteModal(false);
@@ -308,27 +310,26 @@ const ArchivedUsers = () => {
         title: "Deletion failed",
         message: err.message,
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
     } finally {
       setLoader({
         show: false,
-        message: "Processing..."
+        message: "Processing...",
       });
     }
   };
 
-  const capitalize = (s) =>
-    s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
 
   const getInitials = (name) =>
     name
       ? name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase()
       : "??";
 
   const checkHubStatus = (lastSeen) => {
@@ -355,9 +356,7 @@ const ArchivedUsers = () => {
         variant={notification.variant}
         icon={notification.icon}
         duration={3000}
-        onClose={() =>
-          setNotification((prev) => ({ ...prev, show: false }))
-        }
+        onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
       />
       <LoadingPopup
         show={loader.show}
@@ -365,7 +364,7 @@ const ArchivedUsers = () => {
         Loader={PuffLoader}
         color="#ffd700"
       />
-      { }
+      {}
       <div className="page-header">
         <div>
           <div className="page-title">Archived Users</div>
@@ -375,7 +374,7 @@ const ArchivedUsers = () => {
         </div>
       </div>
 
-      { }
+      {}
       <div className="toolbar">
         <div style={{ display: "flex", gap: "12px" }}>
           <div className="search-box">
@@ -412,22 +411,46 @@ const ArchivedUsers = () => {
               }}
               onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
             >
-              <span style={{ color: "#fff", fontSize: "14px" }}>{selectedCity}</span>
-              <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isCityDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+              <span style={{ color: "#fff", fontSize: "14px" }}>
+                {selectedCity}
+              </span>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "18px",
+                  color: "#666",
+                  transform: isCityDropdownOpen
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "0.3s",
+                }}
+              >
                 keyboard_arrow_down
               </span>
             </button>
             {isCityDropdownOpen && (
-              <div className="dropdown-menu" style={{ width: "100%", zIndex: 100, top: "110%" }}>
+              <div
+                className="dropdown-menu"
+                style={{ width: "100%", zIndex: 100, top: "110%" }}
+              >
                 <ul className="options-list">
                   {uniqueCities.map((city) => (
                     <li
                       key={city}
                       className={`provider-option ${selectedCity === city ? "selected" : ""}`}
-                      onClick={() => { setSelectedCity(city); setIsCityDropdownOpen(false); }}
+                      onClick={() => {
+                        setSelectedCity(city);
+                        setIsCityDropdownOpen(false);
+                      }}
                     >
-                      <div className="provider-info"><div className="provider-name">{city}</div></div>
-                      {selectedCity === city && <span className="checkmark material-symbols-outlined">check</span>}
+                      <div className="provider-info">
+                        <div className="provider-name">{city}</div>
+                      </div>
+                      {selectedCity === city && (
+                        <span className="checkmark material-symbols-outlined">
+                          check
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -436,7 +459,7 @@ const ArchivedUsers = () => {
           </div>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
-          { }
+          {}
           <Link
             to="/users"
             className="btn btn-secondary"
@@ -462,13 +485,13 @@ const ArchivedUsers = () => {
         </div>
       </div>
 
-      { }
-      <div className="table-container" >
+      {}
+      <div className="table-container">
         <div className="table-container-scrollable">
-            <table>
-              <thead>
-                <tr>
-                  {/*<th style={{ width: "50px" }}>
+          <table>
+            <thead>
+              <tr>
+                {/*<th style={{ width: "50px" }}>
                     <input
                       style={{
                         accentColor: "var(--primary)",
@@ -489,31 +512,31 @@ const ArchivedUsers = () => {
 
                   </th> */}
 
-                  <th>User Profile</th>
-                  <th>City</th>
-                  <th>Archived Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                <th>User Profile</th>
+                <th>City</th>
+                <th>Archived Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#666",
+                    }}
+                  >
+                    No users found.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {paginatedUsers.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="6"
-                      style={{
-                        textAlign: "center",
-                        padding: "20px",
-                        color: "#666",
-                      }}
-                    >
-                      No users found.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedUsers.map((user) => (
-                    <tr key={user.id}>
-                      {/* <td>
+              ) : (
+                paginatedUsers.map((user) => (
+                  <tr key={user.id}>
+                    {/* <td>
                         <input
                           style={{
                             accentColor: "var(--primary)",
@@ -532,64 +555,64 @@ const ArchivedUsers = () => {
                         />
                       </td>*/}
 
-
-                      <td>
-                        <div className="user-cell">
-                          {user.avatar_url ? (
-                            <img
-                              src={user.avatar_url}
-                              alt="Profile"
-                              className="avatar-md avatar-archived"
-                            />
-                          ) : (
-                            <div className="avatar-md avatar-archived-fallback">
-                              {user.initials}
-                            </div>
-                          )}
-
-                          <div style={{ fontWeight: 600 }}>
-                            {user.name}
-                            <br />
-                            <span style={{ fontSize: "13px", color: "#777" }}>
-                              {user.email}
-                            </span>
+                    <td>
+                      <div className="user-cell">
+                        {user.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            alt="Profile"
+                            className="avatar-md avatar-archived"
+                          />
+                        ) : (
+                          <div className="avatar-md avatar-archived-fallback">
+                            {user.initials}
                           </div>
+                        )}
+
+                        <div style={{ fontWeight: 600 }}>
+                          {user.name}
+                          <br />
+                          <span style={{ fontSize: "13px", color: "#777" }}>
+                            {user.email}
+                          </span>
                         </div>
+                      </div>
+                    </td>
 
-                      </td>
+                    <td style={{ color: "#888" }}>{user.city}</td>
+                    <td style={{ color: "#888" }}>{user.archivedDate}</td>
 
-                      <td style={{ color: "#888" }}>{user.city}</td>
-                      <td style={{ color: "#888" }}>{user.archivedDate}</td>
+                    <td>
+                      <span className="stat-badge stat-archived">Archived</span>
+                    </td>
 
-                      <td>
-                        <span className="stat-badge stat-archived">Archived</span>
-                      </td>
-
-                      <td>
-                        <div className="action-cell">
-                          <button
-                            className="icon-btn btn-view"
-                            title="View Details"
-                            onClick={() => handleViewDetails(user)}
+                    <td>
+                      <div className="action-cell">
+                        <button
+                          className="icon-btn btn-view"
+                          title="View Details"
+                          onClick={() => handleViewDetails(user)}
+                        >
+                          <span
+                            className="material-icons"
+                            style={{ fontSize: "18px" }}
                           >
-                            <span
-                              className="material-icons"
-                              style={{ fontSize: "18px" }}
-                            >
-                              visibility
-                            </span>
-                          </button>
+                            visibility
+                          </span>
+                        </button>
 
-                          <button
-                            className="icon-btn btn-restore"
-                            onClick={() => {
-                              setSelectedUsers([user.id]);
-                              setShowRestoreModal(true);
-                            }}
-                          >
-                            <span className="material-icons">restore_from_trash</span>
-                          </button>
-                          {/*<button
+                        <button
+                          className="icon-btn btn-restore"
+                          onClick={() => {
+                            setSelectedUsers([user.id]);
+                            setShowRestoreModal(true);
+                          }}
+                        >
+                          <span className="material-icons">
+                            restore_from_trash
+                          </span>
+                        </button>
+                        {/*<button
                             className="icon-btn btn-delete"
                             onClick={() => {
                               setSelectedUsers([user.id]);
@@ -598,25 +621,24 @@ const ArchivedUsers = () => {
                           >
                             <span className="material-icons">delete_forever</span>
                           </button>*/}
-
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-
-              </tbody>
-            </table>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
         {filteredUsers.length > 0 && (
           <div className="a-pagination">
             <div style={{ fontSize: "14px", color: "#666" }}>
-              Showing{" "}
-              {(currentPage - 1) * itemsPerPage + 1}
+              Showing {(currentPage - 1) * itemsPerPage + 1}
               {"–"}
-              {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
-              {" "}of {filteredUsers.length}
+              {Math.min(
+                currentPage * itemsPerPage,
+                filteredUsers.length,
+              )} of {filteredUsers.length}
             </div>
 
             <div style={{ display: "flex", gap: "8px" }}>
@@ -632,15 +654,17 @@ const ArchivedUsers = () => {
                 {"<"}
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  className={`u-page-btn ${page === currentPage ? "active" : ""}`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    className={`u-page-btn ${page === currentPage ? "active" : ""}`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
 
               <button
                 className="u-page-btn"
@@ -650,7 +674,8 @@ const ArchivedUsers = () => {
                 }
                 style={{
                   opacity: currentPage === totalPages ? 0.4 : 1,
-                  cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
                 }}
               >
                 {">"}
@@ -658,15 +683,18 @@ const ArchivedUsers = () => {
             </div>
           </div>
         )}
-
       </div>
 
       {restoreModal && (
         <div className="r-modal-overlay">
           <div className="r-modal-container restore-mode">
             <div className="r-modal-header" style={{ borderBottom: "none" }}>
-              <div className="r-modal-title" style={{ color: "var(--success)" }}>
-                <span className="material-icons restore">restore</span> <span className="restore">Restore Account</span>
+              <div
+                className="r-modal-title"
+                style={{ color: "var(--success)" }}
+              >
+                <span className="material-icons restore">restore</span>{" "}
+                <span className="restore">Restore Account</span>
               </div>
               <button
                 className="r-close-btn"
@@ -690,12 +718,23 @@ const ArchivedUsers = () => {
                     ? `${selectedUsers.length} users`
                     : `${selectedUsers.name}`}
                 </strong>
-                ? This action will restore their
-                access to the platform immediately.
+                ? This action will restore their access to the platform
+                immediately.
               </p>
               <div className="r-form-group">
                 <label className="r-form-label">Reason for Restoration</label>
-                <div className="a-input-wrapper" style={{ position: "relative", borderColor: "#333", background: "#1a1a1a", borderRadius: "12px", padding: "14px", display: "flex", alignItems: "center" }}>
+                <div
+                  className="a-input-wrapper"
+                  style={{
+                    position: "relative",
+                    borderColor: "#333",
+                    background: "#1a1a1a",
+                    borderRadius: "12px",
+                    padding: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
                   <button
                     type="button"
                     className="a-form-input"
@@ -710,29 +749,60 @@ const ArchivedUsers = () => {
                       background: "transparent",
                       border: "none",
                       color: "#fff",
-                      fontSize: "14px"
+                      fontSize: "14px",
                     }}
-                    onClick={() => setIsRestoreReasonDropdownOpen(!isRestoreReasonDropdownOpen)}
+                    onClick={() =>
+                      setIsRestoreReasonDropdownOpen(
+                        !isRestoreReasonDropdownOpen,
+                      )
+                    }
                   >
                     <span style={{ color: "#fff", fontSize: "14px" }}>
                       {restoreReason || "Payment Received"}
                     </span>
-                    <span className="material-icons" style={{ fontSize: "18px", color: "#666", transform: isRestoreReasonDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}>
+                    <span
+                      className="material-icons"
+                      style={{
+                        fontSize: "18px",
+                        color: "#666",
+                        transform: isRestoreReasonDropdownOpen
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                        transition: "0.3s",
+                      }}
+                    >
                       keyboard_arrow_down
                     </span>
                   </button>
 
                   {isRestoreReasonDropdownOpen && (
-                    <div className="dropdown-menu" style={{ width: "100%", zIndex: 100 }}>
+                    <div
+                      className="dropdown-menu"
+                      style={{ width: "100%", zIndex: 100 }}
+                    >
                       <ul className="options-list">
-                        {["Payment Received", "Terms Violation Resolved", "Contract Renewed", "Other"].map((reason) => (
+                        {[
+                          "Payment Received",
+                          "Terms Violation Resolved",
+                          "Contract Renewed",
+                          "Other",
+                        ].map((reason) => (
                           <li
                             key={reason}
                             className={`provider-option ${restoreReason === reason ? "selected" : ""}`}
-                            onClick={() => { setRestoreReason(reason); setIsRestoreReasonDropdownOpen(false); }}
+                            onClick={() => {
+                              setRestoreReason(reason);
+                              setIsRestoreReasonDropdownOpen(false);
+                            }}
                           >
-                            <div className="provider-info"><div className="provider-name">{reason}</div></div>
-                            {restoreReason === reason && <span className="checkmark material-symbols-outlined">check</span>}
+                            <div className="provider-info">
+                              <div className="provider-name">{reason}</div>
+                            </div>
+                            {restoreReason === reason && (
+                              <span className="checkmark material-symbols-outlined">
+                                check
+                              </span>
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -750,7 +820,6 @@ const ArchivedUsers = () => {
                   value={restoreNotes}
                   onChange={(e) => setRestoreNotes(e.target.value)}
                 />
-
               </div>
               <div className="r-modal-actions">
                 <button
@@ -759,7 +828,10 @@ const ArchivedUsers = () => {
                 >
                   Cancel
                 </button>
-                <button className="btn-primary btn-primary-modal" onClick={handleRestore}>
+                <button
+                  className="btn-primary btn-primary-modal"
+                  onClick={handleRestore}
+                >
                   <span className="material-icons" style={{ fontSize: "18px" }}>
                     restore
                   </span>{" "}
@@ -799,7 +871,10 @@ const ArchivedUsers = () => {
                   fontWeight: 600,
                 }}
               >
-                <span className="material-icons" style={{ verticalAlign: "middle" }}>
+                <span
+                  className="material-icons"
+                  style={{ verticalAlign: "middle" }}
+                >
                   warning
                 </span>{" "}
                 This action is irreversible
@@ -808,8 +883,8 @@ const ArchivedUsers = () => {
               <p style={{ color: "#ccc", lineHeight: 1.6 }}>
                 You are about to permanently delete{" "}
                 <strong>{selectedUsers.length}</strong> archived user
-                {selectedUsers.length > 1 ? "s" : ""}.
-                All associated records will be removed permanently.
+                {selectedUsers.length > 1 ? "s" : ""}. All associated records
+                will be removed permanently.
               </p>
 
               <div className="r-form-group" style={{ marginTop: "20px" }}>
@@ -820,8 +895,8 @@ const ArchivedUsers = () => {
                       accentColor: "var(--primary)",
                       width: "18px",
                       height: "18px",
-                      marginRight: '10px',
-                      transform: 'translateY(24%)',
+                      marginRight: "10px",
+                      transform: "translateY(24%)",
                     }}
                     onChange={(e) => setConfirmDelete(e.target.checked)}
                   />
@@ -863,26 +938,31 @@ const ArchivedUsers = () => {
               width: "95%",
               maxHeight: "90vh",
               overflowY: "auto",
-
             }}
           >
             <div className="u-modal-header">
               <div className="u-modal-title">
-                <span className="material-icons">
-                  account_circle
-                </span>
+                <span className="material-icons">account_circle</span>
                 User Details
               </div>
-              <button className="u-close-btn" onClick={() => setShowModal(false)}>
+              <button
+                className="u-close-btn"
+                onClick={() => setShowModal(false)}
+              >
                 <span className="material-icons">close</span>
               </button>
             </div>
 
             <div
               className="u-modal-body"
-              style={{ display: "flex", gap: "24px", padding: "24px", flexWrap: "wrap", scrollbarWidth: "none", }}
+              style={{
+                display: "flex",
+                gap: "24px",
+                padding: "24px",
+                flexWrap: "wrap",
+                scrollbarWidth: "none",
+              }}
             >
-
               <div
                 className="profile-card"
                 style={{ width: "380px", flexShrink: 0 }}
@@ -905,16 +985,12 @@ const ArchivedUsers = () => {
                   )}
 
                   <div className="user-name">{viewUser.name}</div>
-                  <div className="user-meta">
-                    • {capitalize(viewUser.role)}
-                  </div>
+                  <div className="user-meta">• {capitalize(viewUser.role)}</div>
 
                   <span className="status-badge status-archived">
                     ARCHIVED ACCOUNT
                   </span>
                 </div>
-
-
 
                 <div className="info-group">
                   <div className="info-row">
@@ -975,14 +1051,19 @@ const ArchivedUsers = () => {
 
                   <div className="info-row">
                     <span className="info-label">User ID</span>
-                    <span className="info-val" style={{ fontFamily: "monospace", fontSize: "12px" }}>
+                    <span
+                      className="info-val"
+                      style={{ fontFamily: "monospace", fontSize: "12px" }}
+                    >
                       {viewUser.id}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <div
+                style={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
                 <div
                   style={{
                     display: "grid",
@@ -1044,7 +1125,6 @@ const ArchivedUsers = () => {
                       );
                     })
                   )}
-
                 </div>
               </div>
             </div>
@@ -1063,23 +1143,18 @@ const ArchivedUsers = () => {
             </p>
             <div className="send-reset-modal-actions">
               <button
-
                 className="u-btn-cancel"
                 onClick={() => setShowResetModal(false)}
               >
                 Cancel
               </button>
-              <button
-                className="u-btn-danger"
-                onClick={handleSendReset}
-              >
+              <button className="u-btn-danger" onClick={handleSendReset}>
                 Send Reset
               </button>
             </div>
           </div>
         </div>
       )}
-
     </>
   );
 };

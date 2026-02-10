@@ -9,8 +9,13 @@ import { supabase } from "../../supabaseClient";
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [temporaryLoading, setTemporaryLoading] = useState(false);
-  const [loginLoadingMessage, setLoginLoadingMessage] = useState("Verifying Credentials...");
-  const [loader, setLoader] = useState({ show: false, message: "Processing..." });
+  const [loginLoadingMessage, setLoginLoadingMessage] = useState(
+    "Verifying Credentials...",
+  );
+  const [loader, setLoader] = useState({
+    show: false,
+    message: "Processing...",
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,12 +36,11 @@ const AdminLogin = () => {
     title: "",
     message: "",
     variant: "",
-    icon: "info"
+    icon: "info",
   });
 
   const emailRegex = /^[^ ,;:<>()\\/]+@[^ ,;:<>()\\/]+\.[^ ,;:<>()\\/]+$/;
-  const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
   const OTP_TTL_MS = 5 * 60 * 1000;
   const OTP_RESEND_COOLDOWN_MS = 3 * 60 * 1000;
 
@@ -173,12 +177,11 @@ const AdminLogin = () => {
         title: "Login failed",
         message: errorMessage,
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
 
       setTemporaryLoading(false);
     }
-
   };
 
   const handleSendOtp = async () => {
@@ -188,7 +191,7 @@ const AdminLogin = () => {
         title: "Invalid email",
         message: "Please enter a valid email address.",
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
       return;
     }
@@ -200,7 +203,7 @@ const AdminLogin = () => {
         title: "Cooldown active",
         message: `Please wait ${Math.ceil((forgotOtpResendAt - Date.now()) / 1000)}s before requesting a new code.`,
         variant: "info",
-        icon: "timer"
+        icon: "timer",
       });
       return;
     }
@@ -218,7 +221,9 @@ const AdminLogin = () => {
       }
 
       if (userData.role !== "admin" && userData.role !== "super admin") {
-        throw new Error("Access Denied: You do not have permission to reset password.");
+        throw new Error(
+          "Access Denied: You do not have permission to reset password.",
+        );
       }
 
       setLoader({ show: true, message: "Sending OTP..." });
@@ -237,7 +242,7 @@ const AdminLogin = () => {
         title: "OTP sent",
         message: "Check your email for the verification code.",
         variant: "success",
-        icon: "check_circle"
+        icon: "check_circle",
       });
     } catch (error) {
       setNotification({
@@ -245,7 +250,7 @@ const AdminLogin = () => {
         title: "Failed to send",
         message: error.message || "Could not send OTP. Please try again.",
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
     } finally {
       setLoader({ show: false, message: "Processing..." });
@@ -260,7 +265,7 @@ const AdminLogin = () => {
         title: "OTP expired",
         message: "Your OTP expired. Please resend a new one.",
         variant: "warning",
-        icon: "warning"
+        icon: "warning",
       });
       return;
     }
@@ -281,7 +286,7 @@ const AdminLogin = () => {
         title: "Invalid OTP",
         message: error.message || "The code you entered is incorrect.",
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
     } finally {
       setLoader({ show: false, message: "Processing..." });
@@ -293,9 +298,10 @@ const AdminLogin = () => {
       setNotification({
         show: true,
         title: "Weak password",
-        message: "Use 8+ chars with uppercase, lowercase, and a special character.",
+        message:
+          "Use 8+ chars with uppercase, lowercase, and a special character.",
         variant: "warning",
-        icon: "warning"
+        icon: "warning",
       });
       return;
     }
@@ -306,7 +312,7 @@ const AdminLogin = () => {
         title: "Password mismatch",
         message: "Passwords do not match.",
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
       return;
     }
@@ -325,7 +331,7 @@ const AdminLogin = () => {
         title: "Password updated",
         message: "Your password has been reset. Please log in.",
         variant: "success",
-        icon: "check_circle"
+        icon: "check_circle",
       });
 
       setshowForgotModal(false);
@@ -340,7 +346,7 @@ const AdminLogin = () => {
         title: "Reset failed",
         message: error.message || "Could not reset password. Please try again.",
         variant: "error",
-        icon: "error"
+        icon: "error",
       });
     } finally {
       setLoader({ show: false, message: "Processing..." });
@@ -357,9 +363,7 @@ const AdminLogin = () => {
           variant={notification.variant}
           icon={notification.icon}
           duration={3000}
-          onClose={() =>
-            setNotification((prev) => ({ ...prev, show: false }))
-          }
+          onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
         />
 
         <LoadingPopup
@@ -378,11 +382,7 @@ const AdminLogin = () => {
         <div className="auth-container">
           <div className="brand-side">
             <div className="logo-circle">
-              <img
-                src="/logoNew.png"
-                className="logo-img"
-                alt="Logo"
-              />
+              <img src="/logoNew.png" className="logo-img" alt="Logo" />
             </div>
             <div className="brand-title">GRIDWATCH</div>
             <div className="brand-desc">
@@ -427,7 +427,11 @@ const AdminLogin = () => {
                   />
                   <span
                     className="material-icons"
-                    style={{ fontSize: "18px", color: "#fff", cursor: "pointer" }}
+                    style={{
+                      fontSize: "18px",
+                      color: "#fff",
+                      cursor: "pointer",
+                    }}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? "visibility" : "visibility_off"}
@@ -436,7 +440,12 @@ const AdminLogin = () => {
               </div>
 
               <div style={{ textAlign: "right", marginBottom: "10px" }}>
-                <span onClick={() => setshowForgotModal(true)} className="forgot-link">Forgot Password?</span>
+                <span
+                  onClick={() => setshowForgotModal(true)}
+                  className="forgot-link"
+                >
+                  Forgot Password?
+                </span>
               </div>
 
               <button
@@ -498,7 +507,12 @@ const AdminLogin = () => {
               }}
             >
               <span
-                style={{ fontSize: "15.5px", fontWeight: "600", color: "#fff", marginTop: "10px" }}
+                style={{
+                  fontSize: "15.5px",
+                  fontWeight: "600",
+                  color: "#fff",
+                  marginTop: "10px",
+                }}
               >
                 Reset Password
               </span>
@@ -513,14 +527,14 @@ const AdminLogin = () => {
                       flexDirection: "column",
                       alignItems: "start",
                       gap: "5px",
-                      marginTop: "5px"
+                      marginTop: "5px",
                     }}
                   >
                     <label
                       style={{
                         fontSize: "12px",
                         color: "#ccc",
-                        letterSpacing: "1px"
+                        letterSpacing: "1px",
                       }}
                     >
                       Email Address
@@ -550,19 +564,32 @@ const AdminLogin = () => {
                       flexDirection: "column",
                       alignItems: "start",
                       gap: "5px",
-                      marginTop: "5px"
+                      marginTop: "5px",
                     }}
                   >
                     <label
                       style={{
                         fontSize: "12px",
                         color: "#ccc",
-                        letterSpacing: "1px"
+                        letterSpacing: "1px",
                       }}
                     >
                       OTP Code
                     </label>
-                    <div className="input-wrapper" style={{ background: 'transparent', border: 'none', padding: 0, display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center',alignContent: 'center', width: '100%'}}>
+                    <div
+                      className="input-wrapper"
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        padding: 0,
+                        display: "flex",
+                        gap: "10px",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        alignContent: "center",
+                        width: "100%",
+                      }}
+                    >
                       {Array.from({ length: 6 }).map((_, index) => (
                         <input
                           key={index}
@@ -571,18 +598,22 @@ const AdminLogin = () => {
                           maxLength="1"
                           className="input-field"
                           style={{
-                            width: '45px',
-                            height: '50px',
-                            textAlign: 'center',
-                            fontSize: '20px',
-                            fontWeight: 'bold',
-                            background: '#1a1a1a',
-                            border: '1px solid #333',
-                            borderRadius: '8px',
+                            width: "45px",
+                            height: "50px",
+                            textAlign: "center",
+                            fontSize: "20px",
+                            fontWeight: "bold",
+                            background: "#1a1a1a",
+                            border: "1px solid #333",
+                            borderRadius: "8px",
                             padding: 0,
-                            color: '#fff'
+                            color: "#fff",
                           }}
-                          value={forgotOtp[index] === " " ? "" : (forgotOtp[index] || "")}
+                          value={
+                            forgotOtp[index] === " "
+                              ? ""
+                              : forgotOtp[index] || ""
+                          }
                           onChange={(e) => handleOtpChange(e, index)}
                           onKeyDown={(e) => handleOtpKeyDown(e, index)}
                           onPaste={handleOtpPaste}
@@ -599,7 +630,7 @@ const AdminLogin = () => {
                       gap: "10px",
                       fontSize: "12px",
                       color: "#888",
-                      marginTop: "6px"
+                      marginTop: "6px",
                     }}
                   >
                     <span>
@@ -616,8 +647,9 @@ const AdminLogin = () => {
                         border: "none",
                         color: "#FFD700",
                         fontWeight: "600",
-                        cursor: forgotOtpRemaining > 0 ? "not-allowed" : "pointer",
-                        opacity: forgotOtpRemaining > 0 ? 0.5 : 1
+                        cursor:
+                          forgotOtpRemaining > 0 ? "not-allowed" : "pointer",
+                        opacity: forgotOtpRemaining > 0 ? 0.5 : 1,
                       }}
                     >
                       Resend now
@@ -645,8 +677,14 @@ const AdminLogin = () => {
                         />
                         <span
                           className="material-icons"
-                          style={{ fontSize: "18px", color: "#fff", cursor: "pointer" }}
-                          onClick={() => setShowForgotPassword(!showForgotPassword)}
+                          style={{
+                            fontSize: "18px",
+                            color: "#fff",
+                            cursor: "pointer",
+                          }}
+                          onClick={() =>
+                            setShowForgotPassword(!showForgotPassword)
+                          }
                         >
                           {showForgotPassword ? "visibility" : "visibility_off"}
                         </span>
@@ -665,8 +703,14 @@ const AdminLogin = () => {
                         />
                         <span
                           className="material-icons"
-                          style={{ fontSize: "18px", color: "#fff", cursor: "pointer" }}
-                          onClick={() => setShowForgotConfirm(!showForgotConfirm)}
+                          style={{
+                            fontSize: "18px",
+                            color: "#fff",
+                            cursor: "pointer",
+                          }}
+                          onClick={() =>
+                            setShowForgotConfirm(!showForgotConfirm)
+                          }
                         >
                           {showForgotConfirm ? "visibility" : "visibility_off"}
                         </span>
@@ -675,7 +719,6 @@ const AdminLogin = () => {
                   </div>
                 </>
               )}
-
             </div>
             <div
               style={{
@@ -713,7 +756,7 @@ const AdminLogin = () => {
               </div>
               <div>
                 <span
-                  style={{ fontSize: "13px", marginTop: '10px' }}
+                  style={{ fontSize: "13px", marginTop: "10px" }}
                   className="forgot-link"
                   onClick={() => {
                     setshowForgotModal(false);

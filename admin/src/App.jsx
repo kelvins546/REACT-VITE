@@ -19,7 +19,7 @@ import AdminLogin from "./pages/auth/AdminLogin";
 function App() {
   return (
     <Routes>
-      { }
+      {}
       <Route path="/register" element={<AdminRegister />} />
       <Route path="/login" element={<AdminLogin />} />
       <Route element={<ProtectedRoute />}>
@@ -31,7 +31,7 @@ function App() {
           <Route path="users" element={<Users />} />
           <Route path="users/archived" element={<ArchivedUsers />} />
           <Route path="users/admins" element={<Admins />} />
-           <Route path="users/admins/archived" element={<ArchivedAdmins />} />
+          <Route path="users/admins/archived" element={<ArchivedAdmins />} />
           <Route path="rates" element={<Rates />} />
         </Route>
       </Route>
