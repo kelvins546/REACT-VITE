@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import "./Users.css";
 import { PuffLoader } from "react-spinners";
@@ -27,9 +27,13 @@ const availableColumns = [
 const Users = () => {
   const navigate = useNavigate();
   const [usersList, setUsersList] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const outletContext = useOutletContext();
+  const { setLoading, setLoadingMessage } = outletContext || {
+    setLoading: () => { },
+    setLoadingMessage: () => { }
+  };
   const itemsPerPage = 10;
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportFromDate, setExportFromDate] = useState("");
@@ -103,7 +107,7 @@ const Users = () => {
     return diffInSeconds < 120 && diffInSeconds > -5;
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     fetchUsers();
   }, []);
 
@@ -205,9 +209,14 @@ const Users = () => {
   }
 
   const fetchUsers = async () => {
-    try {
-      setLoading(true);
+    setLoading(true);
+    setLoadingMessage(navigator.onLine ? "Loading..." : "Check your internet connection...");
+    
+    let timeoutId = setTimeout(() => {
+      setLoadingMessage("Check your internet connection...");
+    }, 5000);
 
+    try {
       const { data: usersData, error } = await supabase
         .from("users")
         .select("*")
@@ -267,6 +276,7 @@ const Users = () => {
     } catch (err) {
       console.error("Error fetching users:", err);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -520,17 +530,6 @@ const Users = () => {
 
       <div className="table-container">
         <div className="table-container-scrollable">
-          {loading ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "50px",
-              }}
-            >
-              <PuffLoader color="#ffd700" size={40} />
-            </div>
-          ) : (
             <table>
               <thead>
                 <tr>
@@ -666,10 +665,9 @@ const Users = () => {
                 )}
               </tbody>
             </table>
-          )}
         </div>
 
-        {!loading && (
+        {filteredUsers.length > 0 && (
           <div className="a-pagination">
             <div style={{ fontSize: "14px", color: "#666" }}>
               Showing{" "}

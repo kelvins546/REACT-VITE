@@ -9,6 +9,7 @@ import { supabase } from "../../supabaseClient";
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [temporaryLoading, setTemporaryLoading] = useState(false);
+  const [loginLoadingMessage, setLoginLoadingMessage] = useState("Verifying Credentials...");
   const [loader, setLoader] = useState({ show: false, message: "Processing..." });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -118,7 +119,12 @@ const AdminLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoginLoadingMessage("Verifying Credentials...");
     setTemporaryLoading(true);
+
+    let timeoutId = setTimeout(() => {
+      setLoginLoadingMessage("Check your internet connection...");
+    }, 5000);
 
     try {
       const { data: authData, error: authError } =
@@ -126,6 +132,8 @@ const AdminLogin = () => {
           email: email,
           password: password,
         });
+
+      clearTimeout(timeoutId);
 
       if (authError) throw authError;
 
@@ -152,12 +160,18 @@ const AdminLogin = () => {
       setTemporaryLoading(false);
       navigate("/");
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error("Login failed:", error);
+
+      let errorMessage = error.message || "Please check your credentials.";
+      if (errorMessage.includes("Failed to fetch")) {
+        errorMessage = "Check your internet connection.";
+      }
 
       setNotification({
         show: true,
         title: "Login failed",
-        message: error.message || "Please check your credentials.",
+        message: errorMessage,
         variant: "error",
         icon: "error"
       });
@@ -350,7 +364,7 @@ const AdminLogin = () => {
 
         <LoadingPopup
           show={temporaryLoading}
-          message="Verifying Credentials..."
+          message={loginLoadingMessage}
           Loader={PuffLoader}
           color="#FFD700"
         />

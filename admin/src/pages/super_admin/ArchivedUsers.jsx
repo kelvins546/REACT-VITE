@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import "./ArchivedUsers.css";
 import { PuffLoader } from "react-spinners";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
@@ -10,6 +10,11 @@ import "../../components/dropdowns/searchableDropdown.css";
 
 const ArchivedUsers = () => {
   const navigate = useNavigate();
+  const outletContext = useOutletContext();
+  const { setLoading, setLoadingMessage } = outletContext || {
+    setLoading: () => { },
+    setLoadingMessage: () => { }
+  };
   const [restoreModal, setShowRestoreModal] = useState(false);
   const [restoreReason, setRestoreReason] = useState("Payment Received");
   const [restoreNotes, setRestoreNotes] = useState("");
@@ -116,7 +121,6 @@ const ArchivedUsers = () => {
 
 
   const [archivedUsers, setArchivedUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const filteredUsers = archivedUsers.filter((user) => {
     const matchesSearch = `${user.name} ${user.email} ${user.unit}`
@@ -140,8 +144,12 @@ const ArchivedUsers = () => {
   const uniqueCities = ["All Cities", ...new Set(archivedUsers.map((u) => u.city).filter(Boolean))];
 
   const fetchArchivedUsers = async () => {
+    setLoading(true);
+    setLoadingMessage(navigator.onLine ? "Loading..." : "Check your internet connection...");
+    let timeoutId = setTimeout(() => {
+      setLoadingMessage("Check your internet connection...");
+    }, 5000);
     try {
-      setLoading(true);
 
       const { data, error } = await supabase
         .from("users")
@@ -184,6 +192,7 @@ const ArchivedUsers = () => {
     } catch (err) {
       console.error("Error fetching archived users:", err);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -202,7 +211,7 @@ const ArchivedUsers = () => {
     message: "Processing..."
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     fetchArchivedUsers();
   }, []);
 
@@ -456,17 +465,6 @@ const ArchivedUsers = () => {
       { }
       <div className="table-container" >
         <div className="table-container-scrollable">
-          {loading ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "50px",
-              }}
-            >
-              <PuffLoader color="#ffd700" size={40} />
-            </div>
-          ) : (
             <table>
               <thead>
                 <tr>
@@ -609,10 +607,9 @@ const ArchivedUsers = () => {
 
               </tbody>
             </table>
-          )}
         </div>
 
-        {!loading && filteredUsers.length > 0 && (
+        {filteredUsers.length > 0 && (
           <div className="a-pagination">
             <div style={{ fontSize: "14px", color: "#666" }}>
               Showing{" "}

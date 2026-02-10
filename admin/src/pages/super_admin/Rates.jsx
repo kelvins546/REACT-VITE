@@ -1,4 +1,4 @@
-﻿﻿import React, { useEffect, useState } from "react";
+﻿﻿import React, { useEffect, useState, useLayoutEffect } from "react";
 import "../super_admin/Rates.css";
 import "../../components/dropdowns/searchableDropdown.css"
 import { PuffLoader } from "react-spinners";
@@ -369,7 +369,7 @@ const Rates = () => {
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     loadCurrentUser();
     fetchRates();
   }, []);
@@ -830,10 +830,8 @@ const Rates = () => {
                 <tbody>
                   {loadingRates ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: "center", padding: "30px" }}>
-                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-                          <PuffLoader color="#ffd700" size={28} />
-                        </div>
+                      <td colSpan="6" style={{ textAlign: "center", padding: "24px", color: "#666" }}>
+                        No rate logs found for {selected}.
                       </td>
                     </tr>
                   ) : paginatedRates.length === 0 ? (
@@ -887,6 +885,7 @@ const Rates = () => {
                 </tbody>
               </table>
             </div>
+            {filteredLogs.length > 0 && (
             <div className="a-pagination">
               <div style={{ fontSize: "14px", color: "#666" }}>
               {filteredLogs.length === 0 ? (
@@ -936,6 +935,7 @@ const Rates = () => {
                 </button>
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>

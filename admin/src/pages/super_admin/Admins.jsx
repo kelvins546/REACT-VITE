@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import { createClient } from "@supabase/supabase-js";
 import emailjs from "@emailjs/browser";
@@ -16,11 +16,14 @@ const Admins = () => {
   const navigate = useNavigate();
   const [adminsList, setAdminsList] = useState([]);
   const [currentUserRole, setCurrentUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const outletContext = useOutletContext();
+  const { setLoading, setLoadingMessage } = outletContext || {
+    setLoading: () => { },
+    setLoadingMessage: () => { }
+  };
   const [searchTerm, setSearchTerm] = useState("");
   const [loader, setLoader] = useState({ show: false, message: "Processing..." });
   const [archiveReason, setArchiveReason] = useState("Inactive");
-
   const [notification, setNotification] = useState({
     show: false,
     title: "",
@@ -208,7 +211,7 @@ const Admins = () => {
     setShowEditModal(true);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     fetchAdmins();
   }, []);
 
@@ -259,8 +262,13 @@ const Admins = () => {
 
 
   const fetchAdmins = async () => {
+    setLoading(true);
+    setLoadingMessage(navigator.onLine ? "Loading..." : "Check your internet connection...");
+    let timeoutId = setTimeout(() => {
+      setLoadingMessage("Check your internet connection...");
+    }, 5000);
+
     try {
-      setLoading(true);
 
       const { data, error } = await supabase
         .from("users")
@@ -290,11 +298,26 @@ const Admins = () => {
     } catch (error) {
       console.error("Error fetching admins:", error);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
 
 
+  const checkEmailExists = async (email) => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+      if (error) throw error;
+      return !!data;
+    } catch (error) {
+      console.error("Error checking email:", error);
+      return false;
+    }
+  };
 
   const handleCreateAdmin = async () => {
     setLoader({ show: true, message: "Creating User..." });
@@ -363,9 +386,6 @@ const Admins = () => {
             },
             { onConflict: "id" }
           );
-
-        if (dbError) throw dbError;
-
 
         if (dbError) throw dbError;
       }
@@ -476,7 +496,7 @@ const Admins = () => {
     );
   };
 
-  const handleStartCreate = () => {
+  const handleStartCreate = async () => {
     if (!isCreateFormValid) {
       setNotification({
         show: true,
@@ -484,6 +504,21 @@ const Admins = () => {
         message: "Please complete all required fields before continuing.",
         variant: "warning",
         icon: "warning",
+      });
+      return;
+    }
+
+    setLoader({ show: true, message: "Checking email..." });
+    const exists = await checkEmailExists(newAdmin.email);
+    setLoader({ show: false, message: "Processing..." });
+
+    if (exists) {
+      setNotification({
+        show: true,
+        title: "Email Taken",
+        message: "This email is already registered.",
+        variant: "error",
+        icon: "error",
       });
       return;
     }
@@ -560,7 +595,7 @@ const Admins = () => {
     }
   };
 
-  const handleSendInvite = () => {
+  const handleSendInvite = async () => {
     if (!isInviteFormValid) {
       setNotification({
         show: true,
@@ -568,6 +603,21 @@ const Admins = () => {
         message: "Please complete the required fields before sending.",
         variant: "warning",
         icon: "warning",
+      });
+      return;
+    }
+
+    setLoader({ show: true, message: "Checking email..." });
+    const exists = await checkEmailExists(newAdmin.email);
+    setLoader({ show: false, message: "Processing..." });
+
+    if (exists) {
+      setNotification({
+        show: true,
+        title: "Email Taken",
+        message: "This email is already registered.",
+        variant: "error",
+        icon: "error",
       });
       return;
     }
@@ -761,8 +811,8 @@ const Admins = () => {
       <div className="page-header">
         <div>
           <div className="page-title">Admin Management</div>
-          <div style={{ color: "#888", fontSize: "14px", marginTop: "5px" }}>
-            Manage system access and team roles.
+          <div className="page-desc">
+            Manage system administrators and their access levels.
           </div>
         </div>
       </div>
@@ -810,17 +860,6 @@ const Admins = () => {
 
       <div className="table-container">
         <div className="table-container-scrollable">
-          {loading ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "50px",
-              }}
-            >
-              <PuffLoader color="#ffd700" size={40} />
-            </div>
-          ) : (
             <table>
               <thead>
                 <tr>
@@ -951,11 +990,9 @@ const Admins = () => {
               </tbody>
 
             </table>
-
-
-          )}
+            
         </div>
-        {!loading && (
+        {filteredAdmins.length > 0 && (
           <div className="a-pagination">
             <div style={{ fontSize: "14px", color: "#666" }}>
               {filteredAdmins.length === 0 ? (

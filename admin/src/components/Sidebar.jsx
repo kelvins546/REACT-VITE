@@ -11,7 +11,7 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { role } = useOutletContext();
+  const { role, profile } = useOutletContext();
   const isSuperAdmin = role === "super admin";
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -33,36 +33,15 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
       setIsUsersOpen(true);
     }
 
-    fetchCurrentAdmin();
-  }, [location.pathname]);
-
-  const fetchCurrentAdmin = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("first_name, last_name, role")
-          .eq("id", user.id)
-          .single();
-
-        if (data && !error) {
-          const fullName = buildDisplayName(data.first_name, data.last_name);
-
-          setAdminProfile({
-            name: fullName,
-            role: capitalize(data.role) || "System Admin",
-            initials: getInitials(fullName),
-          });
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching admin profile:", err);
+    if (profile) {
+      const fullName = buildDisplayName(profile.first_name, profile.last_name);
+      setAdminProfile({
+        name: fullName,
+        role: capitalize(profile.role) || "System Admin",
+        initials: getInitials(fullName),
+      });
     }
-  };
+  }, [location.pathname, profile]);
 
   const buildDisplayName = (first, last) => {
     if (last && first) return `${first} ${last}`;

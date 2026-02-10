@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import "./ArchivedUsers.css";
 import { PuffLoader } from "react-spinners";
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
@@ -9,6 +9,11 @@ import "../../components/dropdowns/searchableDropdown.css";
 
 const ArchivedAdmins = () => {
     const navigate = useNavigate();
+    const outletContext = useOutletContext();
+    const { setLoading, setLoadingMessage } = outletContext || {
+        setLoading: () => { },
+        setLoadingMessage: () => { }
+    };
     const [restoreModal, setShowRestoreModal] = useState(false);
     const [restoreReason, setRestoreReason] = useState("Payment Received");
     const [restoreNotes, setRestoreNotes] = useState("");
@@ -29,7 +34,6 @@ const ArchivedAdmins = () => {
     const [viewStats, setViewStats] = useState({ alerts: 0, registeredHubs: 0 });
 
     const [archivedUsers, setArchivedUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
 
     const [notification, setNotification] = useState({
         show: false,
@@ -85,8 +89,12 @@ const ArchivedAdmins = () => {
             : "??";
 
     const fetchArchivedUsers = async () => {
+        setLoading(true);
+        setLoadingMessage(navigator.onLine ? "Loading..." : "Check your internet connection...");
+        let timeoutId = setTimeout(() => {
+            setLoadingMessage("Check your internet connection...");
+        }, 5000);
         try {
-            setLoading(true);
 
             const { data, error } = await supabase
                 .from("users")
@@ -124,11 +132,12 @@ const ArchivedAdmins = () => {
             console.error("Error fetching archived admins:", err);
             setArchivedUsers([]);
         } finally {
+            clearTimeout(timeoutId);
             setLoading(false);
         }
     };
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         fetchArchivedUsers();
     }, []);
 
@@ -319,17 +328,6 @@ const ArchivedAdmins = () => {
 
             { }
             <div className="table-container">
-                {loading ? (
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            padding: "50px",
-                        }}
-                    >
-                        <PuffLoader color="#ffd700" size={40} />
-                    </div>
-                ) : (
                     <table>
                         <thead>
 
@@ -455,7 +453,6 @@ const ArchivedAdmins = () => {
 
                         </tbody>
                     </table>
-                )}
 
                 { }
                 {filteredUsers.length > 0 && (
