@@ -6,6 +6,18 @@ import { PopupNotification } from "../../components/notifications/PopUpNotificat
 import { LoadingPopup } from "../../components/loaders/LoadingPopUp";
 import CalendarDropdown from "../../components/dropdowns/CalendarDropdown";
 import { supabase } from "../../supabaseClient";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+
+const availableColumns = [
+  { label: "Date Modified", key: "date" },
+  { label: "Provider", key: "provider" },
+  { label: "Previous Rate", key: "prevRate" },
+  { label: "New Rate", key: "newRate" },
+  { label: "Reason / Notes", key: "reason" },
+  { label: "Status", key: "status" },
+  { label: "Updated By", key: "updatedBy" },
+];
 
 const Rates = () => {
   const [showModal, setShowModal] = useState(false);
@@ -27,6 +39,9 @@ const Rates = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Meralco (Commercial)");
   const itemsPerPage = 5;
+  const [selectedColumns, setSelectedColumns] = useState(
+    availableColumns.map((c) => c.key),
+  );
 
   const [notification, setNotification] = useState({
     show: false,
@@ -383,111 +398,180 @@ const Rates = () => {
     }
   }, [filteredLogs, totalPages, currentPage]);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setLoader({
       show: true,
       message: "Exporting Report...",
     });
-
-    setTimeout(() => {
-      try {
-        const headers = [
-          "Date Modified",
-          "Provider",
-          "Previous Rate",
-          "New Rate",
-          "Reason / Notes",
-          "Status",
-          "Updated By",
-        ];
-
-        let ratesToExport = filteredLogs;
-
-        if (exportFromDate) {
-          const fromDate = new Date(exportFromDate);
-          ratesToExport = ratesToExport.filter(
-            (log) => new Date(log.rawDate) >= fromDate,
-          );
-        }
-
-        if (exportToDate) {
-          const toDate = new Date(exportToDate);
-          toDate.setHours(23, 59, 59, 999);
-          ratesToExport = ratesToExport.filter(
-            (log) => new Date(log.rawDate) <= toDate,
-          );
-        }
-
-        const rows = ratesToExport.map((row) =>
-          [
-            row.date,
-            row.provider,
-            row.prevRate,
-            row.newRate,
-            row.reason,
-            row.status,
-            row.updatedBy,
-          ].map((cell) => (cell || "").toString().replace(/₱/g, "P")),
+  
+    try {
+      let ratesToExport = filteredLogs;
+  
+      if (exportFromDate) {
+        const fromDate = new Date(exportFromDate);
+        ratesToExport = ratesToExport.filter(
+          (log) => new Date(log.rawDate) >= fromDate,
         );
-
-        const csvContent = [
-          headers.join(","),
-          ...rows.map((row) =>
-            row
-              .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
-              .join(","),
-          ),
-        ].join("\n");
-
-        const BOM = "\uFEFF";
-        const blob = new Blob([BOM + csvContent], {
-          type: "text/csv;charset=utf-8;",
-        });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-
-        link.setAttribute("href", url);
-        link.setAttribute(
-          "download",
-          `rates_report_${new Date().toISOString().split("T")[0]}.csv`,
-        );
-        link.style.visibility = "hidden";
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        setLoader({
-          show: false,
-          message: "Processing...",
-        });
-
-        setNotification({
-          show: true,
-          title: "Export Successful",
-          message: `Successfully exported ${ratesToExport.length} rate records.`,
-          variant: "success",
-          icon: "check_circle",
-        });
-
-        setShowExportModal(false);
-        setExportFromDate("");
-        setExportToDate("");
-      } catch (error) {
-        setLoader({
-          show: false,
-          message: "Processing...",
-        });
-
-        setNotification({
-          show: true,
-          title: "Export Failed",
-          message: error.message || "Failed to export CSV file.",
-          variant: "error",
-          icon: "error",
-        });
       }
-    }, 1500);
+  
+      if (exportToDate) {
+        const toDate = new Date(exportToDate);
+        toDate.setHours(23, 59, 59, 999);
+        ratesToExport = ratesToExport.filter(
+          (log) => new Date(log.rawDate) <= toDate,
+        );
+      }
+  
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Utility Rates");
+  
+      // ===============================
+      // TITLE SECTION
+      // ===============================
+  
+      worksheet.mergeCells("A1:C2");
+      worksheet.getCell("A1").value = "GRIDWATCH";
+  
+      worksheet.mergeCells("D1:G2");
+      worksheet.getCell("D1").value = "UTILITY RATES";
+  
+      ["A1", "D1"].forEach((cell) => {
+        const c = worksheet.getCell(cell);
+        c.font = { size: 18, bold: true, color: { argb: "FFFFFFFF" } };
+        c.alignment = { vertical: "middle", horizontal: "center" };
+        c.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF4F7C2D" }, // green
+        };
+      });
+  
+      // ===============================
+      // HEADER ROW
+      // ===============================
+  
+      const headerRowIndex = 4;
+  
+      const headers = [
+        "Date Modified",
+        "Provider",
+        "Previous Rate",
+        "New Rate",
+        "Reasons / Notes",
+        "Status",
+        "Updated By",
+      ];
+  
+      const headerRow = worksheet.getRow(headerRowIndex);
+      headers.forEach((header, index) => {
+        const cell = headerRow.getCell(index + 1);
+        cell.value = header;
+        cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+        cell.alignment = { vertical: "middle", horizontal: "center" };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF4F7C2D" },
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+  
+      headerRow.height = 22;
+  
+      // ===============================
+      // DATA ROWS
+      // ===============================
+  
+      let rowIndex = headerRowIndex + 1;
+  
+      ratesToExport.forEach((row) => {
+        const excelRow = worksheet.getRow(rowIndex);
+  
+        excelRow.getCell(1).value = row.date;
+        excelRow.getCell(2).value = row.provider;
+        excelRow.getCell(3).value = Number(row.prevRate.replace(/[₱,]/g, ""));
+        excelRow.getCell(4).value = Number(row.newRate.replace(/[₱,]/g, ""));
+        excelRow.getCell(5).value = row.reason;
+        excelRow.getCell(6).value = row.status;
+        excelRow.getCell(7).value = row.updatedBy;
+  
+        // Currency formatting
+        excelRow.getCell(3).numFmt = '"₱"#,##0.00';
+        excelRow.getCell(4).numFmt = '"₱"#,##0.00';
+  
+        // Borders
+        for (let i = 1; i <= 7; i++) {
+          excelRow.getCell(i).border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        }
+  
+        rowIndex++;
+      });
+  
+      // ===============================
+      // COLUMN WIDTHS
+      // ===============================
+  
+      worksheet.columns = [
+        { width: 18 },
+        { width: 28 },
+        { width: 18 },
+        { width: 18 },
+        { width: 35 },
+        { width: 15 },
+        { width: 22 },
+      ];
+  
+      // ===============================
+      // EXPORT FILE
+      // ===============================
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      saveAs(
+        blob,
+        `GRIDWATCH_UTILITY_RATES_${new Date()
+          .toISOString()
+          .split("T")[0]}.xlsx`,
+      );
+  
+      setLoader({ show: false, message: "Processing..." });
+  
+      setNotification({
+        show: true,
+        title: "Export Successful",
+        message: `Successfully exported ${ratesToExport.length} rate records.`,
+        variant: "success",
+        icon: "check_circle",
+      });
+  
+      setShowExportModal(false);
+      setExportFromDate("");
+      setExportToDate("");
+    } catch (error) {
+      setLoader({ show: false, message: "Processing..." });
+  
+      setNotification({
+        show: true,
+        title: "Export Failed",
+        message: error.message || "Failed to export Excel file.",
+        variant: "error",
+        icon: "error",
+      });
+    }
   };
 
   const handleSelect = (option) => {
@@ -1094,7 +1178,7 @@ const Rates = () => {
               borderRadius: "12px",
               border: "1px solid #333333",
               padding: "20px",
-              maxWidth: "380px",
+              maxWidth: "420px",
               width: "100%",
               textAlign: "center",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
@@ -1179,6 +1263,66 @@ const Rates = () => {
                     placeholder="MM/DD/YY"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "15px", textAlign: "left" }}>
+              <label
+                style={{
+                  fontSize: "12px",
+                  color: "#888",
+                  display: "block",
+                  marginBottom: "8px",
+                }}
+              >
+                Select Columns
+              </label>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "8px",
+                  maxHeight: "150px",
+                  overflowY: "auto",
+                  background: "#1a1a1a",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  border: "1px solid #333",
+                }}
+              >
+                {availableColumns.map((col) => (
+                  <label
+                    key={col.key}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "13px",
+                      color: "#ccc",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedColumns.includes(col.key)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedColumns([...selectedColumns, col.key]);
+                        } else {
+                          setSelectedColumns(
+                            selectedColumns.filter((key) => key !== col.key),
+                          );
+                        }
+                      }}
+                      style={{
+                        accentColor: "#00A651",
+                        width: "14px",
+                        height: "14px",
+                      }}
+                    />
+                    {col.label}
+                  </label>
+                ))}
               </div>
             </div>
 

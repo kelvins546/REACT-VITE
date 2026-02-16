@@ -7,6 +7,8 @@ import { LoadingPopup } from "../../../components/loaders/LoadingPopUp";
 import { PopupNotification } from "../../../components/notifications/PopUpNotification";
 import CalendarDropdown from "../../../components/dropdowns/CalendarDropdown";
 import "../../../components/dropdowns/searchableDropdown.css";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 const buildFullName = (first, last) =>
   [first, last].filter(Boolean).join(" ").trim();
@@ -94,6 +96,7 @@ const Users = () => {
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [archiveReason, setArchiveReason] = useState("Non-payment of Dues");
+  const [archiveNotes, setArchiveNotes] = useState("");
   const [isArchiveReasonDropdownOpen, setIsArchiveReasonDropdownOpen] =
     useState(false);
 
@@ -116,14 +119,13 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setLoader({
       show: true,
       message: "Exporting Report...",
     });
 
-    setTimeout(() => {
-      try {
+    try {
         let usersToExport = filteredUsers;
 
         if (exportFromDate || exportToDate) {
@@ -145,47 +147,123 @@ const Users = () => {
           });
         }
 
-        const headers = availableColumns
-          .filter((col) => selectedColumns.includes(col.key))
-          .map((col) => col.label);
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Users Report");
 
-        const rows = usersToExport.map((user) =>
-          availableColumns
-            .filter((col) => selectedColumns.includes(col.key))
-            .map((col) => {
-              if (col.key === "hubs")
-                return (user.hubs || "").replace(" Registered", "");
-              if (col.key === "joined_at")
-                return new Date(user.joined_at).toLocaleDateString();
-              return user[col.key];
-            }),
+        const columnsToExport = availableColumns.filter((col) =>
+          selectedColumns.includes(col.key),
         );
 
-        const csvContent = [
-          headers.join(","),
-          ...rows.map((row) =>
-            row
-              .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
-              .join(","),
-          ),
-        ].join("\n");
+        if (columnsToExport.length === 0) {
+          throw new Error("No columns selected for export.");
+        }
 
-        const blob = new Blob([csvContent], {
-          type: "text/csv;charset=utf-8;",
+        // Title Section
+        const totalCols = columnsToExport.length;
+        const midPoint = Math.ceil(totalCols / 2);
+
+        worksheet.mergeCells(1, 1, 2, midPoint);
+        const leftTitle = worksheet.getCell(1, 1);
+        leftTitle.value = "GRIDWATCH";
+        leftTitle.font = { size: 18, bold: true, color: { argb: "FFFFFFFF" } };
+        leftTitle.alignment = { vertical: "middle", horizontal: "center" };
+        leftTitle.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF4F7C2D" }, // green
+        };
+
+        if (totalCols > 1) {
+          worksheet.mergeCells(1, midPoint + 1, 2, totalCols);
+          const rightTitle = worksheet.getCell(1, midPoint + 1);
+          rightTitle.value = "USER REPORT";
+          rightTitle.font = { size: 18, bold: true, color: { argb: "FFFFFFFF" } };
+          rightTitle.alignment = { vertical: "middle", horizontal: "center" };
+          rightTitle.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FF4F7C2D" },
+          };
+        } else {
+          leftTitle.value = "GRIDWATCH - USER REPORT";
+        }
+
+        // Header Row
+        const headerRowIndex = 4;
+        const headerRow = worksheet.getRow(headerRowIndex);
+
+        columnsToExport.forEach((col, index) => {
+          const cell = headerRow.getCell(index + 1);
+          cell.value = col.label;
+          cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FF4F7C2D" },
+          };
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
         });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
+        headerRow.height = 22;
 
-        link.setAttribute("href", url);
-        link.setAttribute(
-          "download",
-          `users_report_${new Date().toISOString().split("T")[0]}.csv`,
+        // Data Rows
+        let rowIndex = headerRowIndex + 1;
+        usersToExport.forEach((user) => {
+          const excelRow = worksheet.getRow(rowIndex);
+          columnsToExport.forEach((col, index) => {
+            const cell = excelRow.getCell(index + 1);
+            let value = user[col.key];
+
+            if (col.key === "hubs") {
+              value = (value || "").replace(" Registered", "");
+            } else if (col.key === "joined_at") {
+              value = new Date(value).toLocaleDateString();
+            }
+
+            cell.value = value;
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+          });
+          rowIndex++;
+        });
+
+        // Column Widths
+        const widthMap = {
+          name: 25,
+          email: 30,
+          phone_number: 18,
+          street_address: 30,
+          city: 15,
+          region: 15,
+          zip_code: 12,
+          status: 12,
+          hubs: 15,
+          joined_at: 15,
+        };
+
+        worksheet.columns = columnsToExport.map((col) => ({
+          width: widthMap[col.key] || 20,
+        }));
+
+        // Export
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        saveAs(
+          blob,
+          `GRIDWATCH_USERS_REPORT_${new Date().toISOString().split("T")[0]}.xlsx`,
         );
-        link.style.visibility = "hidden";
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
 
         setLoader({
           show: false,
@@ -212,12 +290,11 @@ const Users = () => {
         setNotification({
           show: true,
           title: "Export Failed",
-          message: error.message || "Failed to export CSV file.",
+          message: error.message || "Failed to export Excel file.",
           variant: "error",
           icon: "error",
         });
       }
-    }, 1500);
   };
 
   const fetchUsers = async () => {
@@ -331,6 +408,7 @@ const Users = () => {
   const handleArchiveClick = (user) => {
     setSelectedUser(user);
     setArchiveReason("Non-payment of Dues");
+    setArchiveNotes("");
     setShowArchiveModal(true);
   };
 
@@ -356,6 +434,8 @@ const Users = () => {
         .update({
           status: "archived",
           archived_at: now,
+          archived_reason: archiveNotes ? `${archiveReason} - ${archiveNotes}` : archiveReason,
+          restore_reason: null,
         })
         .eq("id", selectedUser.id);
 
@@ -1091,8 +1171,8 @@ const Users = () => {
                 <textarea
                   className="u-form-textarea"
                   placeholder="Enter details here..."
-                  /* value={archiveReason} */
-                  /*onChange={(e) => setArchiveReason(e.target.value)}*/
+                  value={archiveNotes}
+                  onChange={(e) => setArchiveNotes(e.target.value)}
                 ></textarea>
               </div>
               <div className="u-modal-actions">

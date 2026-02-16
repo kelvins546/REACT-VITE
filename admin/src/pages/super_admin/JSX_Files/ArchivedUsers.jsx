@@ -236,6 +236,8 @@ const ArchivedUsers = () => {
         .update({
           status: "active",
           archived_at: null,
+          restore_reason: restoreNotes ? `${restoreReason} - ${restoreNotes}` : restoreReason,
+          archived_reason: null,
         })
         .in("id", selectedUsers);
 

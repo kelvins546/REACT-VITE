@@ -27,6 +27,7 @@ const Admins = () => {
     message: "Processing...",
   });
   const [archiveReason, setArchiveReason] = useState("Inactive");
+  const [archiveNotes, setArchiveNotes] = useState("");
   const [notification, setNotification] = useState({
     show: false,
     title: "",
@@ -725,7 +726,12 @@ const Admins = () => {
     try {
       await supabase
         .from("users")
-        .update({ status: "archived", archived_at: new Date().toISOString() })
+        .update({
+          status: "archived",
+          archived_at: new Date().toISOString(),
+          archived_reason: archiveNotes ? `${archiveReason} - ${archiveNotes}` : archiveReason,
+          restore_reason: null,
+        })
         .eq("id", archiveAdmin.id);
 
       setLoader({ show: false, message: "Processing..." });
@@ -780,6 +786,7 @@ const Admins = () => {
 
   const openArchiveModal = (admin) => {
     setArchiveAdmin(admin);
+    setArchiveNotes("");
     setShowArchiveModal(true);
   };
 
@@ -1853,8 +1860,8 @@ const Admins = () => {
                 <textarea
                   className="u-form-textarea"
                   placeholder="Enter details here..."
-                  value={archiveReason}
-                  onChange={(e) => setArchiveReason(e.target.value)}
+                  value={archiveNotes}
+                  onChange={(e) => setArchiveNotes(e.target.value)}
                 ></textarea>
               </div>
               <div className="u-modal-actions">

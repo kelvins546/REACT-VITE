@@ -7,6 +7,9 @@ import { LoadingPopup } from "../../../components/loaders/LoadingPopUp";
 import CalendarDropdown from "../../../components/dropdowns/CalendarDropdown";
 import { supabase } from "../../../supabaseClient";
 
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+
 const availableColumns = [
   { label: "Date Modified", key: "date" },
   { label: "Provider", key: "provider" },
@@ -500,103 +503,201 @@ const Rates = () => {
     }
   }, [filteredLogs, totalPages, currentPage]);
 
-  const handleExport = () => {
-    setLoader({
-      show: true,
-      message: "Exporting Report...",
+const handleExport = async () => {
+  setLoader({
+    show: true,
+    message: "Exporting Report...",
+  });
+
+  try {
+    let ratesToExport = filteredLogs;
+
+    if (exportFromDate) {
+      const fromDate = new Date(exportFromDate);
+      ratesToExport = ratesToExport.filter(
+        (log) => new Date(log.rawDate) >= fromDate,
+      );
+    }
+
+    if (exportToDate) {
+      const toDate = new Date(exportToDate);
+      toDate.setHours(23, 59, 59, 999);
+      ratesToExport = ratesToExport.filter(
+        (log) => new Date(log.rawDate) <= toDate,
+      );
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Utility Rates");
+
+      // Filter columns based on selection
+      const columnsToExport = availableColumns.filter((col) =>
+        selectedColumns.includes(col.key),
+      );
+
+      if (columnsToExport.length === 0) {
+        throw new Error("No columns selected for export.");
+      }
+
+    // ===============================
+    // TITLE SECTION
+    // ===============================
+
+      const totalCols = columnsToExport.length;
+      const midPoint = Math.ceil(totalCols / 2);
+
+      // Left Title
+      worksheet.mergeCells(1, 1, 2, midPoint);
+      const leftTitle = worksheet.getCell(1, 1);
+      leftTitle.value = "GRIDWATCH";
+      leftTitle.font = { size: 18, bold: true, color: { argb: "FFFFFFFF" } };
+      leftTitle.alignment = { vertical: "middle", horizontal: "center" };
+      leftTitle.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF4F7C2D" }, // green
+      };
+
+      // Right Title
+      if (totalCols > 1) {
+        worksheet.mergeCells(1, midPoint + 1, 2, totalCols);
+        const rightTitle = worksheet.getCell(1, midPoint + 1);
+        rightTitle.value = "UTILITY RATES";
+        rightTitle.font = { size: 18, bold: true, color: { argb: "FFFFFFFF" } };
+        rightTitle.alignment = { vertical: "middle", horizontal: "center" };
+        rightTitle.fill = {
+        type: "pattern",
+        pattern: "solid",
+          fgColor: { argb: "FF4F7C2D" },
+      };
+      } else {
+        leftTitle.value = "GRIDWATCH - UTILITY RATES";
+      }
+
+    // ===============================
+    // HEADER ROW
+    // ===============================
+
+    const headerRowIndex = 4;
+    const headerRow = worksheet.getRow(headerRowIndex);
+
+      columnsToExport.forEach((col, index) => {
+      const cell = headerRow.getCell(index + 1);
+        cell.value = col.label;
+      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF4F7C2D" },
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
     });
 
-    setTimeout(() => {
-      try {
-        const headers = availableColumns
-          .filter((col) => selectedColumns.includes(col.key))
-          .map((col) => col.label);
+    headerRow.height = 22;
 
-        let ratesToExport = filteredLogs;
+    // ===============================
+    // DATA ROWS
+    // ===============================
 
-        if (exportFromDate) {
-          const fromDate = new Date(exportFromDate);
-          ratesToExport = ratesToExport.filter(
-            (log) => new Date(log.rawDate) >= fromDate,
-          );
+    let rowIndex = headerRowIndex + 1;
+
+    ratesToExport.forEach((row) => {
+      const excelRow = worksheet.getRow(rowIndex);
+
+      columnsToExport.forEach((col, index) => {
+        const cell = excelRow.getCell(index + 1);
+        let value = row[col.key];
+
+        if (col.key === "prevRate" || col.key === "newRate") {
+          const strVal = String(value || "");
+          const numVal = Number(strVal.replace(/[₱,]/g, ""));
+          if (!isNaN(numVal)) {
+            cell.value = numVal;
+            cell.numFmt = '"₱"#,##0.00';
+          } else {
+            cell.value = value;
+          }
+        } else {
+          cell.value = value;
         }
 
-        if (exportToDate) {
-          const toDate = new Date(exportToDate);
-          toDate.setHours(23, 59, 59, 999);
-          ratesToExport = ratesToExport.filter(
-            (log) => new Date(log.rawDate) <= toDate,
-          );
-        }
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
 
-        const rows = ratesToExport.map((row) =>
-          availableColumns
-            .filter((col) => selectedColumns.includes(col.key))
-            .map((col) => {
-              const val = row[col.key];
-              return (val || "").toString().replace(/₱/g, "P");
-            }),
-        );
+      rowIndex++;
+    });
 
-        const csvContent = [
-          headers.join(","),
-          ...rows.map((row) =>
-            row
-              .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
-              .join(","),
-          ),
-        ].join("\n");
+    // ===============================
+    // COLUMN WIDTHS
+    // ===============================
 
-        const BOM = "\uFEFF";
-        const blob = new Blob([BOM + csvContent], {
-          type: "text/csv;charset=utf-8;",
-        });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
+    const widthMap = {
+      date: 18,
+      provider: 28,
+      prevRate: 18,
+      newRate: 18,
+      reason: 35,
+      status: 15,
+      updatedBy: 22,
+    };
 
-        link.setAttribute("href", url);
-        link.setAttribute(
-          "download",
-          `rates_report_${new Date().toISOString().split("T")[0]}.csv`,
-        );
-        link.style.visibility = "hidden";
+    worksheet.columns = columnsToExport.map((col) => ({
+      width: widthMap[col.key] || 20,
+    }));
 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    // ===============================
+    // EXPORT FILE
+    // ===============================
 
-        setLoader({
-          show: false,
-          message: "Processing...",
-        });
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
 
-        setNotification({
-          show: true,
-          title: "Export Successful",
-          message: `Successfully exported ${ratesToExport.length} rate records.`,
-          variant: "success",
-          icon: "check_circle",
-        });
+    saveAs(
+      blob,
+      `GRIDWATCH_UTILITY_RATES_${new Date()
+        .toISOString()
+        .split("T")[0]}.xlsx`,
+    );
 
-        setShowExportModal(false);
-        setExportFromDate("");
-        setExportToDate("");
-      } catch (error) {
-        setLoader({
-          show: false,
-          message: "Processing...",
-        });
+    setLoader({ show: false, message: "Processing..." });
 
-        setNotification({
-          show: true,
-          title: "Export Failed",
-          message: error.message || "Failed to export CSV file.",
-          variant: "error",
-          icon: "error",
-        });
-      }
-    }, 1500);
-  };
+    setNotification({
+      show: true,
+      title: "Export Successful",
+      message: `Successfully exported ${ratesToExport.length} rate records.`,
+      variant: "success",
+      icon: "check_circle",
+    });
+
+    setShowExportModal(false);
+    setExportFromDate("");
+    setExportToDate("");
+  } catch (error) {
+    setLoader({ show: false, message: "Processing..." });
+
+    setNotification({
+      show: true,
+      title: "Export Failed",
+      message: error.message || "Failed to export Excel file.",
+      variant: "error",
+      icon: "error",
+    });
+  }
+};
 
   const handleSelect = (option) => {
     setSelected(option);
