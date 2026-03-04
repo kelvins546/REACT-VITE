@@ -74,7 +74,7 @@ const Admins = () => {
     confirmPassword: "",
     role: "admin",
   });
-  const [createMode, setCreateMode] = useState("create"); // create | invite
+  const [createMode, setCreateMode] = useState("create");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpInput, setOtpInput] = useState("");
   const [otpCode, setOtpCode] = useState("");
@@ -467,7 +467,6 @@ const Admins = () => {
 
     const fullName = buildFullName(newAdmin.first_name, newAdmin.last_name);
 
-    // Generate the invitation link with query parameters
     const params = new URLSearchParams({
       email: newAdmin.email,
       first_name: newAdmin.first_name,

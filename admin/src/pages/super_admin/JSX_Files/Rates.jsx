@@ -420,7 +420,6 @@ const Rates = () => {
         .order("created_at", { ascending: false });
       if (logsError) throw logsError;
 
-      // Fetch user details for logs manually to avoid FK issues
       const userIds = [
         ...new Set((logsData || []).map((l) => l.updated_by).filter(Boolean)),
       ];
@@ -530,7 +529,6 @@ const handleExport = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Utility Rates");
 
-      // Filter columns based on selection
       const columnsToExport = availableColumns.filter((col) =>
         selectedColumns.includes(col.key),
       );
@@ -539,14 +537,9 @@ const handleExport = async () => {
         throw new Error("No columns selected for export.");
       }
 
-    // ===============================
-    // TITLE SECTION
-    // ===============================
-
       const totalCols = columnsToExport.length;
       const midPoint = Math.ceil(totalCols / 2);
 
-      // Left Title
       worksheet.mergeCells(1, 1, 2, midPoint);
       const leftTitle = worksheet.getCell(1, 1);
       leftTitle.value = "GRIDWATCH";
@@ -555,10 +548,9 @@ const handleExport = async () => {
       leftTitle.fill = {
         type: "pattern",
         pattern: "solid",
-        fgColor: { argb: "FF4F7C2D" }, // green
+        fgColor: { argb: "FF4F7C2D" }, 
       };
 
-      // Right Title
       if (totalCols > 1) {
         worksheet.mergeCells(1, midPoint + 1, 2, totalCols);
         const rightTitle = worksheet.getCell(1, midPoint + 1);
@@ -573,10 +565,6 @@ const handleExport = async () => {
       } else {
         leftTitle.value = "GRIDWATCH - UTILITY RATES";
       }
-
-    // ===============================
-    // HEADER ROW
-    // ===============================
 
     const headerRowIndex = 4;
     const headerRow = worksheet.getRow(headerRowIndex);
@@ -600,10 +588,6 @@ const handleExport = async () => {
     });
 
     headerRow.height = 22;
-
-    // ===============================
-    // DATA ROWS
-    // ===============================
 
     let rowIndex = headerRowIndex + 1;
 
@@ -638,10 +622,6 @@ const handleExport = async () => {
       rowIndex++;
     });
 
-    // ===============================
-    // COLUMN WIDTHS
-    // ===============================
-
     const widthMap = {
       date: 18,
       provider: 28,
@@ -655,10 +635,6 @@ const handleExport = async () => {
     worksheet.columns = columnsToExport.map((col) => ({
       width: widthMap[col.key] || 20,
     }));
-
-    // ===============================
-    // EXPORT FILE
-    // ===============================
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {

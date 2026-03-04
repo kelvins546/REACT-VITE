@@ -425,10 +425,6 @@ const Rates = () => {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Utility Rates");
   
-      // ===============================
-      // TITLE SECTION
-      // ===============================
-  
       worksheet.mergeCells("A1:C2");
       worksheet.getCell("A1").value = "GRIDWATCH";
   
@@ -442,13 +438,9 @@ const Rates = () => {
         c.fill = {
           type: "pattern",
           pattern: "solid",
-          fgColor: { argb: "FF4F7C2D" }, // green
+          fgColor: { argb: "FF4F7C2D" }, 
         };
       });
-  
-      // ===============================
-      // HEADER ROW
-      // ===============================
   
       const headerRowIndex = 4;
   
@@ -483,10 +475,6 @@ const Rates = () => {
   
       headerRow.height = 22;
   
-      // ===============================
-      // DATA ROWS
-      // ===============================
-  
       let rowIndex = headerRowIndex + 1;
   
       ratesToExport.forEach((row) => {
@@ -500,11 +488,9 @@ const Rates = () => {
         excelRow.getCell(6).value = row.status;
         excelRow.getCell(7).value = row.updatedBy;
   
-        // Currency formatting
         excelRow.getCell(3).numFmt = '"₱"#,##0.00';
         excelRow.getCell(4).numFmt = '"₱"#,##0.00';
-  
-        // Borders
+
         for (let i = 1; i <= 7; i++) {
           excelRow.getCell(i).border = {
             top: { style: "thin" },
@@ -517,10 +503,6 @@ const Rates = () => {
         rowIndex++;
       });
   
-      // ===============================
-      // COLUMN WIDTHS
-      // ===============================
-  
       worksheet.columns = [
         { width: 18 },
         { width: 28 },
@@ -530,10 +512,6 @@ const Rates = () => {
         { width: 15 },
         { width: 22 },
       ];
-  
-      // ===============================
-      // EXPORT FILE
-      // ===============================
   
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
@@ -648,7 +626,6 @@ const Rates = () => {
         rate_type: rateType,
       };
 
-      // Try to update the existing rate first to avoid duplicates
       const { data: updatedRows, error: updateError } = await supabase
         .from("utility_rates")
         .update(payload)
@@ -658,7 +635,6 @@ const Rates = () => {
 
       if (updateError) throw updateError;
 
-      // If no row was updated (it doesn't exist), then insert a new one
       if (!updatedRows || updatedRows.length === 0) {
         const { error: insertError } = await supabase
           .from("utility_rates")

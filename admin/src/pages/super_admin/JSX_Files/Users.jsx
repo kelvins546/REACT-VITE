@@ -158,7 +158,6 @@ const Users = () => {
           throw new Error("No columns selected for export.");
         }
 
-        // Title Section
         const totalCols = columnsToExport.length;
         const midPoint = Math.ceil(totalCols / 2);
 
@@ -170,7 +169,7 @@ const Users = () => {
         leftTitle.fill = {
           type: "pattern",
           pattern: "solid",
-          fgColor: { argb: "FF4F7C2D" }, // green
+          fgColor: { argb: "FF4F7C2D" }, 
         };
 
         if (totalCols > 1) {
@@ -188,7 +187,6 @@ const Users = () => {
           leftTitle.value = "GRIDWATCH - USER REPORT";
         }
 
-        // Header Row
         const headerRowIndex = 4;
         const headerRow = worksheet.getRow(headerRowIndex);
 
@@ -211,7 +209,6 @@ const Users = () => {
         });
         headerRow.height = 22;
 
-        // Data Rows
         let rowIndex = headerRowIndex + 1;
         usersToExport.forEach((user) => {
           const excelRow = worksheet.getRow(rowIndex);
@@ -236,7 +233,6 @@ const Users = () => {
           rowIndex++;
         });
 
-        // Column Widths
         const widthMap = {
           name: 25,
           email: 30,
@@ -254,7 +250,6 @@ const Users = () => {
           width: widthMap[col.key] || 20,
         }));
 
-        // Export
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
