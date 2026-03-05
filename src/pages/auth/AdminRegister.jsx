@@ -306,7 +306,7 @@ const AdminRegister = () => {
               className="input-group"
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
                 gap: "14px",
               }}
             >
@@ -420,7 +420,7 @@ const AdminRegister = () => {
               className="btn-login"
               disabled={isFormDisabled || !isFormValid}
             >
-              Create Account register
+              Create Account
             </button>
           </form>
         </div>
