@@ -420,7 +420,7 @@ const AdminRegister = () => {
               className="btn-login"
               disabled={isFormDisabled || !isFormValid}
             >
-              Create Account
+              Create Account register
             </button>
           </form>
         </div>
