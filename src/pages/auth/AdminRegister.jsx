@@ -249,7 +249,7 @@ const AdminRegister = () => {
         color="#ffd700"
       />
       <div className="auth-bg"></div>
-      <div className="auth-container">
+      <div className="auth-container" style={{ height: "auto" }}>
         <div className="brand-side">
           <div className="logo-circle">
             <img src="/logoNew.png" className="logo-img" alt="Logo" />
@@ -261,7 +261,7 @@ const AdminRegister = () => {
           </div>
         </div>
 
-        <div className="form-side" style={{ overflowY: "auto" }}>
+        <div className="form-side">
           <div className="form-header">Complete Registration</div>
           <div className="form-sub">
             Set up your password to access the admin portal.
