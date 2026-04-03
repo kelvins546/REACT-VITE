@@ -16,6 +16,10 @@ const Firmware = () => {
   const itemsPerPage = 8;
   const [newVersion, setNewVersion] = useState("");
   const [newNotes, setNewNotes] = useState("");
+  const [activeField, setActiveField] = useState(null);
+  const [isMainHovered, setIsMainHovered] = useState(false);
+  const [isConfirmHovered, setIsConfirmHovered] = useState(false);
+  const [isCancelHovered, setIsCancelHovered] = useState(false);
   const [notification, setNotification] = useState({
     show: false,
     title: "",
@@ -248,41 +252,68 @@ const Firmware = () => {
 
       {showConfirmModal && (
         <div className="firmware-modal-overlay">
-          <div className="firmware-modal">
+          <div className="firmware-modal" style={{ maxWidth: '500px', width: '95%' }}>
             <div className="firmware-modal-icon">
               <span className="material-icons">upload</span>
             </div>
             <div className="firmware-modal-content">
               <span className="firmware-modal-title">Upload Firmware</span>
-              <span className="firmware-modal-message">
+              <span className="firmware-modal-message" style={{ marginBottom: '25px', display: 'block' }}>
                 Upload <strong>{file?.name}</strong> as a new firmware release
               </span>
 
-              <div className="firmware-modal-inputs">
-                <div className="input-group">
-                  <label htmlFor="version">Version *</label>
+              <div className="firmware-modal-inputs" style={{ textAlign: 'left' }}>
+                <div className="input-group" style={{ marginBottom: '20px' }}>
+                  <label htmlFor="version" style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: '700', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' }}>VERSION *</label>
                   <input
                     id="version"
                     type="text"
                     value={newVersion}
                     onChange={(e) => setNewVersion(e.target.value)}
+                    onFocus={() => setActiveField('version')}
+                    onBlur={() => setActiveField(null)}
                     placeholder="e.g., v1.2.3"
+                    style={{ 
+                      width: '100%', 
+                      padding: '12px', 
+                      background: 'rgba(255,255,255,0.05)', 
+                      border: activeField === 'version' ? '1px solid #007bff' : '1px solid rgba(255,255,255,0.1)', 
+                      borderRadius: '6px', 
+                      color: '#fff', 
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s ease'
+                    }}
                     required
                   />
                 </div>
-                <div className="input-group">
-                  <label htmlFor="notes">Release Notes</label>
+                <div className="input-group" style={{ marginBottom: '10px' }}>
+                  <label htmlFor="notes" style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: '700', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' }}>RELEASE NOTES</label>
                   <textarea
                     id="notes"
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
+                    onFocus={() => setActiveField('notes')}
+                    onBlur={() => setActiveField(null)}
                     placeholder="Optional release notes..."
                     rows={3}
+                    style={{ 
+                      width: '100%', 
+                      padding: '12px', 
+                      background: 'rgba(255,255,255,0.05)', 
+                      border: activeField === 'notes' ? '1px solid #007bff' : '1px solid rgba(255,255,255,0.1)', 
+                      borderRadius: '6px', 
+                      color: '#fff', 
+                      fontSize: '14px', 
+                      resize: 'none',
+                      outline: 'none',
+                      transition: 'border-color 0.2s ease'
+                    }}
                   />
                 </div>
               </div>
             </div>
-            <div className="firmware-modal-actions">
+            <div className="firmware-modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
               <button
                 className="firmware-modal-cancel"
                 onClick={() => {
@@ -290,13 +321,44 @@ const Firmware = () => {
                   setNewVersion("");
                   setNewNotes("");
                 }}
+                onMouseEnter={() => setIsCancelHovered(true)}
+                onMouseLeave={() => setIsCancelHovered(false)}
+                style={{
+                  backgroundColor: isCancelHovered ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                  color: isCancelHovered ? '#fff' : '#aaa',
+                  padding: '10px 20px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  textTransform: 'none',
+                  transform: 'none'
+                }}
               >
                 Cancel
               </button>
               <button
                 className="firmware-modal-confirm"
                 onClick={confirmUpload}
+                onMouseEnter={() => setIsConfirmHovered(true)}
+                onMouseLeave={() => setIsConfirmHovered(false)}
                 disabled={!newVersion.trim()}
+                style={{
+                  backgroundColor: !newVersion.trim() ? 'rgba(255, 255, 255, 0.1)' : (isConfirmHovered ? '#0062cc' : '#007bff'),
+                  color: '#fff',
+                  padding: '10px 24px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  cursor: !newVersion.trim() ? 'not-allowed' : 'pointer',
+                  transition: 'background-color 0.2s ease',
+                  fontSize: '14px',
+                  textTransform: 'none',
+                  transform: 'none',
+                  boxShadow: 'none'
+                }}
               >
                 Upload
               </button>
@@ -365,7 +427,27 @@ const Firmware = () => {
             <button
               className="firmware-btn firmware-btn-primary"
               onClick={handleUpload}
+              onMouseEnter={() => setIsMainHovered(true)}
+              onMouseLeave={() => setIsMainHovered(false)}
               disabled={!file || uploading}
+              style={{
+                backgroundColor: (!file || uploading) ? 'rgba(255, 255, 255, 0.1)' : (isMainHovered ? '#0062cc' : '#007bff'),
+                color: '#fff',
+                padding: '12px 24px',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: '600',
+                cursor: (!file || uploading) ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'background-color 0.2s ease',
+                fontSize: '14px',
+                textTransform: 'none',
+                transform: 'none',
+                boxShadow: 'none'
+              }}
             >
               <span className="material-icons">upload</span>
               {uploading ? "Uploading..." : "Upload Firmware"}
