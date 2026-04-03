@@ -51,6 +51,28 @@ const AdminLogin = () => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
+  const resetErrors = {
+    password:
+      forgotPassword === ""
+        ? ""
+        : !passwordRegex.test(forgotPassword)
+          ? "Must be 8+ chars, 1 uppercase, 1 lowercase & 1 special character"
+          : "",
+    confirmPassword:
+      forgotConfirm === ""
+        ? ""
+        : forgotPassword !== forgotConfirm
+          ? "Passwords do not match"
+          : "",
+  };
+
+  const isResetFormValid = Boolean(
+    forgotPassword &&
+      forgotConfirm &&
+      !resetErrors.password &&
+      !resetErrors.confirmPassword,
+  );
+
   useEffect(() => {
     const checkSession = async () => {
       const {
@@ -689,6 +711,11 @@ const AdminLogin = () => {
                           {showForgotPassword ? "visibility" : "visibility_off"}
                         </span>
                       </div>
+                      {resetErrors.password && (
+                        <span style={{ color: "#ef4444", fontSize: "11px" }}>
+                          {resetErrors.password}
+                        </span>
+                      )}
                     </div>
                     <div className="input-group">
                       <span className="input-label">Confirm Password</span>
@@ -715,6 +742,11 @@ const AdminLogin = () => {
                           {showForgotConfirm ? "visibility" : "visibility_off"}
                         </span>
                       </div>
+                      {resetErrors.confirmPassword && (
+                        <span style={{ color: "#ef4444", fontSize: "11px" }}>
+                          {resetErrors.confirmPassword}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </>
@@ -749,6 +781,11 @@ const AdminLogin = () => {
                   <button
                     className="btn btn-primary-modal"
                     onClick={handleResetPassword}
+                    disabled={!isResetFormValid}
+                    style={{
+                      opacity: !isResetFormValid ? 0.5 : 1,
+                      cursor: !isResetFormValid ? "not-allowed" : "pointer",
+                    }}
                   >
                     Reset Password
                   </button>

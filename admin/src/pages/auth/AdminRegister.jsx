@@ -234,7 +234,7 @@ const AdminRegister = () => {
   const isFormDisabled = loading || !inviteValid;
 
   return (
-    <div className="login-page">
+    <div className="login-page" style={{ height: "100vh", overflowY: "auto", display: "flex" }}>
       <PopupNotification
         show={notification.show}
         title={notification.title}
@@ -248,8 +248,8 @@ const AdminRegister = () => {
         Loader={PuffLoader}
         color="#ffd700"
       />
-      <div className="auth-bg"></div>
-      <div className="auth-container">
+      <div className="auth-bg" style={{ position: "fixed" }}></div>
+      <div className="auth-container" style={{ height: "auto", margin: "auto", position: "relative" }}>
         <div className="brand-side">
           <div className="logo-circle">
             <img src="/logoNew.png" className="logo-img" alt="Logo" />
@@ -306,7 +306,7 @@ const AdminRegister = () => {
               className="input-group"
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
                 gap: "14px",
               }}
             >

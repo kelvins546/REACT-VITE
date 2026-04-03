@@ -1,0 +1,346 @@
+.firmware-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  min-height: calc(100vh - 100px);
+}
+
+.firmware-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 40px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.firmware-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.firmware-header .material-icons {
+  font-size: 32px;
+  color: #007bff;
+}
+
+.firmware-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.firmware-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.firmware-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.file-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.file-input-wrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #1a1a1a;
+  border: 2px dashed #404040;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.file-input-wrapper:hover {
+  border-color: #007bff;
+  background: #222;
+}
+
+.file-input-wrapper.drag-active {
+  border-color: #007bff;
+  background: #1a3a4a;
+  border-width: 2px;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-input-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.file-input-placeholder .material-icons {
+  font-size: 48px;
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.file-input-wrapper:hover .file-input-placeholder .material-icons {
+  color: #007bff;
+}
+
+.file-input-placeholder p {
+  margin: 0;
+  font-size: 14px;
+  color: #aaa;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.file-input-placeholder strong {
+  color: #fff;
+  margin: 0 4px;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+}
+
+.file-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.file-detail .label {
+  font-size: 12px;
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.file-detail .value {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+  word-break: break-word;
+  max-width: 300px;
+  text-align: right;
+}
+
+.firmware-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.firmware-btn {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.firmware-btn .material-icons {
+  font-size: 18px;
+}
+
+.firmware-btn-primary {
+  background: #007bff;
+  color: #fff;
+}
+
+.firmware-btn-primary:hover:not(:disabled) {
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.firmware-btn:disabled {
+  background: #404040;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Confirmation Modal Styles */
+.firmware-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.firmware-modal {
+  background-color: #0f0f0f;
+  border-radius: 12px;
+  border: 1px solid #333333;
+  padding: 20px;
+  max-width: 330px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.5s;
+}
+
+.firmware-modal-icon {
+  display: flex;
+  justify-content: center;
+}
+
+.firmware-modal-icon .material-icons {
+  font-size: 35px;
+  margin-top: 10px;
+  color: #007bff;
+}
+
+.firmware-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.firmware-modal-title {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #fff;
+  margin-top: 10px;
+}
+
+.firmware-modal-message {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.firmware-modal-message strong {
+  color: #007bff;
+  word-break: break-word;
+}
+
+.firmware-modal-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+.firmware-modal-cancel {
+  flex: 1;
+  padding: 10px 16px;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #888;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.firmware-modal-cancel:hover {
+  background: #2a2a2a;
+  color: #aaa;
+}
+
+.firmware-modal-confirm {
+  flex: 1;
+  padding: 10px 16px;
+  background: #007bff;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.firmware-modal-confirm:hover {
+  background: #0056b3;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .firmware-container {
+    padding: 20px 12px;
+  }
+
+  .firmware-card {
+    padding: 24px;
+  }
+
+  .firmware-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .firmware-header h2 {
+    font-size: 20px;
+  }
+
+  .file-input-placeholder {
+    padding: 36px 16px;
+  }
+
+  .file-input-placeholder .material-icons {
+    font-size: 36px;
+  }
+
+  .btn {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .firmware-modal {
+    margin: 0 20px;
+  }
+}

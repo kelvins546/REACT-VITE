@@ -40,15 +40,19 @@ const Dashboard = () => {
   const fetchFirmwareData = async () => {
     try {
       const { data, error } = await supabase
-        .from("firmware_releases")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .from("hubs")
+        .select("current_firmware")
+        .eq("status", "online")
+        .limit(1);
 
       if (error) throw error;
 
-      setFirmwareHistory(data || []);
-      const active = data.find((f) => f.is_active);
-      setActiveFirmwareVersion(active ? active.version : "None");
+      if (data && data.length > 0) {
+        setActiveFirmwareVersion(data[0].current_firmware);
+      } else {
+        setActiveFirmwareVersion("None");
+      }
+      setFirmwareHistory([]);
     } catch (error) {
       console.error("Error fetching firmware:", error);
       setActiveFirmwareVersion("Error");

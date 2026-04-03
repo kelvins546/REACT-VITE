@@ -280,6 +280,28 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
                 </AnimatePresence>
               </div>
             </NavLink>
+
+            <NavLink
+              to="/firmware"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              <span className="material-icons">system_update</span>
+              <AnimatePresence initial={!skipInitialAnimation}>
+                {isVisible && (
+                  <motion.span
+                    key="label-firmware"
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    Firmware
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </NavLink>
           </nav>
 
           <div
@@ -392,6 +414,15 @@ const Sidebar = ({ minimizeSidebar = 1, setminizeSidebar }) => {
               }
             >
               <span className="material-icons">paid</span>
+            </NavLink>
+
+            <NavLink
+              to="/firmware"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              <span className="material-icons">system_update</span>
             </NavLink>
           </nav>
 

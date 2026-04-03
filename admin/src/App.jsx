@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/route_settings/ProtectedRoute";
 
 import MainLayout from "./components/screen/MainLayout";
 import Dashboard from "./pages/shared/Dashboard";
+import Firmware from "./pages/shared/Firmware";
 
 import Users from "./pages/super_admin/JSX_Files/Users";
 import Admins from "./pages/super_admin/JSX_Files/Admins";
@@ -27,6 +28,8 @@ function App() {
           <Route index element={<Dashboard />} />
           {/*admin*/}
           <Route path="/admin/rates" element={<Admin_Rates />} />
+          {/*Shared*/}
+          <Route path="firmware" element={<Firmware />} />
           {/*Super admin*/}
           <Route path="users" element={<Users />} />
           <Route path="users/archived" element={<ArchivedUsers />} />
